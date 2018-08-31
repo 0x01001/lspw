@@ -2,7 +2,9 @@ import React, { Component } from 'react';
 import { Animated, Easing, View, TouchableOpacity } from 'react-native';
 import { createDrawerNavigator, createStackNavigator } from 'react-navigation';
 import Icon from 'react-native-vector-icons/SimpleLineIcons';
+import { connect } from 'react-redux';
 
+import { resetAction } from './actions';
 import Login from './screens/Login';
 import SignUp from './screens/SignUp';
 import ForgotPassword from './screens/ForgotPassword';
@@ -68,7 +70,12 @@ class Router extends Component {
           {
             navigationOptions: ({ navigation }) => ({
               headerLeft: (
-                <TouchableOpacity onPress={() => navigation.goBack()}>
+                <TouchableOpacity
+                  onPress={() => {
+                    this.props.resetAction();
+                    navigation.goBack();
+                  }}
+                >
                   <Icon
                     name="arrow-left"
                     size={25}
@@ -118,4 +125,7 @@ class Router extends Component {
   }
 }
 
-export default Router;
+export default connect(
+  null,
+  { resetAction }
+)(Router);

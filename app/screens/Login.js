@@ -9,11 +9,12 @@ import {
   TouchableWithoutFeedback
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { Input, Button } from 'react-native-elements';
+import { Button } from 'react-native-elements';
 import { connect } from 'react-redux';
 import { loginAction, resetAction } from '../actions';
 import appStyle from '../utils/app_style';
 import style from '../utils/style_sheet';
+import { TextInput } from '../components/common';
 
 class Login extends Component {
   state = {
@@ -86,29 +87,6 @@ class Login extends Component {
     }
   }
 
-  renderField(value, placeholderText, leftIconName, secureTextEntry, errorMessage, onChangeText) {
-    return (
-      <Input
-        inputStyle={style.input}
-        placeholder={placeholderText}
-        placeholderTextColor={appStyle.grayColor}
-        errorStyle={{ color: appStyle.redColor }}
-        errorMessage={errorMessage || null} //"This field is required"
-        leftIcon={<Icon name={leftIconName} size={20} color={appStyle.mainColor} />}
-        leftIconContainerStyle={{ marginLeft: 0 }}
-        containerStyle={{
-          width: '100%'
-        }}
-        inputContainerStyle={{
-          borderBottomColor: appStyle.borderColor
-        }}
-        secureTextEntry={secureTextEntry}
-        value={value}
-        onChangeText={onChangeText}
-      />
-    );
-  }
-
   renderSignUp() {
     if (this.state.isShowSignUp) {
       return (
@@ -133,30 +111,29 @@ class Login extends Component {
         <Icon style={style.logo} name="qrcode" size={80} color={appStyle.mainColor} />
 
         <View style={style.field}>
-          {this.renderField(
-            this.state.email,
-            'Email',
-            'email-outline',
-            null,
-            this.state.emailErrorMessage,
-            email => {
+          <TextInput
+            placeholderText="Email"
+            leftIconName="email-outline"
+            errorMessage={this.state.emailErrorMessage}
+            value={this.state.email}
+            onChangeText={email => {
               this.setState({ email });
               this.setState({ emailErrorMessage: !email ? 'This field is required' : '' });
-            }
-          )}
+            }}
+          />
         </View>
         <View style={style.field}>
-          {this.renderField(
-            this.state.password,
-            'Password',
-            'lock-outline',
-            true,
-            this.state.passwordErrorMessage,
-            password => {
+          <TextInput
+            secureTextEntry
+            placeholderText="Password"
+            leftIconName="lock-outline"
+            errorMessage={this.state.passwordErrorMessage}
+            value={this.state.password}
+            onChangeText={password => {
               this.setState({ password });
               this.setState({ passwordErrorMessage: !password ? 'This field is required' : '' });
-            }
-          )}
+            }}
+          />
         </View>
 
         {this.renderError()}
