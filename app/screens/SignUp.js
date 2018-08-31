@@ -1,20 +1,12 @@
 import React, { Component } from 'react';
-import {
-  StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
-  View,
-  Text,
-  // TouchableWithoutFeedback,
-  // Dimensions,
-  Keyboard
-} from 'react-native';
+import { KeyboardAvoidingView, Platform, View, Text, Keyboard } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 // import IconBack from 'react-native-vector-icons/SimpleLineIcons';
 import { Input, Button } from 'react-native-elements';
 import { connect } from 'react-redux';
 import { signUpAction, customLoginAction } from '../actions';
 import appStyle from '../utils/app_style';
+import style from '../utils/style_sheet';
 
 class SignUp extends Component {
   state = {
@@ -90,7 +82,7 @@ class SignUp extends Component {
     if (this.props.error) {
       return (
         <View>
-          <Text style={styles.error}>{this.props.error}</Text>
+          <Text style={style.error}>{this.props.error}</Text>
         </View>
       );
     }
@@ -107,7 +99,7 @@ class SignUp extends Component {
   ) {
     return (
       <Input
-        inputStyle={styles.input}
+        inputStyle={style.input}
         placeholder={placeholderText}
         placeholderTextColor={appStyle.grayColor}
         errorStyle={{ color: appStyle.redColor }}
@@ -145,19 +137,19 @@ class SignUp extends Component {
     return (
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={styles.container}
+        style={style.container}
       >
         {/* {this.renderBack()} */}
 
-        <Icon style={styles.logo} name="qrcode" size={80} color={appStyle.mainColor} />
+        <Icon style={style.logo} name="qrcode" size={80} color={appStyle.mainColor} />
 
-        <View style={styles.field}>
+        <View style={style.field}>
           {this.renderField(this.state.name, 'Name', 'account', null, null, null, name => {
             this.setState({ name });
           })}
         </View>
 
-        <View style={styles.field}>
+        <View style={style.field}>
           {this.renderField(
             this.state.email,
             'Email',
@@ -171,7 +163,7 @@ class SignUp extends Component {
             }
           )}
         </View>
-        <View style={styles.field}>
+        <View style={style.field}>
           {this.renderField(
             this.state.password,
             'Password',
@@ -188,11 +180,11 @@ class SignUp extends Component {
 
         {this.renderError()}
 
-        <View style={styles.field}>
+        <View style={style.field}>
           <Button
             title="Sign Up"
-            buttonStyle={styles.button}
-            titleStyle={styles.buttonTitle}
+            buttonStyle={style.button}
+            titleStyle={style.buttonTitle}
             loading={this.props.loading}
             loadingProps={{ size: 'small', color: appStyle.mainColor }}
             onPress={this.submitPress}
@@ -202,64 +194,6 @@ class SignUp extends Component {
     );
   }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    backgroundColor: appStyle.backgroundColor,
-    paddingHorizontal: 60,
-    alignItems: 'center'
-  },
-  logo: {
-    alignSelf: 'center',
-    marginBottom: 30,
-    marginTop: -60
-  },
-  field: {
-    marginVertical: 5,
-    width: '100%'
-  },
-  input: {
-    fontSize: 14,
-    fontFamily: appStyle.mainFont,
-    color: appStyle.mainColor
-  },
-  button: {
-    marginTop: 15,
-    backgroundColor: appStyle.buttonBackgroundColor,
-    width: '100%',
-    height: 60,
-    alignSelf: 'center',
-    borderRadius: 1,
-    ...Platform.select({
-      android: {
-        elevation: 0,
-        borderRadius: 1
-      }
-    })
-  },
-  buttonTitle: {
-    backgroundColor: 'transparent',
-    fontSize: 18,
-    fontFamily: appStyle.mainFont,
-    fontWeight: 'normal',
-    color: appStyle.mainColor
-  },
-  back: {
-    position: 'absolute',
-    top: 40,
-    left: 60,
-    height: 60,
-    width: 60
-  },
-  error: {
-    alignSelf: 'center',
-    color: appStyle.redColor,
-    fontFamily: appStyle.mainFont,
-    marginTop: 10
-  }
-});
 
 const mapStateToProps = state => ({
   error: state.auth.error,

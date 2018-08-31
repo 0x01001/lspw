@@ -1,17 +1,16 @@
 import React, { Component } from 'react';
-import { StyleSheet, KeyboardAvoidingView, Platform, View, Text, Keyboard } from 'react-native';
+import { KeyboardAvoidingView, Platform, View, Text, Keyboard } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Input, Button } from 'react-native-elements';
 import { connect } from 'react-redux';
 import { forgotPasswordAction } from '../actions';
 import appStyle from '../utils/app_style';
+import style from '../utils/style_sheet';
 
 class ForgotPassword extends Component {
   state = {
     email: '',
     emailErrorMessage: '',
-    error: '',
-    isShow: true,
     isSuccess: false
   };
 
@@ -43,7 +42,7 @@ class ForgotPassword extends Component {
     if (this.props.error) {
       return (
         <View>
-          <Text style={styles.error}>{this.props.error}</Text>
+          <Text style={style.error}>{this.props.error}</Text>
         </View>
       );
     }
@@ -60,7 +59,7 @@ class ForgotPassword extends Component {
   ) {
     return (
       <Input
-        inputStyle={styles.input}
+        inputStyle={style.input}
         placeholder={placeholderText}
         placeholderTextColor={appStyle.grayColor}
         errorStyle={{ color: appStyle.redColor }}
@@ -84,20 +83,20 @@ class ForgotPassword extends Component {
   render() {
     if (this.state.isSuccess) {
       return (
-        <View style={styles.container}>
-          <Icon style={styles.logo} name="qrcode" size={80} color={appStyle.mainColor} />
-          <View style={styles.field}>
-            <Text style={styles.title}>We just sent email to "{this.state.email}"</Text>
-            <Text style={styles.content}>
+        <View style={style.container}>
+          <Icon style={style.logo} name="qrcode" size={80} color={appStyle.mainColor} />
+          <View style={style.field}>
+            <Text style={style.title}>We just sent email to "{this.state.email}"</Text>
+            <Text style={[style.content, { marginTop: 10 }]}>
               Click the secure link we sent you to reset your password. If you didn't receive an
               email, check your Spam folder.
             </Text>
           </View>
-          <View style={styles.field}>
+          <View style={style.field}>
             <Button
               title="Login"
-              buttonStyle={styles.button}
-              titleStyle={styles.buttonTitle}
+              buttonStyle={style.button}
+              titleStyle={style.buttonTitle}
               loading={this.props.loading}
               loadingProps={{ size: 'small', color: appStyle.mainColor }}
               onPress={() => {
@@ -111,11 +110,11 @@ class ForgotPassword extends Component {
     return (
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={styles.container}
+        style={style.container}
       >
-        <Icon style={styles.logo} name="qrcode" size={80} color={appStyle.mainColor} />
+        <Icon style={style.logo} name="qrcode" size={80} color={appStyle.mainColor} />
 
-        <View style={styles.field}>
+        <View style={style.field}>
           {this.renderField(
             this.state.email,
             'Email',
@@ -132,11 +131,11 @@ class ForgotPassword extends Component {
 
         {this.renderError()}
 
-        <View style={styles.field}>
+        <View style={style.field}>
           <Button
             title="Send"
-            buttonStyle={styles.button}
-            titleStyle={styles.buttonTitle}
+            buttonStyle={style.button}
+            titleStyle={style.buttonTitle}
             loading={this.props.loading}
             loadingProps={{ size: 'small', color: appStyle.mainColor }}
             onPress={this.submitPress}
@@ -146,70 +145,6 @@ class ForgotPassword extends Component {
     );
   }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    backgroundColor: appStyle.backgroundColor,
-    paddingHorizontal: 60,
-    alignItems: 'center'
-  },
-  logo: {
-    alignSelf: 'center',
-    marginBottom: 30,
-    marginTop: -40
-  },
-  field: {
-    marginVertical: 5,
-    width: '100%'
-  },
-  input: {
-    fontSize: 14,
-    fontFamily: appStyle.mainFont,
-    color: appStyle.mainColor
-  },
-  button: {
-    marginTop: 15,
-    backgroundColor: appStyle.buttonBackgroundColor,
-    width: '100%',
-    height: 60,
-    alignSelf: 'center',
-    borderRadius: 1,
-    ...Platform.select({
-      android: {
-        elevation: 0,
-        borderRadius: 1
-      }
-    })
-  },
-  buttonTitle: {
-    backgroundColor: 'transparent',
-    fontSize: 18,
-    fontFamily: appStyle.mainFont,
-    fontWeight: 'normal',
-    color: appStyle.mainColor
-  },
-  error: {
-    alignSelf: 'center',
-    color: appStyle.redColor,
-    fontFamily: appStyle.mainFont,
-    marginTop: 10
-  },
-  title: {
-    fontFamily: appStyle.mainFont,
-    fontWeight: '700',
-    color: appStyle.mainColor,
-    textAlign: 'center'
-  },
-  content: {
-    fontFamily: appStyle.mainFont,
-    fontWeight: 'normal',
-    color: appStyle.mainColor,
-    textAlign: 'center',
-    marginTop: 10
-  }
-});
 
 const mapStateToProps = state => ({
   error: state.auth.error,

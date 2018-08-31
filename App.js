@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { View, StatusBar } from 'react-native';
-// import { GoogleSignin } from 'react-native-google-signin';
 import { createStore, applyMiddleware } from 'redux';
 import { Provider } from 'react-redux';
 import ReduxThunk from 'redux-thunk';
