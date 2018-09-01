@@ -8,13 +8,13 @@ import {
   Keyboard,
   TouchableWithoutFeedback
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Button } from 'react-native-elements';
 import { connect } from 'react-redux';
+
 import { loginAction, resetAction } from '../actions';
 import appStyle from '../utils/app_style';
 import style from '../utils/style_sheet';
-import { TextInput } from '../components/common';
+import { TextInput, Logo } from '../components/common';
 
 class Login extends Component {
   state = {
@@ -49,13 +49,23 @@ class Login extends Component {
     this.setState({ isShowSignUp: true });
   }
 
-  onSignUpPress = () => {
+  reset = () => {
+    this.setState({
+      email: '',
+      password: '',
+      emailErrorMessage: '',
+      passwordErrorMessage: ''
+    });
     this.props.resetAction();
+  };
+
+  onSignUpPress = () => {
+    this.reset();
     this.props.navigation.navigate('signup');
   };
 
   onForgotPasswordPress = () => {
-    this.props.resetAction();
+    this.reset();
     this.props.navigation.navigate('forgotPassword');
   };
 
@@ -108,7 +118,7 @@ class Login extends Component {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={style.container}
       >
-        <Icon style={style.logo} name="qrcode" size={80} color={appStyle.mainColor} />
+        <Logo />
 
         <View style={style.field}>
           <TextInput

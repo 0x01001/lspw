@@ -1,5 +1,7 @@
 import firebase from 'firebase';
 import axios from 'axios';
+import * as Keychain from 'react-native-keychain';
+
 import constant from '../utils/constant';
 
 //#region login
@@ -8,7 +10,10 @@ export const loginAction = ({ email, password }) => dispatch => {
   firebase
     .auth()
     .signInWithEmailAndPassword(email, password)
-    .then(user => loginSuccess(dispatch, user))
+    .then(user => {
+      save({ email, password });
+      loginSuccess(dispatch, user);
+    })
     .catch(() => loginFail(dispatch));
 };
 
@@ -40,6 +45,7 @@ export const signUpAction = ({ name, email, password }) => async dispatch => {
     });
     //console.log(data);
     if (data && data.code === '1') {
+      save({ email, password });
       dispatch({
         type: constant.SIGNUP_SUCCESS,
         payload: data
@@ -75,3 +81,11 @@ export const forgotPasswordAction = ({ email }) => dispatch => {
     .catch(() => dispatch({ type: constant.FORGOT_PASSWORD_FAIL }));
 };
 //#endregion
+
+const save = async ({ email, password }) => {
+  try {
+    await Keychain.setGenericPassword(email, password);
+  } catch (err) {
+    console.log(err);
+  }
+};

@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
 import { KeyboardAvoidingView, Platform, View, Text, Keyboard } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Button } from 'react-native-elements';
 import { connect } from 'react-redux';
+
 import { forgotPasswordAction } from '../actions';
 import appStyle from '../utils/app_style';
 import style from '../utils/style_sheet';
-import { TextInput } from '../components/common';
+import { TextInput, Logo } from '../components/common';
 
 class ForgotPassword extends Component {
   state = {
@@ -53,7 +53,7 @@ class ForgotPassword extends Component {
     if (this.state.isSuccess) {
       return (
         <View style={style.container}>
-          <Icon style={style.logo} name="qrcode" size={80} color={appStyle.mainColor} />
+          <Logo />
           <View style={style.field}>
             <Text style={style.title}>We just sent email to "{this.state.email}"</Text>
             <Text style={[style.content, { marginTop: 10 }]}>
@@ -81,7 +81,7 @@ class ForgotPassword extends Component {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={style.container}
       >
-        <Icon style={style.logo} name="qrcode" size={80} color={appStyle.mainColor} />
+        <Logo />
 
         <View style={style.field}>
           <TextInput

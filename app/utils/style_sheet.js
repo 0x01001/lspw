@@ -67,5 +67,12 @@ export default StyleSheet.create({
     bottom: 0,
     height: 60,
     justifyContent: 'center'
+  },
+  rightIcon: {
+    height: 40,
+    width: 40,
+    justifyContent: 'center',
+    alignItems: 'flex-end',
+    paddingRight: 5
   }
 });
