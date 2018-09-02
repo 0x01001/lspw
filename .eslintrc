@@ -1,1 +1,9 @@
-{ "extends": "rallycoding" }
+{
+  "parser": "babel-eslint",
+  "plugins": ["react", "react-native"],
+  "parserOptions": {
+    "sourceType": "module",
+    "allowImportExportEverywhere": false,
+    "codeFrame": true
+  }
+}

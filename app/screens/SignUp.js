@@ -10,8 +10,8 @@ import appStyle from '../utils/app_style';
 import style from '../utils/style_sheet';
 import { TextInput, Logo } from '../components/common';
 
-const COUNTDOWN = 59;
-
+const timer = require('react-native-timer');
+const COUNTDOWN = 60;
 @observer
 class SignUp extends Component {
   state = {
@@ -21,49 +21,39 @@ class SignUp extends Component {
     emailErrorMessage: '',
     passwordErrorMessage: '',
     secureTextEntry: true,
-    rightIconName: 'eye-off',
-    needVerify: 0,
-    timer: COUNTDOWN
+    rightIconName: 'eye-off'
   };
   @observable
   isCountDown = false;
+  @observable
+  countdown = COUNTDOWN;
 
   componentWillReceiveProps(nextProps) {
     this.onComplete(nextProps);
   }
 
   componentWillUnmount() {
-    clearInterval(this.clockCall);
+    timer.clearTimeout('startTimer');
   }
 
   onComplete(props) {
-    //console.log('onComplete: ', props);
-    this.setState({ needVerify: props.needVerify });
     //console.log('onComplete: ', props.needVerify);
     if (props.needVerify > 0) {
+      this.countdown = COUNTDOWN;
+      this.isCountDown = true;
       this.startTimer();
     }
   }
 
-  //#region timer
   startTimer = () => {
-    //console.log('startTimer: ', this.isCountDown);
-    if (this.clockCall) clearInterval(this.clockCall);
-    this.isCountDown = true;
-    this.setState({ timer: COUNTDOWN });
-    this.clockCall = setInterval(() => {
-      this.decrementClock();
-    }, 1000);
-  };
-
-  decrementClock = () => {
-    if (this.state.timer === 0) {
+    //console.log('startTimer');
+    if (this.countdown === 0) {
       this.isCountDown = false;
-      clearInterval(this.clockCall);
+      timer.clearTimeout('startTimer');
     }
-    this.setState(prevstate => ({ timer: prevstate.timer - 1 }));
+    this.countdown--;
+    timer.setTimeout('startTimer', this.startTimer, 1000);
   };
-  //#endregion
 
   submitPress = () => {
     const { email, password, name } = this.state;
@@ -83,6 +73,13 @@ class SignUp extends Component {
     this.props.signUpAction({ name, email, password });
   };
 
+  submitAgainPress = () => {
+    if (!this.isCountDown) {
+      this.isCountDown = true;
+      this.props.sendEmailVerifyAction();
+    }
+  };
+
   renderError() {
     if (this.props.error) {
       return (
@@ -94,51 +91,23 @@ class SignUp extends Component {
   }
 
   render() {
-    const {
-      email,
-      name,
-      password,
-      needVerify,
-      timer,
-      emailErrorMessage,
-      passwordErrorMessage,
-      secureTextEntry,
-      rightIconName
-    } = this.state;
-    if (needVerify > 0) {
+    const { email, name, password, emailErrorMessage, passwordErrorMessage, secureTextEntry, rightIconName } = this.state;
+    if (this.props.needVerify > 0) {
       return (
         <View style={style.container}>
           <Logo />
           <View style={style.field}>
             <Text style={style.title}>We just sent email to "{email}"</Text>
-            <Text style={[style.content, { marginTop: 10 }]}>
-              Click the secure link we sent you to verify your account. If you didn't receive an
-              email, check your Spam folder.
-            </Text>
+            <Text style={[style.content, { marginTop: 10 }]}>Click the secure link we sent you to verify your account. If you didn't receive an email, check your Spam folder.</Text>
           </View>
           <View style={style.field}>
-            <Button
-              title={`Send ${timer >= 0 ? `(${timer}s)` : ''}`}
-              buttonStyle={style.button}
-              titleStyle={style.buttonTitle}
-              loading={this.props.loading}
-              loadingProps={{ size: 'small', color: appStyle.mainColor }}
-              onPress={() => {
-                if (!this.isCountDown) {
-                  this.isCountDown = true;
-                  this.props.sendEmailVerifyAction();
-                }
-              }}
-            />
+            <Button title={`Send ${this.countdown >= 0 ? `(${this.countdown}s)` : ''}`} buttonStyle={style.button} titleStyle={style.buttonTitle} loading={this.props.loading} loadingProps={{ size: 'small', color: appStyle.mainColor }} onPress={this.submitAgainPress} />
           </View>
         </View>
       );
     }
     return (
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={style.container}
-      >
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={style.container}>
         <Logo />
 
         <View style={style.field}>
@@ -192,14 +161,7 @@ class SignUp extends Component {
         {this.renderError()}
 
         <View style={style.field}>
-          <Button
-            title="Sign Up"
-            buttonStyle={style.button}
-            titleStyle={style.buttonTitle}
-            loading={this.props.loading}
-            loadingProps={{ size: 'small', color: appStyle.mainColor }}
-            onPress={this.submitPress}
-          />
+          <Button title="Sign Up" buttonStyle={style.button} titleStyle={style.buttonTitle} loading={this.props.loading} loadingProps={{ size: 'small', color: appStyle.mainColor }} onPress={this.submitPress} />
         </View>
       </KeyboardAvoidingView>
     );

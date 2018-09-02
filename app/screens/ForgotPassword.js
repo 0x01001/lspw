@@ -10,55 +10,45 @@ import appStyle from '../utils/app_style';
 import style from '../utils/style_sheet';
 import { TextInput, Logo } from '../components/common';
 
-const COUNTDOWN = 59;
+const timer = require('react-native-timer');
+const COUNTDOWN = 60;
 @observer
 class ForgotPassword extends Component {
   state = {
     email: '',
-    emailErrorMessage: '',
-    isSuccess: false,
-    timer: COUNTDOWN
+    emailErrorMessage: ''
   };
   @observable
   isCountDown = false;
+  @observable
+  countdown = COUNTDOWN;
 
   componentWillReceiveProps(nextProps) {
     this.onComplete(nextProps);
   }
 
   componentWillUnmount() {
-    clearInterval(this.clockCall);
+    timer.clearTimeout('startTimer');
   }
 
   onComplete(props) {
-    this.setState({ isSuccess: props.done });
-    //console.log('onComplete: ', props.done);
-    if (props.done > 0) {
+    //console.log('onComplete: ', props.isForgotDone);
+    if (props.isForgotDone) {
+      this.countdown = COUNTDOWN;
+      this.isCountDown = true;
       this.startTimer();
     }
   }
 
-  //#region timer
   startTimer = () => {
-    if (this.clockCall) {
-      //console.log('clear interval');
-      clearInterval(this.clockCall);
-    }
-    this.setState({ timer: COUNTDOWN });
-    this.isCountDown = true;
-    this.clockCall = setInterval(() => {
-      this.decrementClock();
-    }, 1000);
-  };
-
-  decrementClock = () => {
-    if (this.state.timer === 0) {
+    //console.log('startTimer');
+    if (this.countdown === 0) {
       this.isCountDown = false;
-      clearInterval(this.clockCall);
+      timer.clearTimeout('startTimer');
     }
-    this.setState(prevstate => ({ timer: prevstate.timer - 1 }));
+    this.countdown--;
+    timer.setTimeout('startTimer', this.startTimer, 1000);
   };
-  //#endregion
 
   submitPress = () => {
     const { email } = this.state;
@@ -75,6 +65,14 @@ class ForgotPassword extends Component {
     this.props.forgotPasswordAction({ email });
   };
 
+  submitAgainPress = () => {
+    if (!this.isCountDown) {
+      this.isCountDown = true;
+      const { email } = this.state;
+      this.props.forgotPasswordAction({ email });
+    }
+  };
+
   renderError() {
     if (this.props.error) {
       return (
@@ -86,41 +84,23 @@ class ForgotPassword extends Component {
   }
 
   render() {
-    const { email, timer, emailErrorMessage, isSuccess } = this.state;
-    if (isSuccess) {
+    const { email, emailErrorMessage } = this.state;
+    if (this.props.isForgotDone) {
       return (
         <View style={style.container}>
           <Logo />
           <View style={style.field}>
             <Text style={style.title}>We just sent email to "{email}"</Text>
-            <Text style={[style.content, { marginTop: 10 }]}>
-              Click the secure link we sent you to reset your password. If you didn't receive an
-              email, check your Spam folder.
-            </Text>
+            <Text style={[style.content, { marginTop: 10 }]}>Click the secure link we sent you to reset your password. If you didn't receive an email, check your Spam folder.</Text>
           </View>
           <View style={style.field}>
-            <Button
-              title={`Send ${timer >= 0 ? `(${timer}s)` : ''}`}
-              buttonStyle={style.button}
-              titleStyle={style.buttonTitle}
-              loading={this.props.loading}
-              loadingProps={{ size: 'small', color: appStyle.mainColor }}
-              onPress={() => {
-                if (!this.isCountDown) {
-                  this.isCountDown = true;
-                  this.props.forgotPasswordAction({ email });
-                }
-              }}
-            />
+            <Button title={`Send ${this.countdown >= 0 ? `(${this.countdown}s)` : ''}`} buttonStyle={style.button} titleStyle={style.buttonTitle} loading={this.props.loading} loadingProps={{ size: 'small', color: appStyle.mainColor }} onPress={this.submitAgainPress} />
           </View>
         </View>
       );
     }
     return (
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={style.container}
-      >
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={style.container}>
         <Logo />
 
         <View style={style.field}>
@@ -141,14 +121,7 @@ class ForgotPassword extends Component {
         {this.renderError()}
 
         <View style={style.field}>
-          <Button
-            title="Send"
-            buttonStyle={style.button}
-            titleStyle={style.buttonTitle}
-            loading={this.props.loading}
-            loadingProps={{ size: 'small', color: appStyle.mainColor }}
-            onPress={this.submitPress}
-          />
+          <Button title="Send" buttonStyle={style.button} titleStyle={style.buttonTitle} loading={this.props.loading} loadingProps={{ size: 'small', color: appStyle.mainColor }} onPress={this.submitPress} />
         </View>
       </KeyboardAvoidingView>
     );
@@ -158,7 +131,7 @@ class ForgotPassword extends Component {
 const mapStateToProps = state => ({
   error: state.auth.error,
   loading: state.auth.loading,
-  done: state.auth.isForgotDone
+  isForgotDone: state.auth.isForgotDone
 });
 
 export default connect(

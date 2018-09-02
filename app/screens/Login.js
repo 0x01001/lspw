@@ -1,13 +1,5 @@
 import React, { Component } from 'react';
-import {
-  KeyboardAvoidingView,
-  Platform,
-  View,
-  Text,
-  Dimensions,
-  Keyboard,
-  TouchableWithoutFeedback
-} from 'react-native';
+import { KeyboardAvoidingView, Platform, View, Text, Dimensions, Keyboard, TouchableWithoutFeedback } from 'react-native';
 import { Button } from 'react-native-elements';
 import { connect } from 'react-redux';
 
@@ -102,9 +94,7 @@ class Login extends Component {
       return (
         <TouchableWithoutFeedback onPress={this.onSignUpPress}>
           <View style={style.signUp}>
-            <Text style={{ color: appStyle.grayColor, alignSelf: 'center' }}>
-              Don't have an account? Sign Up
-            </Text>
+            <Text style={{ color: appStyle.grayColor, alignSelf: 'center' }}>Don't have an account? Sign Up</Text>
           </View>
         </TouchableWithoutFeedback>
       );
@@ -115,10 +105,7 @@ class Login extends Component {
   render() {
     const { email, password, emailErrorMessage, passwordErrorMessage } = this.state;
     return (
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={style.container}
-      >
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={style.container}>
         <Logo />
 
         <View style={style.field}>
@@ -154,22 +141,12 @@ class Login extends Component {
         {this.renderError()}
 
         <View style={style.field}>
-          <Button
-            title="Log In"
-            buttonStyle={style.button}
-            titleStyle={style.buttonTitle}
-            loading={this.props.loading}
-            loadingProps={{ size: 'small', color: appStyle.mainColor }}
-            onPress={this.submitPress}
-          />
+          <Button title="Log In" buttonStyle={style.button} titleStyle={style.buttonTitle} loading={this.props.loading} loadingProps={{ size: 'small', color: appStyle.mainColor }} onPress={this.submitPress} />
         </View>
 
-        {/* <View style={[styles.field, { marginTop: 15 }]}> */}
         <TouchableWithoutFeedback onPress={this.onForgotPasswordPress}>
           <View style={{ height: 40, justifyContent: 'center', marginTop: 5 }}>
-            <Text style={{ color: appStyle.grayColor, alignSelf: 'center' }}>
-              Forgot your password?
-            </Text>
+            <Text style={{ color: appStyle.grayColor, alignSelf: 'center' }}>Forgot your password?</Text>
           </View>
         </TouchableWithoutFeedback>
 
@@ -181,8 +158,7 @@ class Login extends Component {
 
 const mapStateToProps = state => ({
   error: state.auth.error,
-  loading: state.auth.loading,
-  needVerify: state.auth.needVerify
+  loading: state.auth.loading
 });
 
 export default connect(

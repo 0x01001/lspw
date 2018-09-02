@@ -1,7 +1,6 @@
 import constant from '../utils/constant';
 
 const INITAL_STATE = {
-  // data: {},
   error: '',
   loading: false,
   isForgotDone: false,

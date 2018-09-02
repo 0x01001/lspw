@@ -15,108 +15,106 @@ import Layout from './utils/layout';
 
 class Router extends Component {
   renderContent() {
-    if (this.props.isSignIn !== null) {
-      if (this.props.isSignIn && this.props.isVerify) {
+    //console.log('renderContent: ', this.props.isSignIn);
+    switch (this.props.isSignIn) {
+      case true: {
         const MainNav = createDrawerNavigator({
           main: { screen: Home }
         });
         return <MainNav />;
       }
-      const transitionConfig = () => ({
-        transitionSpec: {
-          duration: 500,
-          easing: Easing.out(Easing.poly(4)),
-          timing: Animated.timing,
-          useNativeDriver: true
-        },
-        screenInterpolator: sceneProps => {
-          const { layout, position, scene } = sceneProps;
 
-          const thisSceneIndex = scene.index;
-          const width = layout.initWidth;
-
-          const translateX = position.interpolate({
-            inputRange: [thisSceneIndex - 1, thisSceneIndex],
-            outputRange: [width, 0]
-          });
-
-          return { transform: [{ translateX }] };
-        }
-      });
-
-      const AuthNav = createStackNavigator(
-        {
-          login: {
-            screen: Login,
-            navigationOptions: {
-              header: null
-            }
+      case false: {
+        const transitionConfig = () => ({
+          transitionSpec: {
+            duration: 500,
+            easing: Easing.out(Easing.poly(4)),
+            timing: Animated.timing,
+            useNativeDriver: true
           },
-          signup: {
-            screen: SignUp
-            // navigationOptions: {
-            //   headerTitle: 'Sign Up'
-            // }
-          },
-          forgotPassword: {
-            screen: ForgotPassword
-            // navigationOptions: {
-            //   headerTitle: 'Forgot Password'
-            // }
+          screenInterpolator: sceneProps => {
+            const { layout, position, scene } = sceneProps;
+
+            const thisSceneIndex = scene.index;
+            const width = layout.initWidth;
+
+            const translateX = position.interpolate({
+              inputRange: [thisSceneIndex - 1, thisSceneIndex],
+              outputRange: [width, 0]
+            });
+
+            return { transform: [{ translateX }] };
           }
-        },
-        {
-          navigationOptions: ({ navigation }) => ({
-            headerLeft: (
-              <TouchableOpacity
-                onPress={() => {
-                  this.props.resetAction();
-                  navigation.goBack();
-                }}
-              >
-                <Icon
-                  name="arrow-left"
-                  size={25}
-                  style={{ color: appStyle.mainColor, padding: 10 }}
-                />
-              </TouchableOpacity>
-            ),
-            headerStyle: {
-              backgroundColor: appStyle.backgroundColor,
-              elevation: 0,
-              shadowColor: 'transparent',
-              paddingTop: Layout.getExtraTopAndroid()
+        });
+
+        const AuthNav = createStackNavigator(
+          {
+            login: {
+              screen: Login,
+              navigationOptions: {
+                header: null
+              }
             },
-            headerLeftContainerStyle: {
-              paddingLeft: 45
+            signup: {
+              screen: SignUp
+              // navigationOptions: {
+              //   headerTitle: 'Sign Up'
+              // }
+            },
+            forgotPassword: {
+              screen: ForgotPassword
+              // navigationOptions: {
+              //   headerTitle: 'Forgot Password'
+              // }
             }
-            // headerTitleStyle: {
-            //   // alignSelf: 'center',
-            //   fontSize: 18,
-            //   fontFamily: appStyle.mainFont,
-            //   fontWeight: '500',
-            //   color: appStyle.mainColor
-            // },
-            // headerTitleContainerStyle: {
-            //   alignItems: 'center',
-            //   justifyContent: 'center',
-            //   marginLeft: -60
-            // }
-          }),
-          transitionConfig
-        }
-      );
-      return <AuthNav />;
+          },
+          {
+            navigationOptions: ({ navigation }) => ({
+              headerLeft: (
+                <TouchableOpacity
+                  onPress={() => {
+                    this.props.resetAction();
+                    navigation.goBack();
+                  }}
+                >
+                  <Icon name="arrow-left" size={25} style={{ color: appStyle.mainColor, padding: 10 }} />
+                </TouchableOpacity>
+              ),
+              headerStyle: {
+                backgroundColor: appStyle.backgroundColor,
+                elevation: 0,
+                shadowColor: 'transparent',
+                paddingTop: Layout.getExtraTopAndroid()
+              },
+              headerLeftContainerStyle: {
+                paddingLeft: 45
+              }
+              // headerTitleStyle: {
+              //   // alignSelf: 'center',
+              //   fontSize: 18,
+              //   fontFamily: appStyle.mainFont,
+              //   fontWeight: '500',
+              //   color: appStyle.mainColor
+              // },
+              // headerTitleContainerStyle: {
+              //   alignItems: 'center',
+              //   justifyContent: 'center',
+              //   marginLeft: -60
+              // }
+            }),
+            transitionConfig
+          }
+        );
+        return <AuthNav />;
+      }
+
+      default:
+        return <Loading size="large" />;
     }
-    return <Loading size="large" />;
   }
 
   render() {
-    return (
-      <View style={{ flex: 1, backgroundColor: appStyle.backgroundColor }}>
-        {this.renderContent()}
-      </View>
-    );
+    return <View style={{ flex: 1, backgroundColor: appStyle.backgroundColor }}>{this.renderContent()}</View>;
   }
 }
 
