@@ -11,7 +11,7 @@ type Props = {};
 const store = createStore(reducers, {}, applyMiddleware(ReduxThunk));
 
 export default class App extends Component<Props> {
-  state = { isSignIn: null };
+  state = { isSignIn: null, isVerify: false };
 
   componentWillMount() {
     const firebase = require('firebase');
@@ -19,12 +19,13 @@ export default class App extends Component<Props> {
     initializeApp(firebase);
     firebase.auth().onAuthStateChanged(user => {
       if (user) {
-        this.setState({ isSignIn: true });
+        this.setState({ isSignIn: true, isVerify: user.emailVerified });
       } else {
         this.setState({ isSignIn: false });
       }
-      //console.log('isSignIn: ', this.state.isSignIn, user);
+      //console.log('app: ', this.state.isSignIn, user);
     });
+    //firebase.auth().signOut();
   }
 
   render() {
@@ -32,7 +33,7 @@ export default class App extends Component<Props> {
       <View style={{ flex: 1 }}>
         <StatusBar backgroundColor="transparent" barStyle="light-content" translucent />
         <Provider store={store}>
-          <Router isSignIn={this.state.isSignIn} />
+          <Router isSignIn={this.state.isSignIn} isVerify={this.state.isVerify} />
         </Provider>
       </View>
     );

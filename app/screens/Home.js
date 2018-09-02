@@ -48,8 +48,8 @@ class Home extends Component {
           title="Logout"
           onPress={() => {
             this.reset();
-            firebase.auth().signOut();
             this.load();
+            firebase.auth().signOut();
           }}
         />
         <Button title="Load" onPress={this.load} />

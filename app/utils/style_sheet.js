@@ -53,7 +53,7 @@ export default StyleSheet.create({
   title: {
     fontFamily: appStyle.mainFont,
     fontWeight: '700',
-    color: appStyle.mainColor,
+    color: appStyle.greenColor,
     textAlign: 'center'
   },
   content: {

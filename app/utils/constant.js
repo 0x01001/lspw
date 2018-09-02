@@ -7,6 +7,7 @@ export default {
   SIGNUP_FAIL: 'signup_fail',
   FORGOT_PASSWORD_SUCCESS: 'forgot_password_success',
   FORGOT_PASSWORD_FAIL: 'forgot_password_fail',
+  VERIFY_EMAIL: 'verify_email',
 
   LOADING: 'loading',
   RESET: 'reset'

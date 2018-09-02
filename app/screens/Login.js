@@ -113,6 +113,7 @@ class Login extends Component {
   }
 
   render() {
+    const { email, password, emailErrorMessage, passwordErrorMessage } = this.state;
     return (
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -124,11 +125,13 @@ class Login extends Component {
           <TextInput
             placeholderText="Email"
             leftIconName="email-outline"
-            errorMessage={this.state.emailErrorMessage}
-            value={this.state.email}
-            onChangeText={email => {
-              this.setState({ email });
-              this.setState({ emailErrorMessage: !email ? 'This field is required' : '' });
+            errorMessage={emailErrorMessage}
+            value={email}
+            onChangeText={text => {
+              this.setState({
+                email: text,
+                emailErrorMessage: !text ? 'This field is required' : ''
+              });
             }}
           />
         </View>
@@ -137,11 +140,13 @@ class Login extends Component {
             secureTextEntry
             placeholderText="Password"
             leftIconName="lock-outline"
-            errorMessage={this.state.passwordErrorMessage}
-            value={this.state.password}
-            onChangeText={password => {
-              this.setState({ password });
-              this.setState({ passwordErrorMessage: !password ? 'This field is required' : '' });
+            errorMessage={passwordErrorMessage}
+            value={password}
+            onChangeText={text => {
+              this.setState({
+                password: text,
+                passwordErrorMessage: !text ? 'This field is required' : ''
+              });
             }}
           />
         </View>
@@ -174,7 +179,11 @@ class Login extends Component {
   }
 }
 
-const mapStateToProps = state => ({ error: state.auth.error, loading: state.auth.loading });
+const mapStateToProps = state => ({
+  error: state.auth.error,
+  loading: state.auth.loading,
+  needVerify: state.auth.needVerify
+});
 
 export default connect(
   mapStateToProps,

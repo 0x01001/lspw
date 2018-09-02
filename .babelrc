@@ -4,5 +4,6 @@
     "production": {
       "plugins": ["transform-remove-console"]
     }
-  }
+  },
+  "plugins": ["transform-decorators-legacy"]
 }
