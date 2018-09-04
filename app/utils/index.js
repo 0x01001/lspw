@@ -1,20 +1,20 @@
 const CryptoJS = require('crypto-js');
 
-var keySize = 256;
-var ivSize = 128;
-var iterations = 100;
+const keySize = 256;
+const ivSize = 128;
+const iterations = 100;
 
 export const encrypt = (msg, pass) => {
   const salt = CryptoJS.lib.WordArray.random(128 / 8);
 
   const key = CryptoJS.PBKDF2(pass, salt, {
     keySize: keySize / 32,
-    iterations: iterations
+    iterations
   });
   const iv = CryptoJS.lib.WordArray.random(128 / 8);
 
   const encrypted = CryptoJS.AES.encrypt(msg, key, {
-    iv: iv,
+    iv,
     padding: CryptoJS.pad.Pkcs7,
     mode: CryptoJS.mode.CBC
   });
@@ -32,11 +32,11 @@ export const decrypt = (transitmessage, pass) => {
 
   const key = CryptoJS.PBKDF2(pass, salt, {
     keySize: keySize / 32,
-    iterations: iterations
+    iterations
   });
 
   const decrypted = CryptoJS.AES.decrypt(encrypted, key, {
-    iv: iv,
+    iv,
     padding: CryptoJS.pad.Pkcs7,
     mode: CryptoJS.mode.CBC
   });

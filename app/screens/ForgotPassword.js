@@ -91,16 +91,29 @@ class ForgotPassword extends Component {
           <Logo />
           <View style={style.field}>
             <Text style={style.title}>We just sent email to "{email}"</Text>
-            <Text style={[style.content, { marginTop: 10 }]}>Click the secure link we sent you to reset your password. If you didn't receive an email, check your Spam folder.</Text>
+            <Text style={[style.content, { marginTop: 10 }]}>
+              Click the secure link we sent you to reset your password. If you didn't receive an
+              email, check your Spam folder.
+            </Text>
           </View>
           <View style={style.field}>
-            <Button title={`Send ${this.countdown >= 0 ? `(${this.countdown}s)` : ''}`} buttonStyle={style.button} titleStyle={style.buttonTitle} loading={this.props.loading} loadingProps={{ size: 'small', color: appStyle.mainColor }} onPress={this.submitAgainPress} />
+            <Button
+              title={`Send ${this.countdown >= 0 ? `(${this.countdown}s)` : ''}`}
+              buttonStyle={style.button}
+              titleStyle={style.buttonTitle}
+              loading={this.props.loading}
+              loadingProps={{ size: 'small', color: appStyle.mainColor }}
+              onPress={this.submitAgainPress}
+            />
           </View>
         </View>
       );
     }
     return (
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={style.container}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={style.container}
+      >
         <Logo />
 
         <View style={style.field}>
@@ -121,7 +134,14 @@ class ForgotPassword extends Component {
         {this.renderError()}
 
         <View style={style.field}>
-          <Button title="Send" buttonStyle={style.button} titleStyle={style.buttonTitle} loading={this.props.loading} loadingProps={{ size: 'small', color: appStyle.mainColor }} onPress={this.submitPress} />
+          <Button
+            title="Send"
+            buttonStyle={style.button}
+            titleStyle={style.buttonTitle}
+            loading={this.props.loading}
+            loadingProps={{ size: 'small', color: appStyle.mainColor }}
+            onPress={this.submitPress}
+          />
         </View>
       </KeyboardAvoidingView>
     );

@@ -9,6 +9,11 @@ export default {
   FORGOT_PASSWORD_FAIL: 'forgot_password_fail',
   VERIFY_EMAIL: 'verify_email',
 
+  GOOGLE_SIGNIN_SUCCESS: 'google_signin_success',
+  GOOGLE_SIGNIN_FAIL: 'google_signin_fail',
+  GOOGLE_FETCH_DATA_SUCCESS: 'google_fetch_data_success',
+  GOOGLE_FETCH_DATA_FAIL: 'google_fetch_data_fail',
+
   LOADING: 'loading',
   RESET: 'reset'
 };

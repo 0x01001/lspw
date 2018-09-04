@@ -1,1 +1,2 @@
-export * from './auth_action';
+export * from './auth';
+export * from './main';

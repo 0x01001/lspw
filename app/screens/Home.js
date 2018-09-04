@@ -1,13 +1,17 @@
 import React, { Component } from 'react';
-import { View, Text } from 'react-native';
-import { Button, Icon, Header } from 'react-native-elements';
-import firebase from 'firebase';
+import { View, Text, TouchableOpacity } from 'react-native';
+import { Button, Icon, Divider } from 'react-native-elements';
 import * as Keychain from 'react-native-keychain';
 import { Toolbar } from 'react-native-material-ui';
+import { connect } from 'react-redux';
+import Modal from 'react-native-modal';
 
 import layout from '../utils/layout';
 import style from '../utils/style_sheet';
 import appStyle from '../utils/app_style';
+import List from '../components/home/List';
+import NavManager from '../NavManager';
+import { googleSignin } from '../actions';
 
 const marginTop = layout.getExtraTop();
 class Home extends Component {
@@ -19,11 +23,23 @@ class Home extends Component {
 
   state = {
     selected: [],
-    searchText: ''
+    searchText: '',
+    isModalVisible: false
   };
 
   componentWillMount() {
     // get all data
+    //NavManager.showLoading();
+  }
+  componentWillReceiveProps(nextProps) {
+    this.onComplete(nextProps);
+  }
+
+  onComplete(props) {
+    //console.log('onComplete: ', props.isForgotDone);
+    if (props.token) {
+      //TODO: show popup
+    }
   }
 
   load = async () => {
@@ -51,13 +67,19 @@ class Home extends Component {
     }
   };
 
+  import = () => {
+    this.props.googleSignin();
+  };
+
+  _toggleModal = () => this.setState({ isModalVisible: !this.state.isModalVisible });
+
   render() {
     return (
-      <View style={{ flex: 1 }}>
+      <View>
         <Toolbar
           style={{
             container: { marginTop, backgroundColor: 'transparent' },
-            centerElementContainer: { justifyContent: 'center', alignItems: 'center' }
+            titleText: { fontSize: 18 }
           }}
           key="toolbar"
           leftElement="menu"
@@ -69,16 +91,35 @@ class Home extends Component {
             onChangeText: value => this.setState({ searchText: value }),
             onSearchClosed: () => this.setState({ searchText: '' })
           }}
-          onRightElementPress={() => {}}
         />
+        <Divider style={{ height: 1, backgroundColor: appStyle.borderColor }} />
+
+        {/* <List /> */}
+
+        <Button title="Import" onPress={this.import} />
+
+        <TouchableOpacity onPress={this._toggleModal}>
+          <Text>Show Modal</Text>
+        </TouchableOpacity>
+
+        <Modal isVisible={this.state.isModalVisible}>
+          <View style={{ flex: 1 }}>
+            <Text>Hello!</Text>
+
+            <TouchableOpacity onPress={this._toggleModal}>
+              <Text>Hide me!</Text>
+            </TouchableOpacity>
+          </View>
+        </Modal>
+
         {/* <Header
           outerContainerStyles={{ marginTop }}
           leftComponent={{ icon: 'menu', color: '#fff' }}
           centerComponent={{ text: 'Home', style: { color: '#fff' } }}
           rightComponent={{ icon: 'home', color: '#fff' }}
-        />
+        /> */}
 
-        <Text> Home </Text>
+        {/* <Text style={{ alignSelf: 'center' }}> Home </Text>
         <Button
           title="Logout"
           onPress={() => {
@@ -93,4 +134,13 @@ class Home extends Component {
   }
 }
 
-export default Home;
+const mapStateToProps = state => ({
+  error: state.main.error,
+  loading: state.main.loading,
+  token: state.main.token
+});
+
+export default connect(
+  mapStateToProps,
+  { googleSignin }
+)(Home);

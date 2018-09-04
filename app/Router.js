@@ -10,7 +10,7 @@ import SignUp from './screens/SignUp';
 import ForgotPassword from './screens/ForgotPassword';
 import Home from './screens/Home';
 import appStyle from './utils/app_style';
-import { Loading } from './components/common';
+import Loading from './components/common/Loading';
 import Layout from './utils/layout';
 
 class Router extends Component {
@@ -77,7 +77,11 @@ class Router extends Component {
                     navigation.goBack();
                   }}
                 >
-                  <Icon name="arrow-left" size={25} style={{ color: appStyle.mainColor, padding: 10 }} />
+                  <Icon
+                    name="arrow-left"
+                    size={25}
+                    style={{ color: appStyle.mainColor, padding: 10 }}
+                  />
                 </TouchableOpacity>
               ),
               headerStyle: {
@@ -109,12 +113,16 @@ class Router extends Component {
       }
 
       default:
-        return <Loading size="large" />;
+        return <Loading size="large" visible />;
     }
   }
 
   render() {
-    return <View style={{ flex: 1, backgroundColor: appStyle.backgroundColor }}>{this.renderContent()}</View>;
+    return (
+      <View style={{ flex: 1, backgroundColor: appStyle.backgroundColor }}>
+        {this.renderContent()}
+      </View>
+    );
   }
 }
 

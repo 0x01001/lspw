@@ -6,6 +6,8 @@ import ReduxThunk from 'redux-thunk';
 import reducers from './app/reducers';
 import Router from './app/Router';
 import { initializeApp } from './reference';
+import Loading from './app/components/common/Loading';
+import NavManager from './app/NavManager';
 
 type Props = {};
 const store = createStore(reducers, {}, applyMiddleware(ReduxThunk));
@@ -34,6 +36,13 @@ export default class App extends Component<Props> {
         <Provider store={store}>
           <Router isSignIn={this.state.isSignIn} />
         </Provider>
+        <Loading
+          size="large"
+          visible={false}
+          ref={ref => {
+            NavManager.loading = ref;
+          }}
+        />
       </View>
     );
   }
