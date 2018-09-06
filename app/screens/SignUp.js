@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import { observable } from 'mobx';
 import { observer } from 'mobx-react/native';
 
-import { signUpAction, sendEmailVerifyAction } from '../actions';
+import { signUp, sendVerify } from '../actions';
 import appStyle from '../utils/app_style';
 import style from '../utils/style_sheet';
 import { TextInput, Logo } from '../components/common';
@@ -70,13 +70,13 @@ class SignUp extends Component {
       return;
     }
     Keyboard.dismiss();
-    this.props.signUpAction({ name, email, password });
+    this.props.signUp({ name, email, password });
   };
 
   submitAgainPress = () => {
     if (!this.isCountDown) {
       this.isCountDown = true;
-      this.props.sendEmailVerifyAction();
+      this.props.sendVerify();
     }
   };
 
@@ -91,23 +91,44 @@ class SignUp extends Component {
   }
 
   render() {
-    const { email, name, password, emailErrorMessage, passwordErrorMessage, secureTextEntry, rightIconName } = this.state;
+    const {
+      email,
+      name,
+      password,
+      emailErrorMessage,
+      passwordErrorMessage,
+      secureTextEntry,
+      rightIconName
+    } = this.state;
     if (this.props.needVerify > 0) {
       return (
         <View style={style.container}>
           <Logo />
           <View style={style.field}>
             <Text style={style.title}>We just sent email to "{email}"</Text>
-            <Text style={[style.content, { marginTop: 10 }]}>Click the secure link we sent you to verify your account. If you didn't receive an email, check your Spam folder.</Text>
+            <Text style={[style.content, { marginTop: 10 }]}>
+              Click the secure link we sent you to verify your account. If you didn't receive an
+              email, check your Spam folder.
+            </Text>
           </View>
           <View style={style.field}>
-            <Button title={`Send ${this.countdown >= 0 ? `(${this.countdown}s)` : ''}`} buttonStyle={style.button} titleStyle={style.buttonTitle} loading={this.props.loading} loadingProps={{ size: 'small', color: appStyle.mainColor }} onPress={this.submitAgainPress} />
+            <Button
+              title={`Send ${this.countdown >= 0 ? `(${this.countdown}s)` : ''}`}
+              buttonStyle={style.button}
+              titleStyle={style.buttonTitle}
+              loading={this.props.loading}
+              loadingProps={{ size: 'small', color: appStyle.mainColor }}
+              onPress={this.submitAgainPress}
+            />
           </View>
         </View>
       );
     }
     return (
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={style.container}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={style.container}
+      >
         <Logo />
 
         <View style={style.field}>
@@ -161,7 +182,14 @@ class SignUp extends Component {
         {this.renderError()}
 
         <View style={style.field}>
-          <Button title="Sign Up" buttonStyle={style.button} titleStyle={style.buttonTitle} loading={this.props.loading} loadingProps={{ size: 'small', color: appStyle.mainColor }} onPress={this.submitPress} />
+          <Button
+            title="Sign Up"
+            buttonStyle={style.button}
+            titleStyle={style.buttonTitle}
+            loading={this.props.loading}
+            loadingProps={{ size: 'small', color: appStyle.mainColor }}
+            onPress={this.submitPress}
+          />
         </View>
       </KeyboardAvoidingView>
     );
@@ -176,5 +204,5 @@ const mapStateToProps = state => ({
 
 export default connect(
   mapStateToProps,
-  { signUpAction, sendEmailVerifyAction }
+  { signUp, sendVerify }
 )(SignUp);

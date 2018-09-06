@@ -11,7 +11,7 @@ import {
 import { Button } from 'react-native-elements';
 import { connect } from 'react-redux';
 
-import { loginAction, resetAction } from '../actions';
+import { login, reset } from '../actions';
 import appStyle from '../utils/app_style';
 import style from '../utils/style_sheet';
 import { TextInput, Logo } from '../components/common';
@@ -56,7 +56,7 @@ class Login extends Component {
       emailErrorMessage: '',
       passwordErrorMessage: ''
     });
-    this.props.resetAction();
+    this.props.reset();
   };
 
   onSignUpPress = () => {
@@ -84,10 +84,10 @@ class Login extends Component {
       return;
     }
     Keyboard.dismiss();
-    this.props.loginAction({ email, password });
+    this.props.login({ email, password });
   };
 
-  renderError() {
+  renderError = () => {
     if (this.props.error) {
       return (
         <View>
@@ -95,9 +95,10 @@ class Login extends Component {
         </View>
       );
     }
-  }
+    return null;
+  };
 
-  renderSignUp() {
+  renderSignUp = () => {
     if (this.state.isShowSignUp) {
       return (
         <TouchableWithoutFeedback onPress={this.onSignUpPress}>
@@ -110,7 +111,7 @@ class Login extends Component {
       );
     }
     return null;
-  }
+  };
 
   render() {
     const { email, password, emailErrorMessage, passwordErrorMessage } = this.state;
@@ -185,5 +186,5 @@ const mapStateToProps = state => ({
 
 export default connect(
   mapStateToProps,
-  { loginAction, resetAction }
+  { login, reset }
 )(Login);

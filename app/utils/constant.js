@@ -11,9 +11,12 @@ export default {
 
   GOOGLE_SIGNIN_SUCCESS: 'google_signin_success',
   GOOGLE_SIGNIN_FAIL: 'google_signin_fail',
-  GOOGLE_FETCH_DATA_SUCCESS: 'google_fetch_data_success',
-  GOOGLE_FETCH_DATA_FAIL: 'google_fetch_data_fail',
+  IMPORT_DATA_SUCCESS: 'import_data_success',
+  IMPORT_DATA_FAIL: 'import_data_fail',
+  FETCH_DATA_SUCCESS: 'fetch_data_success',
+  FETCH_DATA_FAIL: 'fetch_data_fail',
 
-  LOADING: 'loading',
-  RESET: 'reset'
-};
+  AUTH_LOADING: 'auth_loading',
+  MAIN_LOADING: 'main_loading',
+  RESET: 'reset',
+}

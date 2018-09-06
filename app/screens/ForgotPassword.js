@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import { observable } from 'mobx';
 import { observer } from 'mobx-react/native';
 
-import { forgotPasswordAction } from '../actions';
+import { forgotPassword } from '../actions';
 import appStyle from '../utils/app_style';
 import style from '../utils/style_sheet';
 import { TextInput, Logo } from '../components/common';
@@ -62,14 +62,14 @@ class ForgotPassword extends Component {
       return;
     }
     Keyboard.dismiss();
-    this.props.forgotPasswordAction({ email });
+    this.props.forgotPassword({ email });
   };
 
   submitAgainPress = () => {
     if (!this.isCountDown) {
       this.isCountDown = true;
       const { email } = this.state;
-      this.props.forgotPasswordAction({ email });
+      this.props.forgotPassword({ email });
     }
   };
 
@@ -156,5 +156,5 @@ const mapStateToProps = state => ({
 
 export default connect(
   mapStateToProps,
-  { forgotPasswordAction }
+  { forgotPassword }
 )(ForgotPassword);

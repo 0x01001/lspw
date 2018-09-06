@@ -1,27 +1,31 @@
-import React, { Component } from 'react';
-import { Animated, Easing, View, TouchableOpacity } from 'react-native';
-import { createDrawerNavigator, createStackNavigator } from 'react-navigation';
-import Icon from 'react-native-vector-icons/SimpleLineIcons';
-import { connect } from 'react-redux';
+import React, { Component } from 'react'
+import {
+  Animated, Easing, View, TouchableOpacity,
+} from 'react-native'
+import { createDrawerNavigator, createStackNavigator } from 'react-navigation'
+import Icon from 'react-native-vector-icons/SimpleLineIcons'
+import { connect } from 'react-redux'
 
-import { resetAction } from './actions';
-import Login from './screens/Login';
-import SignUp from './screens/SignUp';
-import ForgotPassword from './screens/ForgotPassword';
-import Home from './screens/Home';
-import appStyle from './utils/app_style';
-import Loading from './components/common/Loading';
-import Layout from './utils/layout';
+import { reset } from './actions'
+import Login from './screens/Login'
+import SignUp from './screens/SignUp'
+import ForgotPassword from './screens/ForgotPassword'
+import Home from './screens/Home'
+import appStyle from './utils/app_style'
+import Loading from './components/common/Loading'
+import Layout from './utils/layout'
 
 class Router extends Component {
   renderContent() {
-    //console.log('renderContent: ', this.props.isSignIn);
-    switch (this.props.isSignIn) {
+    // console.log('renderContent: ', this.props.isSignIn);
+    const { isSignIn } = this.props
+
+    switch (isSignIn) {
       case true: {
         const MainNav = createDrawerNavigator({
-          main: { screen: Home }
-        });
-        return <MainNav />;
+          main: { screen: Home },
+        })
+        return <MainNav />
       }
 
       case false: {
@@ -30,51 +34,51 @@ class Router extends Component {
             duration: 500,
             easing: Easing.out(Easing.poly(4)),
             timing: Animated.timing,
-            useNativeDriver: true
+            useNativeDriver: true,
           },
-          screenInterpolator: sceneProps => {
-            const { layout, position, scene } = sceneProps;
+          screenInterpolator: (sceneProps) => {
+            const { layout, position, scene } = sceneProps
 
-            const thisSceneIndex = scene.index;
-            const width = layout.initWidth;
+            const thisSceneIndex = scene.index
+            const width = layout.initWidth
 
             const translateX = position.interpolate({
               inputRange: [thisSceneIndex - 1, thisSceneIndex],
-              outputRange: [width, 0]
-            });
+              outputRange: [width, 0],
+            })
 
-            return { transform: [{ translateX }] };
-          }
-        });
+            return { transform: [{ translateX }] }
+          },
+        })
 
         const AuthNav = createStackNavigator(
           {
             login: {
               screen: Login,
               navigationOptions: {
-                header: null
-              }
+                header: null,
+              },
             },
             signup: {
-              screen: SignUp
+              screen: SignUp,
               // navigationOptions: {
               //   headerTitle: 'Sign Up'
               // }
             },
             forgotPassword: {
-              screen: ForgotPassword
+              screen: ForgotPassword,
               // navigationOptions: {
               //   headerTitle: 'Forgot Password'
               // }
-            }
+            },
           },
           {
             navigationOptions: ({ navigation }) => ({
               headerLeft: (
                 <TouchableOpacity
                   onPress={() => {
-                    this.props.resetAction();
-                    navigation.goBack();
+                    this.props.reset()
+                    navigation.goBack()
                   }}
                 >
                   <Icon
@@ -88,11 +92,11 @@ class Router extends Component {
                 backgroundColor: appStyle.backgroundColor,
                 elevation: 0,
                 shadowColor: 'transparent',
-                paddingTop: Layout.getExtraTopAndroid()
+                paddingTop: Layout.getExtraTopAndroid(),
               },
               headerLeftContainerStyle: {
-                paddingLeft: 45
-              }
+                paddingLeft: 45,
+              },
               // headerTitleStyle: {
               //   // alignSelf: 'center',
               //   fontSize: 18,
@@ -106,14 +110,14 @@ class Router extends Component {
               //   marginLeft: -60
               // }
             }),
-            transitionConfig
-          }
-        );
-        return <AuthNav />;
+            transitionConfig,
+          },
+        )
+        return <AuthNav />
       }
 
       default:
-        return <Loading size="large" visible />;
+        return <Loading size="large" visible />
     }
   }
 
@@ -122,11 +126,11 @@ class Router extends Component {
       <View style={{ flex: 1, backgroundColor: appStyle.backgroundColor }}>
         {this.renderContent()}
       </View>
-    );
+    )
   }
 }
 
 export default connect(
   null,
-  { resetAction }
-)(Router);
+  { reset },
+)(Router)
