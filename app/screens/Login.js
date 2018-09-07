@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component } from 'react'
 import {
   KeyboardAvoidingView,
   Platform,
@@ -7,14 +7,14 @@ import {
   Dimensions,
   Keyboard,
   TouchableWithoutFeedback
-} from 'react-native';
-import { Button } from 'react-native-elements';
-import { connect } from 'react-redux';
+} from 'react-native'
+import { Button } from 'react-native-elements'
+import { connect } from 'react-redux'
 
-import { login, reset } from '../actions';
-import appStyle from '../utils/app_style';
-import style from '../utils/style_sheet';
-import { TextInput, Logo } from '../components/common';
+import { login, reset } from '../actions'
+import appStyle from '../utils/app_style'
+import style from '../utils/style_sheet'
+import { TextInput, Logo } from '../components/common'
 
 class Login extends Component {
   state = {
@@ -26,27 +26,27 @@ class Login extends Component {
   };
 
   componentDidMount() {
-    const show = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
-    const hide = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
-    this.keyboardDidShowListener = Keyboard.addListener(show, e => this._keyboardDidShow(e));
-    this.keyboardDidHideListener = Keyboard.addListener(hide, e => this._keyboardDidHide(e));
+    const show = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow'
+    const hide = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide'
+    this.keyboardDidShowListener = Keyboard.addListener(show, e => this._keyboardDidShow(e))
+    this.keyboardDidHideListener = Keyboard.addListener(hide, e => this._keyboardDidHide(e))
   }
 
   componentWillUnmount() {
-    this.keyboardDidShowListener.remove();
-    this.keyboardDidHideListener.remove();
+    this.keyboardDidShowListener.remove()
+    this.keyboardDidHideListener.remove()
   }
 
   _keyboardDidShow(e) {
-    //console.log('keyboardDidShow');
-    const { width, height } = Dimensions.get('window');
-    this.setState({ isShowSignUp: height > width });
-    //console.log(`${width} - ${height} - ${this.state.isShowSignUp}`);
+    // console.log('keyboardDidShow');
+    const { width, height } = Dimensions.get('window')
+    this.setState({ isShowSignUp: height > width })
+    // console.log(`${width} - ${height} - ${this.state.isShowSignUp}`);
   }
 
   _keyboardDidHide() {
-    //console.log('keyboardDidHide');
-    this.setState({ isShowSignUp: true });
+    // console.log('keyboardDidHide');
+    this.setState({ isShowSignUp: true })
   }
 
   reset = () => {
@@ -55,36 +55,36 @@ class Login extends Component {
       password: '',
       emailErrorMessage: '',
       passwordErrorMessage: ''
-    });
-    this.props.reset();
+    })
+    this.props.reset()
   };
 
   onSignUpPress = () => {
-    this.reset();
-    this.props.navigation.navigate('signup');
+    this.reset()
+    this.props.navigation.navigate('signup')
   };
 
   onForgotPasswordPress = () => {
-    this.reset();
-    this.props.navigation.navigate('forgotPassword');
+    this.reset()
+    this.props.navigation.navigate('forgotPassword')
   };
 
   submitPress = () => {
-    const { email, password } = this.state;
-    let check = false;
+    const { email, password } = this.state
+    let check = false
     if (!email) {
-      this.setState({ emailErrorMessage: !email ? 'This field is required' : '' });
-      check = true;
+      this.setState({ emailErrorMessage: !email ? 'This field is required' : '' })
+      check = true
     }
     if (!password) {
-      this.setState({ passwordErrorMessage: !password ? 'This field is required' : '' });
-      check = true;
+      this.setState({ passwordErrorMessage: !password ? 'This field is required' : '' })
+      check = true
     }
     if (check || this.props.loading) {
-      return;
+      return
     }
-    Keyboard.dismiss();
-    this.props.login({ email, password });
+    Keyboard.dismiss()
+    this.props.login({ email, password })
   };
 
   renderError = () => {
@@ -93,9 +93,9 @@ class Login extends Component {
         <View>
           <Text style={style.error}>{this.props.error}</Text>
         </View>
-      );
+      )
     }
-    return null;
+    return null
   };
 
   renderSignUp = () => {
@@ -108,13 +108,15 @@ class Login extends Component {
             </Text>
           </View>
         </TouchableWithoutFeedback>
-      );
+      )
     }
-    return null;
+    return null
   };
 
   render() {
-    const { email, password, emailErrorMessage, passwordErrorMessage } = this.state;
+    const {
+      email, password, emailErrorMessage, passwordErrorMessage
+    } = this.state
     return (
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -128,11 +130,11 @@ class Login extends Component {
             leftIconName="email-outline"
             errorMessage={emailErrorMessage}
             value={email}
-            onChangeText={text => {
+            onChangeText={(text) => {
               this.setState({
                 email: text,
                 emailErrorMessage: !text ? 'This field is required' : ''
-              });
+              })
             }}
           />
         </View>
@@ -143,11 +145,11 @@ class Login extends Component {
             leftIconName="lock-outline"
             errorMessage={passwordErrorMessage}
             value={password}
-            onChangeText={text => {
+            onChangeText={(text) => {
               this.setState({
                 password: text,
                 passwordErrorMessage: !text ? 'This field is required' : ''
-              });
+              })
             }}
           />
         </View>
@@ -175,16 +177,16 @@ class Login extends Component {
 
         {this.renderSignUp()}
       </KeyboardAvoidingView>
-    );
+    )
   }
 }
 
 const mapStateToProps = state => ({
   error: state.auth.error,
   loading: state.auth.loading
-});
+})
 
 export default connect(
   mapStateToProps,
   { login, reset }
-)(Login);
+)(Login)

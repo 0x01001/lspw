@@ -1,17 +1,18 @@
-import React, { Component } from 'react';
-import { KeyboardAvoidingView, Platform, View, Text, Keyboard } from 'react-native';
-import { Button } from 'react-native-elements';
-import { connect } from 'react-redux';
-import { observable } from 'mobx';
-import { observer } from 'mobx-react/native';
+import React, { Component } from 'react'
+import { KeyboardAvoidingView, Platform, View, Text, Keyboard } from 'react-native'
+import { Button } from 'react-native-elements'
+import { connect } from 'react-redux'
+import { observable } from 'mobx'
+import { observer } from 'mobx-react/native'
 
-import { forgotPassword } from '../actions';
-import appStyle from '../utils/app_style';
-import style from '../utils/style_sheet';
-import { TextInput, Logo } from '../components/common';
+import { forgotPassword } from '../actions'
+import appStyle from '../utils/app_style'
+import style from '../utils/style_sheet'
+import { TextInput, Logo } from '../components/common'
 
-const timer = require('react-native-timer');
-const COUNTDOWN = 60;
+const timer = require('react-native-timer')
+
+const COUNTDOWN = 60
 @observer
 class ForgotPassword extends Component {
   state = {
@@ -24,52 +25,52 @@ class ForgotPassword extends Component {
   countdown = COUNTDOWN;
 
   componentWillReceiveProps(nextProps) {
-    this.onComplete(nextProps);
+    this.onComplete(nextProps)
   }
 
   componentWillUnmount() {
-    timer.clearTimeout('startTimer');
+    timer.clearTimeout('startTimer')
   }
 
   onComplete(props) {
-    //console.log('onComplete: ', props.isForgotDone);
+    // console.log('onComplete: ', props.isForgotDone);
     if (props.isForgotDone) {
-      this.countdown = COUNTDOWN;
-      this.isCountDown = true;
-      this.startTimer();
+      this.countdown = COUNTDOWN
+      this.isCountDown = true
+      this.startTimer()
     }
   }
 
   startTimer = () => {
-    //console.log('startTimer');
+    // console.log('startTimer');
     if (this.countdown === 0) {
-      this.isCountDown = false;
-      timer.clearTimeout('startTimer');
+      this.isCountDown = false
+      timer.clearTimeout('startTimer')
     }
-    this.countdown--;
-    timer.setTimeout('startTimer', this.startTimer, 1000);
+    this.countdown--
+    timer.setTimeout('startTimer', this.startTimer, 1000)
   };
 
   submitPress = () => {
-    const { email } = this.state;
-    let check = false;
+    const { email } = this.state
+    let check = false
     if (!email) {
-      this.setState({ emailErrorMessage: !email ? 'This field is required' : '' });
-      check = true;
+      this.setState({ emailErrorMessage: !email ? 'This field is required' : '' })
+      check = true
     }
 
     if (check || this.props.loading) {
-      return;
+      return
     }
-    Keyboard.dismiss();
-    this.props.forgotPassword({ email });
+    Keyboard.dismiss()
+    this.props.forgotPassword({ email })
   };
 
   submitAgainPress = () => {
     if (!this.isCountDown) {
-      this.isCountDown = true;
-      const { email } = this.state;
-      this.props.forgotPassword({ email });
+      this.isCountDown = true
+      const { email } = this.state
+      this.props.forgotPassword({ email })
     }
   };
 
@@ -79,12 +80,12 @@ class ForgotPassword extends Component {
         <View>
           <Text style={style.error}>{this.props.error}</Text>
         </View>
-      );
+      )
     }
   }
 
   render() {
-    const { email, emailErrorMessage } = this.state;
+    const { email, emailErrorMessage } = this.state
     if (this.props.isForgotDone) {
       return (
         <View style={style.container}>
@@ -107,7 +108,7 @@ class ForgotPassword extends Component {
             />
           </View>
         </View>
-      );
+      )
     }
     return (
       <KeyboardAvoidingView
@@ -122,11 +123,11 @@ class ForgotPassword extends Component {
             leftIconName="email-outline"
             errorMessage={emailErrorMessage}
             value={email}
-            onChangeText={text => {
+            onChangeText={(text) => {
               this.setState({
                 email: text,
                 emailErrorMessage: !text ? 'This field is required' : ''
-              });
+              })
             }}
           />
         </View>
@@ -144,7 +145,7 @@ class ForgotPassword extends Component {
           />
         </View>
       </KeyboardAvoidingView>
-    );
+    )
   }
 }
 
@@ -152,9 +153,9 @@ const mapStateToProps = state => ({
   error: state.auth.error,
   loading: state.auth.loading,
   isForgotDone: state.auth.isForgotDone
-});
+})
 
 export default connect(
   mapStateToProps,
   { forgotPassword }
-)(ForgotPassword);
+)(ForgotPassword)

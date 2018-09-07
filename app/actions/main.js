@@ -31,60 +31,74 @@ const getPassword = async () => {
   return ''
 }
 
-const submitData = async (data, pw, uid, key) => {
-  const temp = data
-  delete temp.uid
-  const json = JSON.stringify(temp)
-  // console.log('submitData json: ', json)
+const submitData = (dispatch, data, pw, uid, key) => {
+  // const temp = data
+  // delete temp.uid
+  // const json = JSON.stringify(temp)
+  const json = JSON.stringify(data)
+  console.log('------json: ', json)
   // A post entry.
   const postData = encrypt(json, pw)
   // Get a key for a new Post.
-  const newKey = key !== '' ? key : firebase.database().ref(`/data/${uid}/b`).push().key
+  // const newKey = key !== '' ? key : firebase.database().ref(`/data/${uid}/b`).push().key
   // Write the new post's data simultaneously in the posts list and the user's post list.
   const updates = {}
-  updates[`/data/${uid}/b/${newKey}`] = postData
-  firebase.database().ref().update(updates).then(() => newKey)
+  // updates[`/data/${uid}/b/${newKey}`] = postData
+  updates[`/data/${uid}/b`] = postData
+  firebase.database().ref().update(updates).then(() => {
+    NavManager.hideLoading()
+    dispatch({ type: constant.IMPORT_DATA_SUCCESS })
+  }) // .then(() => newKey)
 }
 
 export const fetchData = () => async (dispatch) => {
   const { currentUser } = firebase.auth()
   const pw = await getPassword()
+  if (pw === '') {
+    NavManager.hideLoading()
+    dispatch({ type: constant.FETCH_DATA_FAIL })
+  }
+
   // console.log('pw: ', pw)
   firebase.database().ref(`/data/${currentUser.uid}/b`).on('value', (snapshot) => {
-    // console.log('snapshot: ', snapshot.val())
-    if (pw === '') {
+    console.log('fetchData: ', snapshot.val())
+    // const result = _.map(snapshot.val(), (val, uid) => {
+    //   const json = decrypt(val, pw)
+    //   // console.log('val: ', val, uid, json)
+    //   if (json) {
+    //     const data = JSON.parse(json)
+    //     data.uid = uid
+    //     // console.log('data: ', data)
+    //     return data
+    //   }
+    //   return null
+    // })
+    try {
+      const json = decrypt(snapshot.val(), pw)
+      const result = JSON.parse(json)
+      NavManager.hideLoading()
+      dispatch({ type: constant.FETCH_DATA_SUCCESS, payload: result })
+    } catch (error) {
+      console.log('fetchData: ', error)
       NavManager.hideLoading()
       dispatch({ type: constant.FETCH_DATA_FAIL })
     }
-
-    const result = _.map(snapshot.val(), (val, uid) => {
-      const json = decrypt(val, pw)
-      // console.log('val: ', val, uid, json)
-      if (json) {
-        const data = JSON.parse(json)
-        data.uid = uid
-        // console.log('data: ', data)
-        return data
-      }
-      return null
-    })
-    NavManager.hideLoading()
-    dispatch({ type: constant.FETCH_DATA_SUCCESS, payload: result })
   })
 }
 
 export const googleSignin = () => async (dispatch) => {
   // TODO: check accessToken !== null
-  dispatch({ type: constant.MAIN_LOADING })
   try {
+    console.log('googleSignin')
+    dispatch({ type: constant.MAIN_LOADING })
     await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true })
     const userInfo = await GoogleSignin.signIn()
-    // console.log(`token: ${userInfo.accessToken}`)
+    console.log(`token: ${userInfo.accessToken}`)
     dispatch({ type: constant.GOOGLE_SIGNIN_SUCCESS, payload: userInfo.accessToken })
   } catch (error) {
     dispatch({ type: constant.GOOGLE_SIGNIN_FAIL })
     // this.setState({ error: error.code });
-    console.log('error: ', error)
+    console.log('googleSignin: ', error)
     if (error.code === statusCodes.SIGN_IN_CANCELLED) {
       // user cancelled the login flow
     } else if (error.code === statusCodes.IN_PROGRESS) {
@@ -117,7 +131,7 @@ export const importData = ({ url, token, listData }) => async (dispatch) => {
     let usernameIndex = 2
     let passwordIndex = 3
     let extraIndex = 4
-    const result = []
+    let result = []
 
     for (let i = 0; i < item.length; i++) {
       const list = item[i].values
@@ -145,69 +159,65 @@ export const importData = ({ url, token, listData }) => async (dispatch) => {
         //   `${name_index} - ${url_index} - ${username_index} - ${password_index} - ${extra_index}`
         // );
       } else {
-        // result = [
-        //   ...result,
-        //   {
-        //     name: getData(list, name_index),
-        //     url: getData(list, url_index),
-        //     username: getData(list, username_index),
-        //     password: getData(list, password_index),
-        //     desc: getData(list, extra_index)
-        //   }
-        // ];
         const model = {
-          uid: '',
+          // uid: '',
           name: getData(list, nameIndex),
           url: getData(list, urlIndex),
           username: getData(list, usernameIndex),
           password: getData(list, passwordIndex),
-          desc: getData(list, extraIndex),
+          desc: getData(list, extraIndex)
         }
         if (model.password !== '' || model.name !== '' || model.url !== '' || model.username !== '' || model.desc !== '') {
-          result.push(model)
+          result = [...result, model]
+          // result.push(model)
         }
       }
     }
     // merge data
+    // let arrDuplicate = []
     // console.log('currentData: ', listData)
     const join = _.union(result, listData)
     // console.log('join: ', join)
     const listJoin = _.uniqWith(join, (x, y) => {
       if (x.username === y.username && x.url === y.url) {
-        y.uid = x.uid
-        // console.log('uid: ', y.uid, x.uid)
+        // console.log('uid: ',y.uid, x.uid);
+        // y.uid = x.uid
+        // if (x.password === y.password && x.desc === y.desc) {
+        //   // console.log('duplicate: ',y);
+        //   arrDuplicate = [...arrDuplicate, y]
+        // }
         return true
       }
       return false
     })
-    // console.log('------> ', listJoin)
 
-    // const arrPush = []
-    // const arrUpdate = _.remove(listJoin, (x) => {
-    //   if (x.uid !== '') {
-    //     return true
-    //   }
-    //   arrPush.push(x)
-    //   return false
+    // // remove duplicate
+    // arrDuplicate.forEach((x) => {
+    //   _.pull(listJoin, x)
     // })
-    // console.log('------> ', arrPush, arrUpdate)
+    console.log('importData json ', listJoin)
 
-    const { currentUser } = firebase.auth()
-    const pw = await getPassword()
-    // console.log('pw: ', pw)
-    if (pw === '') {
+    if (listJoin.length > 0) {
+      const { currentUser } = firebase.auth()
+      const pw = await getPassword()
+      // console.log('pw: ', pw)
+      if (pw === '') {
+        NavManager.hideLoading()
+        dispatch({ type: constant.IMPORT_DATA_FAIL })
+      }
+      submitData(dispatch, listJoin, pw, currentUser.uid)
+
+      // for (let i = 0; i < listJoin.length; i++) {
+      //   const element = listJoin[i]
+      //   await submitData(element, pw, currentUser.uid, element.uid)
+      //   // listJoin[i].uid = newKey
+      // }
+    } else {
       NavManager.hideLoading()
-      dispatch({ type: constant.IMPORT_DATA_FAIL })
+      dispatch({ type: constant.IMPORT_DATA_SUCCESS })
     }
-
-    for (let i = 0; i < listJoin.length; i++) {
-      const element = listJoin[i]
-      await submitData(element, pw, currentUser.uid, element.uid)
-      // listJoin[i].uid = newKey
-    }
-
-    NavManager.hideLoading()
-    dispatch({ type: constant.IMPORT_DATA_SUCCESS }) // , payload: listJoin })
+    // NavManager.hideLoading()
+    // dispatch({ type: constant.IMPORT_DATA_SUCCESS }) // , payload: listJoin })
   } catch (error) {
     console.log(error)
     NavManager.hideLoading()

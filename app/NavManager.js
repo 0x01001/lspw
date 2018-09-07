@@ -1,5 +1,5 @@
-import { observable, action } from 'mobx';
-import { NavigationActions } from 'react-navigation';
+import { observable, action } from 'mobx'
+import { NavigationActions } from 'react-navigation'
 
 class ObservableNavManager {
   @observable.ref
@@ -8,18 +8,18 @@ class ObservableNavManager {
   loading = null;
 
   showLoading() {
-    this.loading && this.loading.show();
+    this.loading && this.loading.show()
   }
 
   hideLoading() {
-    this.loading && this.loading.hide();
+    this.loading && this.loading.hide()
   }
 
   @action
   goBack() {
-    this.navigator.dispatch(NavigationActions.back());
+    this.navigator.dispatch(NavigationActions.back())
   }
 }
 
-const NavManager = new ObservableNavManager();
-export default NavManager;
+const NavManager = new ObservableNavManager()
+export default NavManager

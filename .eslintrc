@@ -1,5 +1,12 @@
 {
-  "extends": "airbnb",
+  "parser": "babel-eslint",
+  "plugins": ["react", "react-native"],
+  "parserOptions": {
+    "ecmaFeatures": {
+      "jsx": true
+    }
+  },
+  "extends": ["eslint:recommended", "plugin:react/recommended", "airbnb-standard"],
   "rules": {
     "arrow-body-style": "warn",
     "react-native/no-unused-styles": 2,
@@ -43,5 +50,8 @@
     "eqeqeq": 0,
     "no-return-await": 0,
     "camelcase": 0
+  },
+  "env": {
+    "react-native/react-native": true
   }
 }

@@ -1,17 +1,18 @@
-import React, { Component } from 'react';
-import { KeyboardAvoidingView, Platform, View, Text, Keyboard } from 'react-native';
-import { Button } from 'react-native-elements';
-import { connect } from 'react-redux';
-import { observable } from 'mobx';
-import { observer } from 'mobx-react/native';
+import React, { Component } from 'react'
+import { KeyboardAvoidingView, Platform, View, Text, Keyboard } from 'react-native'
+import { Button } from 'react-native-elements'
+import { connect } from 'react-redux'
+import { observable } from 'mobx'
+import { observer } from 'mobx-react/native'
 
-import { signUp, sendVerify } from '../actions';
-import appStyle from '../utils/app_style';
-import style from '../utils/style_sheet';
-import { TextInput, Logo } from '../components/common';
+import { signUp, sendVerify } from '../actions'
+import appStyle from '../utils/app_style'
+import style from '../utils/style_sheet'
+import { TextInput, Logo } from '../components/common'
 
-const timer = require('react-native-timer');
-const COUNTDOWN = 60;
+const timer = require('react-native-timer')
+
+const COUNTDOWN = 60
 @observer
 class SignUp extends Component {
   state = {
@@ -29,54 +30,54 @@ class SignUp extends Component {
   countdown = COUNTDOWN;
 
   componentWillReceiveProps(nextProps) {
-    this.onComplete(nextProps);
+    this.onComplete(nextProps)
   }
 
   componentWillUnmount() {
-    timer.clearTimeout('startTimer');
+    timer.clearTimeout('startTimer')
   }
 
   onComplete(props) {
-    //console.log('onComplete: ', props.needVerify);
+    // console.log('onComplete: ', props.needVerify);
     if (props.needVerify > 0) {
-      this.countdown = COUNTDOWN;
-      this.isCountDown = true;
-      this.startTimer();
+      this.countdown = COUNTDOWN
+      this.isCountDown = true
+      this.startTimer()
     }
   }
 
   startTimer = () => {
-    //console.log('startTimer');
+    // console.log('startTimer');
     if (this.countdown === 0) {
-      this.isCountDown = false;
-      timer.clearTimeout('startTimer');
+      this.isCountDown = false
+      timer.clearTimeout('startTimer')
     }
-    this.countdown--;
-    timer.setTimeout('startTimer', this.startTimer, 1000);
+    this.countdown--
+    timer.setTimeout('startTimer', this.startTimer, 1000)
   };
 
   submitPress = () => {
-    const { email, password, name } = this.state;
-    let check = false;
+    const { email, password, name } = this.state
+    let check = false
     if (!email) {
-      this.setState({ emailErrorMessage: !email ? 'This field is required' : '' });
-      check = true;
+      this.setState({ emailErrorMessage: !email ? 'This field is required' : '' })
+      check = true
     }
     if (!password) {
-      this.setState({ passwordErrorMessage: !password ? 'This field is required' : '' });
-      check = true;
+      this.setState({ passwordErrorMessage: !password ? 'This field is required' : '' })
+      check = true
     }
     if (check || this.props.loading) {
-      return;
+      return
     }
-    Keyboard.dismiss();
-    this.props.signUp({ name, email, password });
+    Keyboard.dismiss()
+    this.props.signUp({ name, email, password })
   };
 
   submitAgainPress = () => {
     if (!this.isCountDown) {
-      this.isCountDown = true;
-      this.props.sendVerify();
+      this.isCountDown = true
+      this.props.sendVerify()
     }
   };
 
@@ -86,7 +87,7 @@ class SignUp extends Component {
         <View>
           <Text style={style.error}>{this.props.error}</Text>
         </View>
-      );
+      )
     }
   }
 
@@ -99,7 +100,7 @@ class SignUp extends Component {
       passwordErrorMessage,
       secureTextEntry,
       rightIconName
-    } = this.state;
+    } = this.state
     if (this.props.needVerify > 0) {
       return (
         <View style={style.container}>
@@ -122,7 +123,7 @@ class SignUp extends Component {
             />
           </View>
         </View>
-      );
+      )
     }
     return (
       <KeyboardAvoidingView
@@ -136,8 +137,8 @@ class SignUp extends Component {
             placeholderText="Name"
             leftIconName="account"
             value={name}
-            onChangeText={text => {
-              this.setState({ name: text });
+            onChangeText={(text) => {
+              this.setState({ name: text })
             }}
           />
         </View>
@@ -148,11 +149,11 @@ class SignUp extends Component {
             leftIconName="email-outline"
             errorMessage={emailErrorMessage}
             value={email}
-            onChangeText={text => {
+            onChangeText={(text) => {
               this.setState({
                 email: text,
                 emailErrorMessage: !text ? 'This field is required' : ''
-              });
+              })
             }}
           />
         </View>
@@ -164,17 +165,17 @@ class SignUp extends Component {
             rightIconName={rightIconName}
             errorMessage={passwordErrorMessage}
             value={password}
-            onChangeText={text => {
+            onChangeText={(text) => {
               this.setState({
                 password: text,
                 passwordErrorMessage: !text ? 'This field is required' : ''
-              });
+              })
             }}
             onRightIconPress={() => {
               this.setState({
                 secureTextEntry: !secureTextEntry,
                 rightIconName: secureTextEntry ? 'eye' : 'eye-off'
-              });
+              })
             }}
           />
         </View>
@@ -192,7 +193,7 @@ class SignUp extends Component {
           />
         </View>
       </KeyboardAvoidingView>
-    );
+    )
   }
 }
 
@@ -200,9 +201,9 @@ const mapStateToProps = state => ({
   error: state.auth.error,
   loading: state.auth.loading,
   needVerify: state.auth.needVerify
-});
+})
 
 export default connect(
   mapStateToProps,
   { signUp, sendVerify }
-)(SignUp);
+)(SignUp)

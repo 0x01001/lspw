@@ -10,7 +10,7 @@ const loginSuccess = (dispatch, data) => {
   const emailVerified = data ? data.user.emailVerified : null
   if (emailVerified) {
     dispatch({
-      type: constant.LOGIN_SUCCESS,
+      type: constant.LOGIN_SUCCESS
     })
   } else {
     // console.log('need verify');
@@ -70,7 +70,7 @@ export const signUp = ({ name, email, password }) => async (dispatch) => {
     const { data } = await axios.post('https://us-central1-lspw-49d1f.cloudfunctions.net/signup', {
       name,
       email,
-      password,
+      password
     })
     // console.log(data);
     if (data && data.code === '1') {

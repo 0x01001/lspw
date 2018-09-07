@@ -1,32 +1,32 @@
-import React, { Component } from 'react';
-import { View, StatusBar } from 'react-native';
-import { createStore, applyMiddleware } from 'redux';
-import { Provider } from 'react-redux';
-import ReduxThunk from 'redux-thunk';
-import reducers from './app/reducers';
-import Router from './app/Router';
-import { initializeApp } from './reference';
-import Loading from './app/components/common/Loading';
-import NavManager from './app/NavManager';
+import React, { Component } from 'react'
+import { View, StatusBar } from 'react-native'
+import { createStore, applyMiddleware } from 'redux'
+import { Provider } from 'react-redux'
+import ReduxThunk from 'redux-thunk'
+import reducers from './app/reducers'
+import Router from './app/Router'
+import { initializeApp } from './reference'
+import Loading from './app/components/common/Loading'
+import NavManager from './app/NavManager'
 
 type Props = {};
-const store = createStore(reducers, {}, applyMiddleware(ReduxThunk));
+const store = createStore(reducers, {}, applyMiddleware(ReduxThunk))
 
 export default class App extends Component<Props> {
   state = { isSignIn: null };
 
   componentWillMount() {
-    const firebase = require('firebase');
+    const firebase = require('firebase')
 
-    initializeApp(firebase);
-    firebase.auth().onAuthStateChanged(user => {
+    initializeApp(firebase)
+    firebase.auth().onAuthStateChanged((user) => {
       if (user) {
-        this.setState({ isSignIn: user.emailVerified });
+        this.setState({ isSignIn: user.emailVerified })
       } else {
-        this.setState({ isSignIn: false });
+        this.setState({ isSignIn: false })
       }
-      //console.log('app: ', this.state.isSignIn, user);
-    });
+      // console.log('app: ', this.state.isSignIn, user);
+    })
   }
 
   render() {
@@ -39,11 +39,11 @@ export default class App extends Component<Props> {
         <Loading
           size="large"
           visible={false}
-          ref={ref => {
-            NavManager.loading = ref;
+          ref={(ref) => {
+            NavManager.loading = ref
           }}
         />
       </View>
-    );
+    )
   }
 }
