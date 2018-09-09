@@ -14,7 +14,7 @@ const TextInput = ({
   leftIconName,
   rightIconName,
   onRightIconPress,
-  onChangeText,
+  onChangeText
 }) => (
   <Input
     inputStyle={style.input}
@@ -24,18 +24,18 @@ const TextInput = ({
     errorMessage={errorMessage || null} // "This field is required"
     leftIcon={<Icon name={leftIconName} size={20} color={appStyle.mainColor} />}
     rightIcon={(
-<TouchableOpacity onPress={onRightIconPress}>
+      <TouchableOpacity onPress={onRightIconPress}>
         <View style={style.rightIcon}>
           <Icon name={rightIconName} size={20} color={appStyle.mainColor} />
         </View>
       </TouchableOpacity>
-)}
+    )}
     leftIconContainerStyle={{ marginLeft: 0 }}
     containerStyle={{
-      width: '100%',
+      width: '100%'
     }}
     inputContainerStyle={{
-      borderBottomColor: appStyle.borderColor,
+      borderBottomColor: appStyle.borderColor
     }}
     value={value}
     onChangeText={onChangeText}

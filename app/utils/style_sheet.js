@@ -7,21 +7,21 @@ export default StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: appStyle.backgroundColor,
     paddingHorizontal: 60,
-    alignItems: 'center',
+    alignItems: 'center'
   },
   logo: {
     alignSelf: 'center',
     marginBottom: 30,
-    marginTop: -40,
+    marginTop: -40
   },
   field: {
     marginVertical: 5,
-    width: '100%',
+    width: '100%'
   },
   input: {
     fontSize: 14,
     fontFamily: appStyle.mainFont,
-    color: appStyle.mainColor,
+    color: appStyle.mainColor
   },
   button: {
     marginTop: 15,
@@ -33,46 +33,46 @@ export default StyleSheet.create({
     ...Platform.select({
       android: {
         elevation: 0,
-        borderRadius: 1,
-      },
-    }),
+        borderRadius: 1
+      }
+    })
   },
   buttonTitle: {
     backgroundColor: 'transparent',
     fontSize: 18,
     fontFamily: appStyle.mainFont,
     fontWeight: 'normal',
-    color: appStyle.mainColor,
+    color: appStyle.mainColor
   },
   error: {
     alignSelf: 'center',
     color: appStyle.redColor,
     fontFamily: appStyle.mainFont,
-    marginTop: 10,
+    marginTop: 10
   },
   title: {
     fontFamily: appStyle.mainFont,
     fontWeight: '700',
     color: appStyle.greenColor,
-    textAlign: 'center',
+    textAlign: 'center'
   },
-  content: {
+  desciption: {
     fontFamily: appStyle.mainFont,
     fontWeight: 'normal',
     color: appStyle.mainColor,
-    textAlign: 'center',
+    textAlign: 'center'
   },
   signUp: {
     position: 'absolute',
     bottom: 0,
     height: 60,
-    justifyContent: 'center',
+    justifyContent: 'center'
   },
   rightIcon: {
     height: 40,
     width: 40,
     justifyContent: 'center',
     alignItems: 'flex-end',
-    paddingRight: 5,
-  },
+    paddingRight: 5
+  }
 })

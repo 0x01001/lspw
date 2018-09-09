@@ -1,44 +1,66 @@
-import React, { Component } from 'react';
-import { StyleSheet, View, ActivityIndicator } from 'react-native';
-import appStyle from '../../utils/app_style';
+import React, { Component } from 'react'
+import { View } from 'react-native'
+import Spinner from 'react-native-loading-spinner-overlay'
+import PropTypes from 'prop-types'
+import appStyle from '../../utils/app_style'
+
+const SIZES = ['small', 'normal', 'large']
 
 class Loading extends Component {
+  static propTypes = {
+    visible: PropTypes.bool,
+    size: PropTypes.oneOf(SIZES)
+  }
+
+  static defaultProps = {
+    visible: false,
+    size: 'normal' // 'normal',
+  }
+
   state = {
     visible: this.props.visible || false
-  };
+  }
 
   show = () => {
-    this.setState({ visible: true });
+    this.setState({ visible: true })
   };
 
   hide = () => {
-    this.setState({ visible: false });
+    this.setState({ visible: false })
   };
 
   render() {
-    const { visible } = this.state;
+    const { visible } = this.state
     if (!visible) {
-      return null;
+      return null
     }
     return (
-      <View style={styles.container}>
-        <ActivityIndicator size={this.props.size || 'small'} color={appStyle.redColor} />
+      // <View style={styles.container}>
+      //   <ActivityIndicator size={this.props.size || 'small'} color={appStyle.redColor} />
+      // </View>
+      <View>
+        <Spinner
+          visible={visible}
+          // textContent="Loading..."
+          color={appStyle.redColor}
+          size={this.props.size}
+        />
       </View>
-    );
+    )
   }
 }
 
-const styles = StyleSheet.create({
-  container: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    left: 0,
-    right: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: `${appStyle.blackColor}50`
-  }
-});
+// const styles = StyleSheet.create({
+//   container: {
+//     position: 'absolute',
+//     top: 0,
+//     bottom: 0,
+//     left: 0,
+//     right: 0,
+//     justifyContent: 'center',
+//     alignItems: 'center',
+//     backgroundColor: `${appStyle.blackColor}50`
+//   }
+// })
 
-export default Loading;
+export default Loading

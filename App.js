@@ -3,11 +3,13 @@ import { View, StatusBar } from 'react-native'
 import { createStore, applyMiddleware } from 'redux'
 import { Provider } from 'react-redux'
 import ReduxThunk from 'redux-thunk'
+
 import reducers from './app/reducers'
 import Router from './app/Router'
 import { initializeApp } from './reference'
 import Loading from './app/components/common/Loading'
-import NavManager from './app/NavManager'
+import AppNav from './app/AppNav'
+import ImportPopup from './app/components/home/ImportPopup'
 
 type Props = {};
 const store = createStore(reducers, {}, applyMiddleware(ReduxThunk))
@@ -36,11 +38,14 @@ export default class App extends Component<Props> {
         <Provider store={store}>
           <Router isSignIn={this.state.isSignIn} />
         </Provider>
+        <ImportPopup ref={(ref) => {
+          AppNav.import = ref
+        }}
+        />
         <Loading
           size="large"
-          visible={false}
           ref={(ref) => {
-            NavManager.loading = ref
+            AppNav.loading = ref
           }}
         />
       </View>

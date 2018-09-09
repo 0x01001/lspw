@@ -4,7 +4,7 @@ const INITAL_STATE = {
   error: '',
   loading: false,
   isForgotDone: false,
-  needVerify: 0,
+  needVerify: 0
 }
 
 export default (state = INITAL_STATE, action) => {
@@ -21,7 +21,7 @@ export default (state = INITAL_STATE, action) => {
         ...state,
         ...INITAL_STATE,
         needVerify: ++counter,
-        error: action.payload === true ? 'Your account is not activated.' : '',
+        error: action.payload === true ? 'Your account is not activated.' : ''
       }
     }
     case constant.SIGNUP_FAIL:
@@ -38,3 +38,7 @@ export default (state = INITAL_STATE, action) => {
       return state
   }
 }
+
+// if ( action.type === LOG_OUT ) {
+//   state = undefined;
+// }

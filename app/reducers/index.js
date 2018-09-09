@@ -4,5 +4,5 @@ import main from './main'
 
 export default combineReducers({
   auth,
-  main,
+  main
 })

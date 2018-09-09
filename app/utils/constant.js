@@ -13,10 +13,11 @@ export default {
   GOOGLE_SIGNIN_FAIL: 'google_signin_fail',
   IMPORT_DATA_SUCCESS: 'import_data_success',
   IMPORT_DATA_FAIL: 'import_data_fail',
+  IMPORT_NO_DATA: 'import_no_data',
   FETCH_DATA_SUCCESS: 'fetch_data_success',
   FETCH_DATA_FAIL: 'fetch_data_fail',
 
   AUTH_LOADING: 'auth_loading',
   MAIN_LOADING: 'main_loading',
-  RESET: 'reset',
+  RESET: 'reset'
 }

@@ -107,7 +107,7 @@ class SignUp extends Component {
           <Logo />
           <View style={style.field}>
             <Text style={style.title}>We just sent email to "{email}"</Text>
-            <Text style={[style.content, { marginTop: 10 }]}>
+            <Text style={[style.desciption, { marginTop: 10 }]}>
               Click the secure link we sent you to verify your account. If you didn't receive an
               email, check your Spam folder.
             </Text>

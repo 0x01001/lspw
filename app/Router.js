@@ -1,7 +1,5 @@
 import React, { Component } from 'react'
-import {
-  Animated, Easing, View, TouchableOpacity
-} from 'react-native'
+import { Animated, Easing, View, TouchableOpacity } from 'react-native'
 import { createDrawerNavigator, createStackNavigator } from 'react-navigation'
 import Icon from 'react-native-vector-icons/SimpleLineIcons'
 import { connect } from 'react-redux'
@@ -14,6 +12,7 @@ import Home from './screens/Home'
 import appStyle from './utils/app_style'
 import Loading from './components/common/Loading'
 import Layout from './utils/layout'
+import SideMenu from './components/common/SideMenu'
 
 class Router extends Component {
   renderContent() {
@@ -24,6 +23,9 @@ class Router extends Component {
       case true: {
         const MainNav = createDrawerNavigator({
           main: { screen: Home }
+        }, {
+          contentComponent: SideMenu,
+          drawerWidth: 300
         })
         return <MainNav />
       }

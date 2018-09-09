@@ -92,7 +92,7 @@ class ForgotPassword extends Component {
           <Logo />
           <View style={style.field}>
             <Text style={style.title}>We just sent email to "{email}"</Text>
-            <Text style={[style.content, { marginTop: 10 }]}>
+            <Text style={[style.desciption, { marginTop: 10 }]}>
               Click the secure link we sent you to reset your password. If you didn't receive an
               email, check your Spam folder.
             </Text>

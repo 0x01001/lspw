@@ -1,14 +1,9 @@
 import React, { Component } from 'react'
-import {
-  View, Text, TouchableOpacity, StyleSheet, LayoutAnimation, FlatList
-} from 'react-native'
-import {
-  Button, Icon, Divider, ListItem
-} from 'react-native-elements'
+import { View, Text, TouchableOpacity, StyleSheet, LayoutAnimation, FlatList } from 'react-native'
+import { Button, Icon, Divider, ListItem } from 'react-native-elements'
 import * as Keychain from 'react-native-keychain'
 import { Toolbar } from 'react-native-material-ui'
 import { connect } from 'react-redux'
-import Modal from 'react-native-modal'
 import firebase from 'firebase'
 import _ from 'lodash'
 
@@ -16,31 +11,26 @@ import layout from '../utils/layout'
 import style from '../utils/style_sheet'
 import appStyle from '../utils/app_style'
 import List from '../components/home/List'
-import NavManager from '../NavManager'
+import AppNav from '../AppNav'
 import { googleSignin, importData, fetchData } from '../actions'
-import { TextInput } from '../components/common'
 
 const marginTop = layout.getExtraTop()
 class Home extends Component {
-  static navigationOptions = {
-    title: 'Home',
-    drawerLabel: 'Home',
-    drawerIcon: ({ tintColor }) => <Icon name="list" size={24} color={tintColor} />
-  };
+  // static navigationOptions = {
+  //   title: 'Home',
+  //   drawerLabel: 'Home',
+  //   drawerIcon: ({ tintColor }) => <Icon name="list" size={24} color={tintColor} />
+  // };
 
   state = {
-    isInit: false,
     selected: [],
     searchText: '',
-    isModalVisible: false,
-    url: '',
-    urlErrorMessage: ''
+    isShowImport: false
+
   };
 
   componentWillMount() {
     // get all data
-    this.setState({ isInit: true })
-    NavManager.showLoading()
     this.props.fetchData()
   }
 
@@ -48,18 +38,18 @@ class Home extends Component {
     this.onComplete(nextProps)
   }
 
-  componentWillUpdate() {
-    LayoutAnimation.spring()
-  }
+  // componentWillUpdate() {
+  //   LayoutAnimation.spring()
+  // }
 
   onComplete(props) {
-    this.setState({ isInit: false })
     console.log('onComplete: ', `${props.token} - ${props.isShowImport}`)
     // props.listData.forEach((x) => {
     //   console.log('onComplete: ', x)
     // })
     // show popup
-    this.setState({ isModalVisible: props.isShowImport && props.token !== '' })
+    this.setState({ isShowImport: props.isShowImport && props.token !== '' })
+    if (props.isShowImport) { AppNav.showImport() }
   }
 
   reset = async () => {
@@ -146,56 +136,6 @@ class Home extends Component {
     this.props.importData({ url, token, listData })
   };
 
-  resetModal = () => {
-    this.setState({ url: '' })
-  };
-
-  renderError = () => {
-    if (this.props.error) {
-      return (
-        <View>
-          <Text style={style.error}>{this.props.error}</Text>
-        </View>
-      )
-    }
-    return null
-  };
-
-  renderModalContent = () => (
-    <View style={styles.modal}>
-      <TextInput
-        placeholderText="Link"
-        leftIconName="link-variant"
-        errorMessage={this.state.urlErrorMessage}
-        value={this.state.url}
-        onChangeText={(text) => {
-          this.setState({
-            url: text,
-            urlErrorMessage: !text ? 'This field is required' : ''
-          })
-        }}
-      />
-      {this.renderError()}
-      <View style={styles.modalContent}>
-        <Button
-          title="Ok"
-          buttonStyle={[style.button, { marginLeft: -15, marginTop: 20 }]}
-          titleStyle={style.buttonTitle}
-          onPress={this.import}
-        />
-        <Button
-          title="Cancel"
-          buttonStyle={[style.button, { marginRight: -30, marginTop: 20 }]}
-          titleStyle={style.buttonTitle}
-          onPress={() => {
-            this.setState({ isModalVisible: false })
-          }}
-        />
-      </View>
-      <Text style={styles.note}>(*) Automatic remove duplicates</Text>
-    </View>
-  );
-
   renderButton = (text, onPress) => (
     <TouchableOpacity onPress={onPress}>
       <View style={style.button}>
@@ -207,7 +147,7 @@ class Home extends Component {
   renderItem = ({ item }) => (
     <ListItem
       // contentContainerStyle={{justifyContent:'flex-start', alignContent:'flex-start'}}
-      title={item.url}
+      title={item.name}
       subtitle={item.username}
       // leftAvatar={{
       //   source: item.avatar_url && { uri: item.avatar_url },
@@ -218,50 +158,37 @@ class Home extends Component {
   )
 
   renderButtonImport = () => {
-    // console.log('renderButtonImport: ', this.state.isModalVisible)
-    if (this.state.isModalVisible) {
+    // console.log('renderButtonImport: ', this.state.isShowImport)
+    if (this.state.isShowImport) {
       return null
     }
     return (
       <Button
-        title="Import"
+        title="Import data"
         buttonStyle={[style.button, { width: 120 }]}
         titleStyle={style.buttonTitle}
         loading={this.props.loading}
         loadingProps={{ size: 'small', color: appStyle.mainColor }}
         onPress={() => { this.props.googleSignin() }}
-      />)
+      />
+    )
   }
 
   renderContent = () => {
-    if (this.state.isInit) {
-      return null
-    } else if (this.props.listData) {
+    if (this.props.listData) {
       return (
-        <View style={{ flex: 1, backgroundColor: appStyle.backgroundColor }}>
+        <View style={{ flex: 1 }}>
           <FlatList
             data={this.props.listData}
             renderItem={this.renderItem}
             keyExtractor={(x, i) => i.toString()}
+            ListEmptyComponent={this.renderButtonImport}
+            contentContainerStyle={[{ flexGrow: 1 }, this.props.listData.length ? null : { justifyContent: 'center' }]}
           />
         </View>
       )
     }
-    return (
-      <View style={styles.import}>
-        {this.renderButtonImport()}
-        <Modal
-          isVisible={this.state.isModalVisible}
-          onBackdropPress={() => this.setState({ isModalVisible: false })}
-          // animationIn="slideInLeft"
-          // animationOut="slideOutRight"
-          backdropColor="#00000050"
-          onModalHide={this.resetModal}
-        >
-          {this.renderModalContent()}
-        </Modal>
-      </View>
-    )
+    return (<View style={styles.content}><Text style={{ color: appStyle.mainColor }}>Loading...</Text></View>)
   };
 
   render() {
@@ -319,30 +246,10 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     flexDirection: 'column'
   },
-  modal: {
-    backgroundColor: `${appStyle.blackColor}60`,
-    padding: 22,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 1,
-    borderColor: 'rgba(0, 0, 0, 1)'
-  },
-  import: {
+  content: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center'
-  },
-  modalContent: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    marginLeft: 15,
-    marginRight: 15
-  },
-  note: {
-    marginTop: 15,
-    color: appStyle.grayColor,
-    fontSize: 14,
-    alignSelf: 'flex-start'
   }
 })
 
