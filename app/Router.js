@@ -79,7 +79,7 @@ class Router extends Component {
               headerLeft: (
                 <TouchableOpacity
                   onPress={() => {
-                    this.props.reset()
+                    // this.props.reset()
                     navigation.goBack()
                   }}
                 >
@@ -132,7 +132,8 @@ class Router extends Component {
   }
 }
 
-export default connect(
-  null,
-  { reset }
-)(Router)
+export default Router
+// export default connect(
+//   null,
+//   { reset }
+// )(Router)

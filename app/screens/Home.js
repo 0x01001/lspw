@@ -13,6 +13,7 @@ import appStyle from '../utils/app_style'
 import List from '../components/home/List'
 import AppNav from '../AppNav'
 import { googleSignin, importData, fetchData } from '../actions'
+// import { Account, ListAccount } from '../stores'
 
 const marginTop = layout.getExtraTop()
 class Home extends Component {

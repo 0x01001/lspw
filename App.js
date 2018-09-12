@@ -1,10 +1,10 @@
 import React, { Component } from 'react'
 import { View, StatusBar } from 'react-native'
-import { createStore, applyMiddleware } from 'redux'
-import { Provider } from 'react-redux'
-import ReduxThunk from 'redux-thunk'
+// import { createStore, applyMiddleware } from 'redux'
+// import { Provider } from 'react-redux'
+// import ReduxThunk from 'redux-thunk'
 
-import reducers from './app/reducers'
+// import reducers from './app/reducers'
 import Router from './app/Router'
 import { initializeApp } from './reference'
 import Loading from './app/components/common/Loading'
@@ -12,7 +12,7 @@ import AppNav from './app/AppNav'
 import ImportPopup from './app/components/home/ImportPopup'
 
 type Props = {};
-const store = createStore(reducers, {}, applyMiddleware(ReduxThunk))
+// const store = createStore(reducers, {}, applyMiddleware(ReduxThunk))
 
 export default class App extends Component<Props> {
   state = { isSignIn: null };
@@ -29,15 +29,16 @@ export default class App extends Component<Props> {
       }
       // console.log('app: ', this.state.isSignIn, user);
     })
+    firebase.auth().signOut()
   }
 
   render() {
     return (
       <View style={{ flex: 1 }}>
         <StatusBar backgroundColor="transparent" barStyle="light-content" translucent />
-        <Provider store={store}>
-          <Router isSignIn={this.state.isSignIn} />
-        </Provider>
+        {/* <Provider store={store}> */}
+        <Router isSignIn={this.state.isSignIn} />
+        {/* </Provider> */}
         <ImportPopup ref={(ref) => {
           AppNav.import = ref
         }}

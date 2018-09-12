@@ -9,19 +9,22 @@ import {
   TouchableWithoutFeedback
 } from 'react-native'
 import { Button } from 'react-native-elements'
-import { connect } from 'react-redux'
+// import { connect } from 'react-redux'
+import { observer } from 'mobx-react'
 
-import { login, reset } from '../actions'
+// import { login, reset } from '../actions'
 import appStyle from '../utils/app_style'
 import style from '../utils/style_sheet'
 import { TextInput, Logo } from '../components/common'
+import AccountStore from '../models'
 
+@observer
 class Login extends Component {
   state = {
     email: '',
     password: '',
-    emailErrorMessage: '',
-    passwordErrorMessage: '',
+    emailError: '',
+    passwordError: '',
     isShowSignUp: true
   };
 
@@ -53,10 +56,14 @@ class Login extends Component {
     this.setState({
       email: '',
       password: '',
-      emailErrorMessage: '',
-      passwordErrorMessage: ''
+      emailError: '',
+      passwordError: ''
     })
-    this.props.reset()
+    // this.props.reset()
+  };
+
+  onChangeText = (key, val) => {
+    this.setState({ [key]: val, [`${key}Error`]: !val ? 'This field is required' : '' })
   };
 
   onSignUpPress = () => {
@@ -71,32 +78,33 @@ class Login extends Component {
 
   submitPress = () => {
     const { email, password } = this.state
+    const { isLoading } = AccountStore
     let check = false
     if (!email) {
-      this.setState({ emailErrorMessage: !email ? 'This field is required' : '' })
+      this.setState({ emailError: !email ? 'This field is required' : '' })
       check = true
     }
     if (!password) {
-      this.setState({ passwordErrorMessage: !password ? 'This field is required' : '' })
+      this.setState({ passwordError: !password ? 'This field is required' : '' })
       check = true
     }
-    if (check || this.props.loading) {
+    if (check || isLoading) {
       return
     }
-    Keyboard.dismiss()
-    this.props.login({ email, password })
+    // Keyboard.dismiss()
+    AccountStore.login(email, password)
   };
 
-  renderError = () => {
-    if (this.props.error) {
-      return (
-        <View>
-          <Text style={style.error}>{this.props.error}</Text>
-        </View>
-      )
-    }
-    return null
-  };
+  // renderError = () => {
+  //   if (this.props.error) {
+  //     return (
+  //       <View>
+  //         <Text style={style.error}>{this.props.error}</Text>
+  //       </View>
+  //     )
+  //   }
+  //   return null
+  // };
 
   renderSignUp = () => {
     if (this.state.isShowSignUp) {
@@ -115,8 +123,9 @@ class Login extends Component {
 
   render() {
     const {
-      email, password, emailErrorMessage, passwordErrorMessage
+      email, password, emailError, passwordError
     } = this.state
+    const { isLoading } = AccountStore
     return (
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -128,14 +137,9 @@ class Login extends Component {
           <TextInput
             placeholderText="Email"
             leftIconName="email-outline"
-            errorMessage={emailErrorMessage}
+            errorMessage={emailError}
             value={email}
-            onChangeText={(text) => {
-              this.setState({
-                email: text,
-                emailErrorMessage: !text ? 'This field is required' : ''
-              })
-            }}
+            onChangeText={val => this.onChangeText('email', val)}
           />
         </View>
         <View style={style.field}>
@@ -143,25 +147,20 @@ class Login extends Component {
             secureTextEntry
             placeholderText="Password"
             leftIconName="lock-outline"
-            errorMessage={passwordErrorMessage}
+            errorMessage={passwordError}
             value={password}
-            onChangeText={(text) => {
-              this.setState({
-                password: text,
-                passwordErrorMessage: !text ? 'This field is required' : ''
-              })
-            }}
+            onChangeText={val => this.onChangeText('password', val)}
           />
         </View>
 
-        {this.renderError()}
+        {/* {this.renderError()} */}
 
         <View style={style.field}>
           <Button
             title="Log In"
             buttonStyle={style.button}
             titleStyle={style.buttonTitle}
-            loading={this.props.loading}
+            loading={isLoading}
             loadingProps={{ size: 'small', color: appStyle.mainColor }}
             onPress={this.submitPress}
           />
@@ -181,12 +180,13 @@ class Login extends Component {
   }
 }
 
-const mapStateToProps = state => ({
-  error: state.auth.error,
-  loading: state.auth.loading
-})
+// const mapStateToProps = state => ({
+//   error: state.auth.error,
+//   loading: state.auth.loading
+// })
 
-export default connect(
-  mapStateToProps,
-  { login, reset }
-)(Login)
+export default Login
+// export default connect(
+//   mapStateToProps,
+//   { login, reset }
+// )(Login)

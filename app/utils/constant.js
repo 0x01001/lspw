@@ -1,4 +1,5 @@
 export default {
+  ROOT_URL: 'https://us-central1-lspw-49d1f.cloudfunctions.net',
   EMAIL_CHANGED: 'email_change',
   PASSWORD_CHANGED: 'password_change',
   LOGIN_SUCCESS: 'login_success',
