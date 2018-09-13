@@ -1,5 +1,6 @@
 import { observable, action } from 'mobx'
-import { NavigationActions } from 'react-navigation'
+import { NavigationActions, DrawerActions } from 'react-navigation'
+import { DURATION } from '../app/components/common/Toast'
 
 class ObservableNav {
   @observable.ref
@@ -8,6 +9,11 @@ class ObservableNav {
   loading = null;
   @observable.ref
   import = null;
+  @observable.ref
+  toast = null;
+
+  cacheMsg = '';
+
   showLoading() {
     this.loading && this.loading.show()
   }
@@ -25,8 +31,35 @@ class ObservableNav {
   }
 
   @action
+  showToast(msg) {
+    this.toast.show(msg, DURATION.SHORT)
+    // if (this.cacheMsg === msg) {
+    //   return
+    // }
+    // // console.log('show msg')
+    // this.cacheMsg = msg
+    // Toast.show(msg, {
+    //   containerStyle: { borderRadius: 1 },
+    //   opacity: 0.6,
+    //   onHide: () => { this.cacheMsg = '' }
+    // })
+  }
+
+  @action
   goBack() {
     this.navigator.dispatch(NavigationActions.back())
+  }
+
+  @action
+  closeMenu() {
+    this.navigator.dispatch(DrawerActions.closeDrawer())
+  }
+
+  @action pushToScreen(routeName, params = null) {
+    this.navigator.dispatch(NavigationActions.navigate({
+      routeName,
+      params
+    }))
   }
 }
 

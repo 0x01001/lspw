@@ -17,6 +17,7 @@ import appStyle from '../utils/app_style'
 import style from '../utils/style_sheet'
 import { TextInput, Logo } from '../components/common'
 import AccountStore from '../models'
+import AppNav from '../AppNav'
 
 @observer
 class Login extends Component {
@@ -40,40 +41,20 @@ class Login extends Component {
     this.keyboardDidHideListener.remove()
   }
 
-  _keyboardDidShow(e) {
-    // console.log('keyboardDidShow');
-    const { width, height } = Dimensions.get('window')
-    this.setState({ isShowSignUp: height > width })
-    // console.log(`${width} - ${height} - ${this.state.isShowSignUp}`);
-  }
-
-  _keyboardDidHide() {
-    // console.log('keyboardDidHide');
-    this.setState({ isShowSignUp: true })
-  }
-
-  reset = () => {
-    this.setState({
-      email: '',
-      password: '',
-      emailError: '',
-      passwordError: ''
-    })
-    // this.props.reset()
-  };
-
   onChangeText = (key, val) => {
     this.setState({ [key]: val, [`${key}Error`]: !val ? 'This field is required' : '' })
   };
 
   onSignUpPress = () => {
     this.reset()
-    this.props.navigation.navigate('signup')
+    AppNav.pushToScreen('signup')
+    // this.props.navigation.navigate('signup')
   };
 
   onForgotPasswordPress = () => {
     this.reset()
-    this.props.navigation.navigate('forgotPassword')
+    AppNav.pushToScreen('forgotPassword')
+    // this.props.navigation.navigate('forgotPassword')
   };
 
   submitPress = () => {
@@ -91,9 +72,31 @@ class Login extends Component {
     if (check || isLoading) {
       return
     }
-    // Keyboard.dismiss()
+    Keyboard.dismiss()
     AccountStore.login(email, password)
   };
+
+  reset = () => {
+    this.setState({
+      email: '',
+      password: '',
+      emailError: '',
+      passwordError: ''
+    })
+    AccountStore.showLoading(false)
+  };
+
+  _keyboardDidShow(e) {
+    // console.log('keyboardDidShow');
+    const { width, height } = Dimensions.get('window')
+    this.setState({ isShowSignUp: height > width })
+    // console.log(`${width} - ${height} - ${this.state.isShowSignUp}`);
+  }
+
+  _keyboardDidHide() {
+    // console.log('keyboardDidHide');
+    this.setState({ isShowSignUp: true })
+  }
 
   // renderError = () => {
   //   if (this.props.error) {
@@ -152,9 +155,7 @@ class Login extends Component {
             onChangeText={val => this.onChangeText('password', val)}
           />
         </View>
-
         {/* {this.renderError()} */}
-
         <View style={style.field}>
           <Button
             title="Log In"

@@ -2,10 +2,11 @@ import firebase from 'firebase'
 import axios from 'axios'
 import * as Keychain from 'react-native-keychain'
 import { types } from 'mobx-state-tree'
-import Toast from 'react-native-root-toast'
+import { GoogleSignin, statusCodes } from 'react-native-google-signin'
 
 import constant from '../utils/constant'
-import { encrypt } from '../utils'
+import AppNav from '../AppNav'
+import { encrypt, getPassword, decrypt } from '../utils'
 
 const Account = types.model({
   name: types.string,
@@ -15,67 +16,65 @@ const Account = types.model({
   desc: types.string
 })
 
-let isShowToast = false
-
 const AccountStore = types.model({
   items: types.array(Account),
-  isLoading: false,
-  isShowVerify: false
+  accessToken: '',
+  isLoading: false
 }).actions(self => ({
+  setItems(data) {
+
+  },
+
+  add(item) {
+    self.items.push(item)
+  },
+
+  setToken(token) {
+    self.accessToken = token
+  },
+
   showLoading(val) {
-    console.log('showloading: '.val)
+    // console.log('showloading: ', val)
     self.isLoading = val
   },
 
-  showVerify() {
-    self.isShowVerify = true
-  },
-
   showMsg(msg) {
-    if (isShowToast) {
-      // console.log('return..........')
-      return
-    }
-    // console.log('show msg')
-    isShowToast = true
-    Toast.show(msg, {
-      duration: Toast.durations.SHORT,
-      position: Toast.positions.BOTTOM,
-      shadow: true,
-      animation: true,
-      hideOnPress: true,
-      delay: 0,
-      onHide: () => {
-        // calls on toast\`s hide animation start.
-        isShowToast = false
-      }
-    })
-  },
-
-  showError(msg) {
     self.showLoading(false)
-    self.showMsg(msg !== null ? msg : 'Something went wrong.')
+    const m = msg === undefined || msg === null ? 'Something went wrong.' : msg
+    AppNav.showToast(m)
   },
 
-  verify() {
-    // console.log('verify email');
+  showVerify(msg = '') {
+    if (msg !== '') { self.showMsg(msg) }
+  },
+
+  sendVerify(callback) {
     firebase.auth().currentUser.sendEmailVerification().then(() => {
       self.showVerify()
+      callback()
+    }).catch(() => {
+      self.showMsg()
     })
   },
 
   login(email, password) {
-    // console.log('login----------')
     self.showLoading(true)
-    firebase.auth().signInWithEmailAndPassword(email, password).then((user) => {
-      save({ email, password })
+    firebase.auth().signInWithEmailAndPassword(email, password).then((data) => {
       self.showLoading(false)
+      console.log('user: ', data.user)
+      const emailVerified = data.user ? data.user.emailVerified : null
+      console.log('emailVerified: ', emailVerified)
+      if (emailVerified) {
+        save({ email, password })
+      } else {
+        self.showVerify('Your account is not activated.')
+      }
     }).catch(() => {
-      self.showError('Authentication failed.')
+      self.showMsg('Authentication failed.')
     })
   },
 
-  async signUp (name, email, password) {
+  async signUp(name, email, password, callback) {
     self.showLoading(true)
     try {
       const { data } = await axios.post(`${constant.ROOT_URL}/signup`, { name, email, password })
@@ -84,20 +83,91 @@ const AccountStore = types.model({
         if (token) {
           // console.log('token: ', token);
           firebase.auth().signInWithCustomToken(token).then(() => {
-            self.verify()
+            self.sendVerify(callback)
             save({ email, password })
           }).catch(() => {
-            self.showError()
+            self.showMsg()
           })
         }
       } else {
-        self.showError()
+        self.showMsg()
       }
     } catch (err) {
       // console.log(err)
-      self.showError()
+      self.showMsg()
+    }
+  },
+
+  forgotPassword(email, callback) {
+    self.showLoading(true)
+    firebase.auth().sendPasswordResetEmail(email).then(() => {
+      self.showLoading(false)
+      callback()
+    }).catch(() => {
+      // console.log(err)
+      self.showMsg()
+    })
+  },
+
+  // -----------------------------------------------
+  async fetchData() {
+    // self.showLoading(true)
+    const { currentUser } = firebase.auth()
+    const pw = await getPassword()
+    if (pw === '') {
+      self.showMsg()
+      return
+    }
+
+    firebase.database().ref(`/data/${currentUser.uid}/b`).on('value', (snapshot) => {
+      console.log('fetchData: ', snapshot.val())
+      // self.showLoading(false)
+      // try {
+      //   const data = snapshot.val();
+      //   if (data) {
+      //     const json = decrypt(data, pw)
+      //     const result = JSON.parse(json)
+      //     // result.forEach(x => {
+      //     //   self.add(x)
+      //     // });
+      //   }
+      //   // dispatch({ type: constant.FETCH_DATA_SUCCESS, payload: result })
+      // } catch (error) {
+      //   console.log('fetchData: ', error)
+      //   self.showMsg()
+      // }
+    }).catch(() => {
+      // console.log(err)
+      self.showMsg()
+    })
+  },
+
+  async googleSignin() {
+    // TODO: check accessToken !== null
+    try {
+      // console.log('googleSignin')
+      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true })
+      // self.showLoading(true)
+      const userInfo = await GoogleSignin.signIn()
+      // self.showLoading(false)
+      // console.log(`token: ${userInfo.accessToken}`)
+      self.setToken(userInfo.accessToken)
+      AppNav.showImport()
+    } catch (error) {
+      self.showMsg()
+      // console.log('googleSignin: ', error)
+      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+        // user cancelled the login flow
+      } else if (error.code === statusCodes.IN_PROGRESS) {
+        // operation (f.e. sign in) is in progress already
+      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        // play services not available or outdated
+      } else {
+        // some other error happened
+      }
     }
   }
+
 })).create({
   items: []
 })

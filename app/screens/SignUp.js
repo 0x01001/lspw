@@ -1,14 +1,15 @@
 import React, { Component } from 'react'
 import { KeyboardAvoidingView, Platform, View, Text, Keyboard } from 'react-native'
 import { Button } from 'react-native-elements'
-import { connect } from 'react-redux'
+// import { connect } from 'react-redux'
 import { observable } from 'mobx'
-import { observer } from 'mobx-react/native'
+import { observer } from 'mobx-react'
 
-import { signUp, sendVerify } from '../actions'
+// import { signUp, sendVerify } from '../actions'
 import appStyle from '../utils/app_style'
 import style from '../utils/style_sheet'
 import { TextInput, Logo } from '../components/common'
+import AccountStore from '../models'
 
 const timer = require('react-native-timer')
 
@@ -19,32 +20,34 @@ class SignUp extends Component {
     email: '',
     password: '',
     name: '',
-    emailErrorMessage: '',
-    passwordErrorMessage: '',
+    emailError: '',
+    passwordError: '',
     secureTextEntry: true,
-    rightIconName: 'eye-off'
+    rightIconName: 'eye-off',
+    isShowVerify: false
   };
+
   @observable
   isCountDown = false;
   @observable
   countdown = COUNTDOWN;
 
-  componentWillReceiveProps(nextProps) {
-    this.onComplete(nextProps)
-  }
+  // componentWillReceiveProps(nextProps) {
+  //   this.onComplete(nextProps)
+  // }
 
   componentWillUnmount() {
     timer.clearTimeout('startTimer')
   }
 
-  onComplete(props) {
-    // console.log('onComplete: ', props.needVerify);
-    if (props.needVerify > 0) {
-      this.countdown = COUNTDOWN
-      this.isCountDown = true
-      this.startTimer()
-    }
-  }
+  // onComplete(props) {
+  //   // console.log('onComplete: ', props.needVerify);
+  //   if (props.needVerify > 0) {
+  //     this.countdown = COUNTDOWN
+  //     this.isCountDown = true
+  //     this.startTimer()
+  //   }
+  // }
 
   startTimer = () => {
     // console.log('startTimer');
@@ -56,52 +59,65 @@ class SignUp extends Component {
     timer.setTimeout('startTimer', this.startTimer, 1000)
   };
 
+  startCountDown = () => {
+    // console.log('start countdown')
+    this.setState({ isShowVerify: true })
+    this.countdown = COUNTDOWN
+    this.isCountDown = true
+    this.startTimer()
+  }
+
   submitPress = () => {
     const { email, password, name } = this.state
+    const { isLoading } = AccountStore
     let check = false
     if (!email) {
-      this.setState({ emailErrorMessage: !email ? 'This field is required' : '' })
+      this.setState({ emailError: !email ? 'This field is required' : '' })
       check = true
     }
     if (!password) {
-      this.setState({ passwordErrorMessage: !password ? 'This field is required' : '' })
+      this.setState({ passwordError: !password ? 'This field is required' : '' })
       check = true
     }
-    if (check || this.props.loading) {
+    if (check || isLoading) {
       return
     }
     Keyboard.dismiss()
-    this.props.signUp({ name, email, password })
+    AccountStore.signUp(name, email, password, () => {
+      this.startCountDown()
+    })
   };
 
   submitAgainPress = () => {
     if (!this.isCountDown) {
       this.isCountDown = true
-      this.props.sendVerify()
+      AccountStore.sendVerify(() => {
+        this.startCountDown()
+      })
     }
   };
 
-  renderError() {
-    if (this.props.error) {
-      return (
-        <View>
-          <Text style={style.error}>{this.props.error}</Text>
-        </View>
-      )
-    }
-  }
+  // renderError() {
+  //   if (this.props.error) {
+  //     return (
+  //       <View>
+  //         <Text style={style.error}>{this.props.error}</Text>
+  //       </View>
+  //     )
+  //   }
+  // }
+
+  onChangeText = (key, val) => {
+    this.setState({ [key]: val, [`${key}Error`]: !val ? 'This field is required' : '' })
+  };
 
   render() {
     const {
-      email,
-      name,
-      password,
-      emailErrorMessage,
-      passwordErrorMessage,
-      secureTextEntry,
-      rightIconName
+      email, name, password, emailError, passwordError,
+      secureTextEntry, rightIconName, isShowVerify
     } = this.state
-    if (this.props.needVerify > 0) {
+    const { isLoading } = AccountStore
+    if (isShowVerify) {
       return (
         <View style={style.container}>
           <Logo />
@@ -117,7 +133,7 @@ class SignUp extends Component {
               title={`Send ${this.countdown >= 0 ? `(${this.countdown}s)` : ''}`}
               buttonStyle={style.button}
               titleStyle={style.buttonTitle}
-              loading={this.props.loading}
+              loading={isLoading}
               loadingProps={{ size: 'small', color: appStyle.mainColor }}
               onPress={this.submitAgainPress}
             />
@@ -137,8 +153,8 @@ class SignUp extends Component {
             placeholderText="Name"
             leftIconName="account"
             value={name}
-            onChangeText={(text) => {
-              this.setState({ name: text })
+            onChangeText={(val) => {
+              this.setState({ name: val })
             }}
           />
         </View>
@@ -147,14 +163,9 @@ class SignUp extends Component {
           <TextInput
             placeholderText="Email"
             leftIconName="email-outline"
-            errorMessage={emailErrorMessage}
+            errorMessage={emailError}
             value={email}
-            onChangeText={(text) => {
-              this.setState({
-                email: text,
-                emailErrorMessage: !text ? 'This field is required' : ''
-              })
-            }}
+            onChangeText={val => this.onChangeText('email', val)}
           />
         </View>
         <View style={style.field}>
@@ -163,14 +174,9 @@ class SignUp extends Component {
             placeholderText="Password"
             leftIconName="lock-outline"
             rightIconName={rightIconName}
-            errorMessage={passwordErrorMessage}
+            errorMessage={passwordError}
             value={password}
-            onChangeText={(text) => {
-              this.setState({
-                password: text,
-                passwordErrorMessage: !text ? 'This field is required' : ''
-              })
-            }}
+            onChangeText={val => this.onChangeText('password', val)}
             onRightIconPress={() => {
               this.setState({
                 secureTextEntry: !secureTextEntry,
@@ -180,14 +186,14 @@ class SignUp extends Component {
           />
         </View>
 
-        {this.renderError()}
+        {/* {this.renderError()} */}
 
         <View style={style.field}>
           <Button
             title="Sign Up"
             buttonStyle={style.button}
             titleStyle={style.buttonTitle}
-            loading={this.props.loading}
+            loading={isLoading}
             loadingProps={{ size: 'small', color: appStyle.mainColor }}
             onPress={this.submitPress}
           />
@@ -197,13 +203,14 @@ class SignUp extends Component {
   }
 }
 
-const mapStateToProps = state => ({
-  error: state.auth.error,
-  loading: state.auth.loading,
-  needVerify: state.auth.needVerify
-})
+// const mapStateToProps = state => ({
+//   error: state.auth.error,
+//   loading: state.auth.loading,
+//   needVerify: state.auth.needVerify
+// })
 
-export default connect(
-  mapStateToProps,
-  { signUp, sendVerify }
-)(SignUp)
+export default SignUp
+// export default connect(
+//   mapStateToProps,
+//   { signUp, sendVerify }
+// )(SignUp)

@@ -34,16 +34,27 @@ class ImportPopup extends Component {
       this.setState({ url: '' })
     };
 
-    renderError = () => {
-      if (this.props.error) {
-        return (
-          <View>
-            <Text style={style.error}>{this.props.error}</Text>
-          </View>
-        )
-      }
-      return null
-    };
+    // renderError = () => {
+    //   if (this.props.error) {
+    //     return (
+    //       <View>
+    //         <Text style={style.error}>{this.props.error}</Text>
+    //       </View>
+    //     )
+    //   }
+    //   return null
+    // };
+
+  import = () => {
+    const { url } = this.state
+    if (!url) {
+      this.setState({ urlErrorMessage: !url ? 'This field is required' : '' })
+      return
+    }
+    const { token, listData } = this.props
+    // console.log('import: ', token, listData)
+    this.props.importData({ url, token, listData })
+  };
 
     renderModalContent = () => (
       <View style={styles.modal}>
@@ -59,7 +70,7 @@ class ImportPopup extends Component {
             })
           }}
         />
-        {this.renderError()}
+        {/* {this.renderError()} */}
         <View style={styles.modalContent}>
           <Button
             title="Ok"

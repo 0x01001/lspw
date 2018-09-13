@@ -3,19 +3,22 @@ import { View, Text, TouchableOpacity, StyleSheet, LayoutAnimation, FlatList } f
 import { Button, Icon, Divider, ListItem } from 'react-native-elements'
 import * as Keychain from 'react-native-keychain'
 import { Toolbar } from 'react-native-material-ui'
-import { connect } from 'react-redux'
+// import { connect } from 'react-redux'
 import firebase from 'firebase'
 import _ from 'lodash'
+import { observer } from 'mobx-react'
 
 import layout from '../utils/layout'
 import style from '../utils/style_sheet'
 import appStyle from '../utils/app_style'
-import List from '../components/home/List'
+// import List from '../components/home/List'
 import AppNav from '../AppNav'
-import { googleSignin, importData, fetchData } from '../actions'
-// import { Account, ListAccount } from '../stores'
+// import { googleSignin, importData, fetchData } from '../actions'
+import AccountStore from '../models'
 
 const marginTop = layout.getExtraTop()
+
+@observer
 class Home extends Component {
   // static navigationOptions = {
   //   title: 'Home',
@@ -27,31 +30,30 @@ class Home extends Component {
     selected: [],
     searchText: '',
     isShowImport: false
-
   };
 
   componentWillMount() {
     // get all data
-    this.props.fetchData()
+    AccountStore.fetchData()
   }
 
-  componentWillReceiveProps(nextProps) {
-    this.onComplete(nextProps)
-  }
+  // componentWillReceiveProps(nextProps) {
+  //   this.onComplete(nextProps)
+  // }
 
   // componentWillUpdate() {
   //   LayoutAnimation.spring()
   // }
 
-  onComplete(props) {
-    console.log('onComplete: ', `${props.token} - ${props.isShowImport}`)
-    // props.listData.forEach((x) => {
-    //   console.log('onComplete: ', x)
-    // })
-    // show popup
-    this.setState({ isShowImport: props.isShowImport && props.token !== '' })
-    if (props.isShowImport) { AppNav.showImport() }
-  }
+  // onComplete(props) {
+  //   console.log('onComplete: ', `${props.token} - ${props.isShowImport}`)
+  //   // props.listData.forEach((x) => {
+  //   //   console.log('onComplete: ', x)
+  //   // })
+  //   // show popup
+  //   this.setState({ isShowImport: props.isShowImport && props.token !== '' })
+  //   if (props.isShowImport) { AppNav.showImport() }
+  // }
 
   reset = async () => {
     try {
@@ -126,17 +128,6 @@ class Home extends Component {
     // console.log('------> ', arrPush, arrUpdate);
   };
 
-  import = () => {
-    const { url } = this.state
-    if (!url) {
-      this.setState({ urlErrorMessage: !url ? 'This field is required' : '' })
-      return
-    }
-    const { token, listData } = this.props
-    // console.log('import: ', token, listData)
-    this.props.importData({ url, token, listData })
-  };
-
   renderButton = (text, onPress) => (
     <TouchableOpacity onPress={onPress}>
       <View style={style.button}>
@@ -158,38 +149,25 @@ class Home extends Component {
     />
   )
 
-  renderButtonImport = () => {
-    // console.log('renderButtonImport: ', this.state.isShowImport)
-    if (this.state.isShowImport) {
-      return null
-    }
-    return (
-      <Button
-        title="Import data"
-        buttonStyle={[style.button, { width: 120 }]}
-        titleStyle={style.buttonTitle}
-        loading={this.props.loading}
-        loadingProps={{ size: 'small', color: appStyle.mainColor }}
-        onPress={() => { this.props.googleSignin() }}
-      />
-    )
-  }
+  renderEmptyContent = () => (
+    <Text>No data.</Text>
+  )
 
   renderContent = () => {
-    if (this.props.listData) {
-      return (
-        <View style={{ flex: 1 }}>
-          <FlatList
-            data={this.props.listData}
-            renderItem={this.renderItem}
-            keyExtractor={(x, i) => i.toString()}
-            ListEmptyComponent={this.renderButtonImport}
-            contentContainerStyle={[{ flexGrow: 1 }, this.props.listData.length ? null : { justifyContent: 'center' }]}
-          />
-        </View>
-      )
+    if (AccountStore.isLoading) {
+      return (<View style={styles.content}><Text style={{ color: appStyle.mainColor }}>Loading...</Text></View>)
     }
-    return (<View style={styles.content}><Text style={{ color: appStyle.mainColor }}>Loading...</Text></View>)
+    return (
+      <View style={{ flex: 1 }}>
+        <FlatList
+          data={AccountStore.items}
+          renderItem={this.renderItem}
+          keyExtractor={(x, i) => i.toString()}
+          ListEmptyComponent={this.renderEmptyContent}
+          contentContainerStyle={[{ flexGrow: 1 }, AccountStore.items.length ? null : { justifyContent: 'center' }]}
+        />
+      </View>
+    )
   };
 
   render() {
@@ -254,15 +232,16 @@ const styles = StyleSheet.create({
   }
 })
 
-const mapStateToProps = state => ({
-  error: state.main.error,
-  loading: state.main.loading,
-  token: state.main.token,
-  isShowImport: state.main.isShowImport,
-  listData: state.main.listData
-})
+// const mapStateToProps = state => ({
+//   error: state.main.error,
+//   loading: state.main.loading,
+//   token: state.main.token,
+//   isShowImport: state.main.isShowImport,
+//   listData: state.main.listData
+// })
 
-export default connect(
-  mapStateToProps,
-  { googleSignin, importData, fetchData }
-)(Home)
+export default Home
+// export default connect(
+//   mapStateToProps,
+//   { googleSignin, importData, fetchData }
+// )(Home)

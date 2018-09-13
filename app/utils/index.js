@@ -1,3 +1,6 @@
+import * as Keychain from 'react-native-keychain'
+import firebase from 'firebase'
+
 const CryptoJS = require('crypto-js')
 
 const keySize = 256
@@ -77,8 +80,33 @@ export const extractDomain = (url) => {
   return domain
 }
 
+export const getGoogleSheetData = (list, i) => {
+  if (i < list.length && list[i].formattedValue) {
+    return list[i].formattedValue
+  }
+  return ''
+}
+
+export const getPassword = async () => {
+  try {
+    const credentials = await Keychain.getGenericPassword()
+    if (credentials) {
+      // console.log('password decrypt: ', credentials.password)
+      const { currentUser } = firebase.auth()
+      const pw = decrypt(credentials.password, currentUser.uid) // pincode
+      return pw
+    }
+    console.log('No credentials stored.')
+  } catch (err) {
+    console.log(err)
+  }
+  return ''
+}
+
 export default {
   encrypt,
   decrypt,
-  extractDomain
+  extractDomain,
+  getGoogleSheetData,
+  getPassword
 }

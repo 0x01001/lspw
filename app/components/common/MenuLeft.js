@@ -1,20 +1,15 @@
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
-import { NavigationActions, DrawerActions } from 'react-navigation'
 import { ScrollView, Text, View, StyleSheet } from 'react-native'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
+import AccountStore from '../../models'
+import AppNav from '../../AppNav'
 
-class SideMenu extends Component {
-  navigateToScreen = route => () => {
-    const navigateAction = NavigationActions.navigate({
-      routeName: route
-    })
-    this.props.navigation.dispatch(navigateAction)
-  }
-
+class MenuLeft extends Component {
   showImport = () => {
-    console.log('show import')
-    this.props.navigation.dispatch(DrawerActions.closeDrawer())
+    // console.log('show import')
+    AppNav.closeMenu()
+    AccountStore.googleSignin()
   }
 
   render () {
@@ -76,8 +71,4 @@ const styles = StyleSheet.create({
   }
 })
 
-SideMenu.propTypes = {
-  navigation: PropTypes.object
-}
-
-export default SideMenu
+export default MenuLeft

@@ -2,9 +2,7 @@ import React, { Component } from 'react'
 import { Animated, Easing, View, TouchableOpacity } from 'react-native'
 import { createDrawerNavigator, createStackNavigator } from 'react-navigation'
 import Icon from 'react-native-vector-icons/SimpleLineIcons'
-import { connect } from 'react-redux'
 
-import { reset } from './actions'
 import Login from './screens/Login'
 import SignUp from './screens/SignUp'
 import ForgotPassword from './screens/ForgotPassword'
@@ -12,7 +10,9 @@ import Home from './screens/Home'
 import appStyle from './utils/app_style'
 import Loading from './components/common/Loading'
 import Layout from './utils/layout'
-import SideMenu from './components/common/SideMenu'
+import MenuLeft from './components/common/MenuLeft'
+import AccountStore from './models'
+import AppNav from '../app/AppNav'
 
 class Router extends Component {
   renderContent() {
@@ -24,10 +24,10 @@ class Router extends Component {
         const MainNav = createDrawerNavigator({
           main: { screen: Home }
         }, {
-          contentComponent: SideMenu,
+          contentComponent: MenuLeft,
           drawerWidth: 300
         })
-        return <MainNav />
+        return <MainNav ref={(ref) => { AppNav.navigator = ref }} />
       }
 
       case false: {
@@ -77,11 +77,10 @@ class Router extends Component {
           {
             navigationOptions: ({ navigation }) => ({
               headerLeft: (
-                <TouchableOpacity
-                  onPress={() => {
-                    // this.props.reset()
-                    navigation.goBack()
-                  }}
+                <TouchableOpacity onPress={() => {
+                  AccountStore.showLoading(false)
+                  navigation.goBack()
+                }}
                 >
                   <Icon
                     name="arrow-left"
@@ -115,7 +114,7 @@ class Router extends Component {
             transitionConfig
           }
         )
-        return <AuthNav />
+        return <AuthNav ref={(ref) => { AppNav.navigator = ref }} />
       }
 
       default:
@@ -133,7 +132,3 @@ class Router extends Component {
 }
 
 export default Router
-// export default connect(
-//   null,
-//   { reset }
-// )(Router)
