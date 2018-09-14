@@ -234,17 +234,3 @@
 //   // merge data
 //   mergeData(dispatch, currentData, result)
 // }
-
-// signOut = async () => {
-//   try {
-//     await GoogleSignin.revokeAccess()
-//     await GoogleSignin.signOut()
-//     try {
-//       await Keychain.resetGenericPassword()
-//     } catch (err) {
-//       // 'Could not reset credentials, ' + err;
-//     }
-//   } catch (error) {
-//     console.error(error)
-//   }
-// }

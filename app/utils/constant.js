@@ -1,5 +1,6 @@
 export default {
   ROOT_URL: 'https://us-central1-lspw-49d1f.cloudfunctions.net',
+  GOOGLE_SHEET_URL: 'https://sheets.googleapis.com/v4/spreadsheets',
   EMAIL_CHANGED: 'email_change',
   PASSWORD_CHANGED: 'password_change',
   LOGIN_SUCCESS: 'login_success',

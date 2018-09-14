@@ -11,6 +11,8 @@ class ObservableNav {
   import = null;
   @observable.ref
   toast = null;
+  @observable.ref
+  notify = null;
 
   cacheMsg = '';
 
@@ -45,6 +47,10 @@ class ObservableNav {
     // })
   }
 
+  @action showNotify(content, style, styleText) {
+    this.notify && this.notify.show(content, style, styleText)
+  }
+
   @action
   goBack() {
     this.navigator.dispatch(NavigationActions.back())
@@ -53,6 +59,11 @@ class ObservableNav {
   @action
   closeMenu() {
     this.navigator.dispatch(DrawerActions.closeDrawer())
+  }
+
+  @action
+  openMenu() {
+    this.navigator.dispatch(DrawerActions.openDrawer())
   }
 
   @action pushToScreen(routeName, params = null) {

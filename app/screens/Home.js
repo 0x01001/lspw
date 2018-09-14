@@ -3,17 +3,13 @@ import { View, Text, TouchableOpacity, StyleSheet, LayoutAnimation, FlatList } f
 import { Button, Icon, Divider, ListItem } from 'react-native-elements'
 import * as Keychain from 'react-native-keychain'
 import { Toolbar } from 'react-native-material-ui'
-// import { connect } from 'react-redux'
-import firebase from 'firebase'
 import _ from 'lodash'
 import { observer } from 'mobx-react'
 
 import layout from '../utils/layout'
 import style from '../utils/style_sheet'
 import appStyle from '../utils/app_style'
-// import List from '../components/home/List'
 import AppNav from '../AppNav'
-// import { googleSignin, importData, fetchData } from '../actions'
 import AccountStore from '../models'
 
 const marginTop = layout.getExtraTop()
@@ -28,32 +24,13 @@ class Home extends Component {
 
   state = {
     selected: [],
-    searchText: '',
-    isShowImport: false
+    searchText: ''
   };
 
   componentWillMount() {
     // get all data
     AccountStore.fetchData()
   }
-
-  // componentWillReceiveProps(nextProps) {
-  //   this.onComplete(nextProps)
-  // }
-
-  // componentWillUpdate() {
-  //   LayoutAnimation.spring()
-  // }
-
-  // onComplete(props) {
-  //   console.log('onComplete: ', `${props.token} - ${props.isShowImport}`)
-  //   // props.listData.forEach((x) => {
-  //   //   console.log('onComplete: ', x)
-  //   // })
-  //   // show popup
-  //   this.setState({ isShowImport: props.isShowImport && props.token !== '' })
-  //   if (props.isShowImport) { AppNav.showImport() }
-  // }
 
   reset = async () => {
     try {
@@ -150,12 +127,12 @@ class Home extends Component {
   )
 
   renderEmptyContent = () => (
-    <Text>No data.</Text>
+    <View style={styles.content}><Text style={{ color: appStyle.mainColor, fontSize: 18 }}>No data</Text></View>
   )
 
   renderContent = () => {
-    if (AccountStore.isLoading) {
-      return (<View style={styles.content}><Text style={{ color: appStyle.mainColor }}>Loading...</Text></View>)
+    if (AccountStore.isFetching) {
+      return (<View style={styles.content}><Text style={{ color: appStyle.mainColor, fontSize: 18 }}>Loading...</Text></View>)
     }
     return (
       <View style={{ flex: 1 }}>
@@ -168,7 +145,7 @@ class Home extends Component {
         />
       </View>
     )
-  };
+  }
 
   render() {
     return (
@@ -180,7 +157,7 @@ class Home extends Component {
           }}
           key="toolbar"
           leftElement="menu"
-          onLeftElementPress={() => this.props.navigation.openDrawer()}
+          onLeftElementPress={() => AppNav.openMenu()}
           centerElement="Home"
           searchable={{
             autoFocus: true,
@@ -232,16 +209,4 @@ const styles = StyleSheet.create({
   }
 })
 
-// const mapStateToProps = state => ({
-//   error: state.main.error,
-//   loading: state.main.loading,
-//   token: state.main.token,
-//   isShowImport: state.main.isShowImport,
-//   listData: state.main.listData
-// })
-
 export default Home
-// export default connect(
-//   mapStateToProps,
-//   { googleSignin, importData, fetchData }
-// )(Home)

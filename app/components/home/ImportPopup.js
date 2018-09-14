@@ -6,6 +6,7 @@ import { Button } from 'react-native-elements'
 import style from '../../utils/style_sheet'
 import appStyle from '../../utils/app_style'
 import { TextInput } from '../../components/common'
+import AccountStore from '../../models'
 
 class ImportPopup extends Component {
     static propTypes = {
@@ -19,8 +20,12 @@ class ImportPopup extends Component {
     state = {
       visible: this.props.visible || false,
       url: '',
-      urlErrorMessage: ''
+      urlError: ''
     }
+
+    onChangeText = (key, val) => {
+      this.setState({ [key]: val, [`${key}Error`]: !val ? 'This field is required' : '' })
+    };
 
     show = () => {
       this.setState({ visible: true })
@@ -28,6 +33,7 @@ class ImportPopup extends Component {
 
     hide = () => {
       this.setState({ visible: false })
+      this.resetModal()
     };
 
     resetModal = () => {
@@ -48,12 +54,12 @@ class ImportPopup extends Component {
   import = () => {
     const { url } = this.state
     if (!url) {
-      this.setState({ urlErrorMessage: !url ? 'This field is required' : '' })
+      this.setState({ urlError: !url ? 'This field is required' : '' })
       return
     }
-    const { token, listData } = this.props
-    // console.log('import: ', token, listData)
-    this.props.importData({ url, token, listData })
+    const { token, allItems } = AccountStore
+    console.log('import: ', token, allItems)
+    AccountStore.importData(url, token, allItems)
   };
 
     renderModalContent = () => (
@@ -61,14 +67,9 @@ class ImportPopup extends Component {
         <TextInput
           placeholderText="Link"
           leftIconName="link-variant"
-          errorMessage={this.state.urlErrorMessage}
+          errorMessage={this.state.urlError}
           value={this.state.url}
-          onChangeText={(text) => {
-            this.setState({
-              url: text,
-              urlErrorMessage: !text ? 'This field is required' : ''
-            })
-          }}
+          onChangeText={val => this.onChangeText('url', val)}
         />
         {/* {this.renderError()} */}
         <View style={styles.modalContent}>

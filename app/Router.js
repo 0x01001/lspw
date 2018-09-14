@@ -10,7 +10,7 @@ import Home from './screens/Home'
 import appStyle from './utils/app_style'
 import Loading from './components/common/Loading'
 import Layout from './utils/layout'
-import MenuLeft from './components/common/MenuLeft'
+import MenuLeft from './components/home/MenuLeft'
 import AccountStore from './models'
 import AppNav from '../app/AppNav'
 

@@ -1,20 +1,9 @@
-import React, { Component } from 'react'
-import { View, Text } from 'react-native'
+import { observable, action } from 'mobx'
 
-class AppState extends Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-    }
-  }
+class AppState {
+  @observable internetConnect = 'online' // online || offline
 
-  render() {
-    return (
-      <View>
-        <Text> textInComponent </Text>
-      </View>
-    )
-  }
+  @action setInternetConnect = (val) => { this.internetConnect = val }
 }
 
-export default AppState
+export default new AppState()

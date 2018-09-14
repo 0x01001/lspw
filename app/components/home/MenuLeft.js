@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import { ScrollView, Text, View, StyleSheet } from 'react-native'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
@@ -7,9 +6,13 @@ import AppNav from '../../AppNav'
 
 class MenuLeft extends Component {
   showImport = () => {
-    // console.log('show import')
     AppNav.closeMenu()
     AccountStore.googleSignin()
+  }
+
+  logout = () => {
+    AppNav.closeMenu()
+    AccountStore.signOut()
   }
 
   render () {
@@ -33,6 +36,10 @@ class MenuLeft extends Component {
             <View style={styles.navSectionStyle}>
               <Icon name="database-import" size={20} />
               <Text style={styles.navItemStyle} onPress={this.showImport}>Import Data</Text>
+            </View>
+            <View style={styles.navSectionStyle}>
+              <Icon name="logout" size={20} />
+              <Text style={styles.navItemStyle} onPress={this.logout}>Logout</Text>
             </View>
           </View>
         </ScrollView>

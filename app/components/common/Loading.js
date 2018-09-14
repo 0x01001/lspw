@@ -5,6 +5,7 @@ import PropTypes from 'prop-types'
 import appStyle from '../../utils/app_style'
 
 const SIZES = ['small', 'normal', 'large']
+const timer = require('react-native-timer')
 
 class Loading extends Component {
   static propTypes = {
@@ -21,8 +22,14 @@ class Loading extends Component {
     visible: this.props.visible || false
   }
 
+  componentWillUnmount() {
+    timer.clearTimeout('hideLoading')
+  }
+
   show = () => {
     this.setState({ visible: true })
+    timer.clearTimeout('hideLoading')
+    timer.setTimeout('hideLoading', this.hide, 30000) // 30s
   };
 
   hide = () => {

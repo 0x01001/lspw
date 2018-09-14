@@ -19,7 +19,7 @@
     "react": "16.3.1",
     "react-native": "0.55.4",
     "react-native-elements": "^1.0.0-beta5",
-    "react-native-google-signin": "^1.0.0-rc3",
+    "react-native-google-signin": "^1.0.0-rc5",
     "react-native-keychain": "^3.0.0",
     "react-native-loading-spinner-overlay": "^0.5.2",
     "react-native-material-ui": "^1.30.1",
