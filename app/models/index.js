@@ -28,13 +28,17 @@ const AccountStore = types.model({
   isLoading: false,
   isFetching: false
 }).views(self => ({
-  get allItems() {
+  get data() {
     return self.items
   },
   get token() {
     return self.accessToken
   }
 })).actions(self => ({
+  // afterCreate() {
+  //   self.fetchData()
+  // },
+
   setItem(json) {
     const list = []
     const result = JSON.parse(json)
@@ -62,30 +66,29 @@ const AccountStore = types.model({
     AppNav.showToast(m)
   },
 
-  showVerify(msg = '') {
-    if (msg !== '') { self.showMsg(msg) }
-  },
-
   sendVerify(callback) {
+    self.showLoading(true)
     firebase.auth().currentUser.sendEmailVerification().then(() => {
-      self.showVerify()
+      // console.log('sendVerify done')
+      self.showLoading(false)
       callback()
     }).catch(() => {
       self.showMsg()
     })
   },
 
-  login(email, password) {
+  login(email, password, callback) {
     self.showLoading(true)
     firebase.auth().signInWithEmailAndPassword(email, password).then((data) => {
       self.showLoading(false)
-      console.log('user: ', data.user)
+      // console.log('user: ', data.user)
       const emailVerified = data.user ? data.user.emailVerified : null
-      console.log('emailVerified: ', emailVerified)
+      // console.log('emailVerified: ', emailVerified)
       if (emailVerified) {
         save({ email, password })
+        callback()
       } else {
-        self.showVerify('Your account is not activated.')
+        self.showMsg('Your account is not activated.')
       }
     }).catch(() => {
       self.showMsg('Authentication failed.')
@@ -97,16 +100,19 @@ const AccountStore = types.model({
     self.showLoading(true)
     try {
       const { data } = await axios.post(`${constant.ROOT_URL}/signup`, { name, email, password })
+      // console.log('data: ', data)
       if (data && data.code === '1') {
         const { token } = data.data
         if (token) {
-          // console.log('token: ', token);
+          // console.log('token: ', token)
           firebase.auth().signInWithCustomToken(token).then(() => {
             self.sendVerify(callback)
             save({ email, password })
           }).catch(() => {
             self.showMsg()
           })
+        } else {
+          self.showMsg()
         }
       } else {
         self.showMsg()
@@ -129,7 +135,7 @@ const AccountStore = types.model({
   },
 
   // -----------------------------------------------
-  async fetchData() {
+  async load() {
     self.setFetch(true)
     const { currentUser } = firebase.auth()
     const pw = await getPassword()
@@ -141,13 +147,14 @@ const AccountStore = types.model({
       self.setFetch(false)
       try {
         const data = snapshot.val()
-        // console.log('fetchData: ', data)
+        console.log('load: ', data)
         if (data) {
           const json = decrypt(data, pw)
+          // console.log('load decrypt: ', json)
           self.setItem(json)
         }
       } catch (err) {
-        console.log('fetchData: ', err)
+        console.log('load: ', err)
         self.showMsg()
       }
     })
@@ -278,7 +285,9 @@ const AccountStore = types.model({
         await GoogleSignin.signOut()
       }
       await Keychain.resetGenericPassword()
-      firebase.auth().signOut()
+      firebase.auth().signOut().then(() => {
+        AppNav.reset()
+      })
     } catch (error) {
       console.log(error)
       self.showMsg()

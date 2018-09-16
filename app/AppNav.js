@@ -72,6 +72,30 @@ class ObservableNav {
       params
     }))
   }
+
+  @action reset() {
+    const resetAction = {
+      type: NavigationActions.NAVIGATE,
+      routeName: 'loginStack',
+      action: {
+        type: NavigationActions.RESET,
+        index: 0,
+        actions: [{ type: NavigationActions.NAVIGATE, routeName: 'loginStack' }]
+      }
+    }
+    this.navigator.dispatch(resetAction)
+  }
+
+  // @action reset() {
+  //   // This will reset back to loginStack
+  //   // https://github.com/react-community/react-navigation/issues/1127
+  //   const actionToDispatch = NavigationActions.reset({
+  //     index: 0,
+  //     key: null, // black magic
+  //     actions: [NavigationActions.navigate({ routeName: 'loginStack' })]
+  //   })
+  //    this.navigator.dispatch(actionToDispatch)
+  // }
 }
 
 const AppNav = new ObservableNav()

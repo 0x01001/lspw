@@ -9,47 +9,36 @@ import { TextInput } from '../../components/common'
 import AccountStore from '../../models'
 
 class ImportPopup extends Component {
-    static propTypes = {
-      visible: PropTypes.bool
-    }
+  static propTypes = {
+    visible: PropTypes.bool
+  }
 
-    static defaultProps = {
-      visible: false
-    }
+  static defaultProps = {
+    visible: false
+  }
 
-    state = {
-      visible: this.props.visible || false,
-      url: '',
-      urlError: ''
-    }
+  state = {
+    visible: this.props.visible || false,
+    url: '',
+    urlError: ''
+  }
 
-    onChangeText = (key, val) => {
-      this.setState({ [key]: val, [`${key}Error`]: !val ? 'This field is required' : '' })
-    };
+  onChangeText = (key, val) => {
+    this.setState({ [key]: val, [`${key}Error`]: !val ? 'This field is required' : '' })
+  };
 
-    show = () => {
-      this.setState({ visible: true })
-    };
+  show = () => {
+    this.setState({ visible: true })
+  };
 
-    hide = () => {
-      this.setState({ visible: false })
-      this.resetModal()
-    };
+  hide = () => {
+    this.setState({ visible: false })
+    this.resetModal()
+  };
 
-    resetModal = () => {
-      this.setState({ url: '' })
-    };
-
-    // renderError = () => {
-    //   if (this.props.error) {
-    //     return (
-    //       <View>
-    //         <Text style={style.error}>{this.props.error}</Text>
-    //       </View>
-    //     )
-    //   }
-    //   return null
-    // };
+  resetModal = () => {
+    this.setState({ url: '' })
+  };
 
   import = () => {
     const { url } = this.state
@@ -57,61 +46,61 @@ class ImportPopup extends Component {
       this.setState({ urlError: !url ? 'This field is required' : '' })
       return
     }
-    const { token, allItems } = AccountStore
-    console.log('import: ', token, allItems)
-    AccountStore.importData(url, token, allItems)
+    const { token, data } = AccountStore
+    console.log('import: ', token, data)
+    AccountStore.importData(url, token, data)
   };
 
-    renderModalContent = () => (
-      <View style={styles.modal}>
-        <TextInput
-          placeholderText="Link"
-          leftIconName="link-variant"
-          errorMessage={this.state.urlError}
-          value={this.state.url}
-          onChangeText={val => this.onChangeText('url', val)}
+  renderModalContent = () => (
+    <View style={styles.modal}>
+      <TextInput
+        placeholderText="Link"
+        leftIconName="link-variant"
+        errorMessage={this.state.urlError}
+        value={this.state.url}
+        onChangeText={val => this.onChangeText('url', val)}
+      />
+      {/* {this.renderError()} */}
+      <View style={styles.modalContent}>
+        <Button
+          title="Ok"
+          buttonStyle={[style.button, { marginLeft: -15, marginTop: 20 }]}
+          titleStyle={style.buttonTitle}
+          onPress={this.import}
         />
-        {/* {this.renderError()} */}
-        <View style={styles.modalContent}>
-          <Button
-            title="Ok"
-            buttonStyle={[style.button, { marginLeft: -15, marginTop: 20 }]}
-            titleStyle={style.buttonTitle}
-            onPress={this.import}
-          />
-          <Button
-            title="Cancel"
-            buttonStyle={[style.button, { marginRight: -30, marginTop: 20 }]}
-            titleStyle={style.buttonTitle}
-            onPress={() => {
-              this.setState({ visible: false })
-            }}
-          />
-        </View>
-        <Text style={styles.note}>(*) Automatic remove duplicates</Text>
+        <Button
+          title="Cancel"
+          buttonStyle={[style.button, { marginRight: -30, marginTop: 20 }]}
+          titleStyle={style.buttonTitle}
+          onPress={() => {
+            this.setState({ visible: false })
+          }}
+        />
       </View>
-    );
+      <Text style={styles.note}>(*) Automatic remove duplicates</Text>
+    </View>
+  );
 
-    render() {
-      const { visible } = this.state
-      if (!visible) {
-        return null
-      }
-      return (
-        <View style={styles.wrapper}>
-          <Modal
-            isVisible={visible}
-            onBackdropPress={() => this.setState({ visible: false })}
-            // animationIn="slideInLeft"
-            // animationOut="slideOutRight"
-            backdropColor="#00000050"
-            onModalHide={this.resetModal}
-          >
-            {this.renderModalContent()}
-          </Modal>
-        </View>
-      )
+  render() {
+    const { visible } = this.state
+    if (!visible) {
+      return null
     }
+    return (
+      <View style={styles.wrapper}>
+        <Modal
+          isVisible={visible}
+          onBackdropPress={() => this.setState({ visible: false })}
+          // animationIn="slideInLeft"
+          // animationOut="slideOutRight"
+          backdropColor="rgba(0,0,0,0.6)"
+          onModalHide={this.resetModal}
+        >
+          {this.renderModalContent()}
+        </Modal>
+      </View>
+    )
+  }
 }
 const styles = StyleSheet.create({
   wrapper: {
@@ -119,7 +108,7 @@ const styles = StyleSheet.create({
     position: 'absolute'
   },
   modal: {
-    backgroundColor: `${appStyle.blackColor}60`,
+    backgroundColor: 'rgba(0,0,0,0.8)',
     padding: 22,
     justifyContent: 'center',
     alignItems: 'center',

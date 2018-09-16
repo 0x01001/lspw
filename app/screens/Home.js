@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
-import { View, Text, TouchableOpacity, StyleSheet, LayoutAnimation, FlatList } from 'react-native'
-import { Button, Icon, Divider, ListItem } from 'react-native-elements'
+import { View, Text, TouchableOpacity, StyleSheet, LayoutAnimation, FlatList, Animated, PanResponder, Dimensions, Clipboard } from 'react-native'
+import { Button, Icon, Divider } from 'react-native-elements'
 import * as Keychain from 'react-native-keychain'
-import { Toolbar } from 'react-native-material-ui'
+import { Toolbar, ActionButton, ListItem } from 'react-native-material-ui'
 import _ from 'lodash'
 import { observer } from 'mobx-react'
 
@@ -24,13 +24,28 @@ class Home extends Component {
 
   state = {
     selected: [],
-    searchText: ''
+    searchText: '',
+    pan: new Animated.ValueXY() // Step 1
   };
 
   componentWillMount() {
     // get all data
-    AccountStore.fetchData()
+    // AccountStore.fetchData()
   }
+
+  panResponder = PanResponder.create({ // Step 2
+    onStartShouldSetPanResponder: () => true,
+    onPanResponderMove: Animated.event([null, { // Step 3
+      dx: this.state.pan.x,
+      dy: this.state.pan.y
+    }]),
+    onPanResponderRelease: (e, gesture) => {
+      // Animated.spring( // Step 1
+      //   this.state.pan, // Step 2
+      //   { toValue: { x: 0, y: 0 } } // Step 3
+      // ).start()
+    } // Step 4
+  });
 
   reset = async () => {
     try {
@@ -105,6 +120,12 @@ class Home extends Component {
     // console.log('------> ', arrPush, arrUpdate);
   };
 
+  writeToClipboard = async ({ item }) => {
+    await Clipboard.setString(item.password)
+    AccountStore.showMsg(`Password of '${item.username}' from <${item.name}> copied.`)
+    // alert('Copied to Clipboard!')
+  };
+
   renderButton = (text, onPress) => (
     <TouchableOpacity onPress={onPress}>
       <View style={style.button}>
@@ -114,15 +135,25 @@ class Home extends Component {
   );
 
   renderItem = ({ item }) => (
+    // <ListItem
+    //   // contentContainerStyle={{justifyContent:'flex-start', alignContent:'flex-start'}}
+    //   title={item.name}
+    //   subtitle={item.username}
+    //   // leftAvatar={{
+    //   //   source: item.avatar_url && { uri: item.avatar_url },
+    //   //   title: item.name[0]
+    //   // }}
+    //   rightIcon={{ name: 'chevron-right' }}
+    // />
     <ListItem
-      // contentContainerStyle={{justifyContent:'flex-start', alignContent:'flex-start'}}
-      title={item.name}
-      subtitle={item.username}
-      // leftAvatar={{
-      //   source: item.avatar_url && { uri: item.avatar_url },
-      //   title: item.name[0]
-      // }}
-      rightIcon={{ name: 'chevron-right' }}
+      divider
+      centerElement={{
+        primaryText: item.name,
+        secondaryText: item.username
+      }}
+      onPress={() => AppNav.pushToScreen('detail', { item })}
+      onLongPress={() => this.writeToClipboard({ item })}
+      rightElement="chevron-right"
     />
   )
 
@@ -137,11 +168,11 @@ class Home extends Component {
     return (
       <View style={{ flex: 1 }}>
         <FlatList
-          data={AccountStore.items}
+          data={AccountStore.data}
           renderItem={this.renderItem}
           keyExtractor={(x, i) => i.toString()}
           ListEmptyComponent={this.renderEmptyContent}
-          contentContainerStyle={[{ flexGrow: 1 }, AccountStore.items.length ? null : { justifyContent: 'center' }]}
+          contentContainerStyle={[{ flexGrow: 1 }, AccountStore.data.length ? null : { justifyContent: 'center' }]}
         />
       </View>
     )
@@ -159,6 +190,12 @@ class Home extends Component {
           leftElement="menu"
           onLeftElementPress={() => AppNav.openMenu()}
           centerElement="Home"
+          rightElement={{
+            menu: {
+              icon: 'more-vert',
+              labels: ['item 1', 'item 2']
+            }
+          }}
           searchable={{
             autoFocus: true,
             placeholder: 'Search',
@@ -168,6 +205,15 @@ class Home extends Component {
         />
         <Divider style={{ backgroundColor: appStyle.borderColor }} />
         {this.renderContent()}
+        {/* <View style={styles.draggableContainer}>
+          <Animated.View {...this.panResponder.panHandlers} style={[this.state.pan.getLayout(), styles.circle]}> */}
+        <ActionButton
+          style={{ container: { backgroundColor: `${appStyle.redColor}80`, margin: 10 } }}
+          useNativeFeedback={false}
+          onPress={() => { AppNav.pushToScreen('detail') }}
+        />
+        {/* </Animated.View>
+        </View> */}
 
         {/* <Header
           outerContainerStyles={{ marginTop }}
@@ -200,7 +246,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'flex-start',
-    flexDirection: 'column'
+    flexDirection: 'column',
+    backgroundColor: appStyle.backgroundColor
   },
   content: {
     flex: 1,

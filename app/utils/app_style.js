@@ -8,7 +8,5 @@ export default {
   borderColor: '#484558',
   greenColor: '#DBFFDB', // '#587C0C', // '#A9CF54',
 
-  // mainFontBold: 'OpenSans-Bold',
   mainFont: 'sans-serif-light'
-  // mainFontSemiBold: 'OpenSans-Semibold'
 }

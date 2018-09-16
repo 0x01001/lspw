@@ -37,15 +37,15 @@ class MenuLeft extends Component {
               <Icon name="database-import" size={20} />
               <Text style={styles.navItemStyle} onPress={this.showImport}>Import Data</Text>
             </View>
-            <View style={styles.navSectionStyle}>
-              <Icon name="logout" size={20} />
-              <Text style={styles.navItemStyle} onPress={this.logout}>Logout</Text>
-            </View>
+
           </View>
         </ScrollView>
-        <View style={styles.footerContainer}>
-          <Text>This is my fixed footer</Text>
+
+        <View style={styles.navSectionStyle}>
+          <Icon name="logout" size={20} />
+          <Text style={[styles.navItemStyle]} onPress={this.logout}>Logout</Text>
         </View>
+
       </View>
     )
   }
@@ -73,7 +73,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10
   },
   footerContainer: {
-    padding: 15,
     backgroundColor: 'lightgrey'
   }
 })

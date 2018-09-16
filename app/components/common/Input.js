@@ -7,6 +7,7 @@ import style from '../../utils/style_sheet'
 import appStyle from '../../utils/app_style'
 
 const TextInput = ({
+  label,
   placeholderText,
   secureTextEntry,
   value,
@@ -17,6 +18,7 @@ const TextInput = ({
   onChangeText
 }) => (
   <Input
+    label={label}
     inputStyle={style.input}
     placeholder={placeholderText}
     placeholderTextColor={appStyle.grayColor}
@@ -31,12 +33,8 @@ const TextInput = ({
       </TouchableOpacity>
     )}
     leftIconContainerStyle={{ marginLeft: 0 }}
-    containerStyle={{
-      width: '100%'
-    }}
-    inputContainerStyle={{
-      borderBottomColor: appStyle.borderColor
-    }}
+    containerStyle={{ width: '100%' }}
+    inputContainerStyle={{ borderBottomColor: appStyle.borderColor }}
     value={value}
     onChangeText={onChangeText}
     secureTextEntry={secureTextEntry}

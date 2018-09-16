@@ -73,7 +73,9 @@ class Login extends Component {
       return
     }
     Keyboard.dismiss()
-    AccountStore.login(email, password)
+    AccountStore.login(email, password, () => {
+      this.reset()
+    })
   };
 
   reset = () => {

@@ -10,6 +10,7 @@ import AppState from './app/AppState'
 import ImportPopup from './app/components/home/ImportPopup'
 import appStyle from './app/utils/app_style'
 import Notify from './app/components/common/Notify'
+import AccountStore from './app/models'
 
 type Props = {};
 export default class App extends Component<Props> {
@@ -20,8 +21,10 @@ export default class App extends Component<Props> {
     initializeApp(firebase)
 
     firebase.auth().onAuthStateChanged((user) => {
-      if (user) {
-        this.setState({ isSignIn: user.emailVerified })
+      if (user && user.emailVerified) {
+        this.setState({ isSignIn: true })
+        AccountStore.load()
+        AppNav.pushToScreen('mainStack')
       } else {
         this.setState({ isSignIn: false })
       }
@@ -41,11 +44,18 @@ export default class App extends Component<Props> {
     AppState.setInternetConnect(type)
   }
 
+  renderContent = () => {
+    if (this.state.isSignIn === null) {
+      return <Loading size="large" visible />
+    }
+    return <Router />
+  }
+
   render() {
     return (
-      <View style={{ flex: 1 }}>
+      <View style={{ flex: 1, backgroundColor: appStyle.backgroundColor }}>
         <StatusBar backgroundColor="transparent" barStyle="light-content" translucent />
-        <Router isSignIn={this.state.isSignIn} />
+        {this.renderContent()}
         <ImportPopup ref={(ref) => { AppNav.import = ref }} />
         <Notify ref={(ref) => { AppNav.notify = ref }} />
         <Toast

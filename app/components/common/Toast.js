@@ -12,8 +12,8 @@ import PropTypes from 'prop-types'
 
 const ViewPropTypes = RNViewPropTypes || View.propTypes
 export const DURATION = {
-  SHORT: 1000,
-  LONG: 2000,
+  SHORT: 2000,
+  LONG: 3000,
   FOREVER: 0
 }
 
@@ -106,8 +106,8 @@ export default class Toast extends Component {
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
-    left: 0,
-    right: 0,
+    left: 20,
+    right: 20,
     elevation: 999,
     alignItems: 'center',
     zIndex: 10000

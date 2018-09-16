@@ -97,16 +97,6 @@ class SignUp extends Component {
     }
   };
 
-  // renderError() {
-  //   if (this.props.error) {
-  //     return (
-  //       <View>
-  //         <Text style={style.error}>{this.props.error}</Text>
-  //       </View>
-  //     )
-  //   }
-  // }
-
   onChangeText = (key, val) => {
     this.setState({ [key]: val, [`${key}Error`]: !val ? 'This field is required' : '' })
   };
@@ -186,8 +176,6 @@ class SignUp extends Component {
           />
         </View>
 
-        {/* {this.renderError()} */}
-
         <View style={style.field}>
           <Button
             title="Sign Up"
@@ -203,14 +191,4 @@ class SignUp extends Component {
   }
 }
 
-// const mapStateToProps = state => ({
-//   error: state.auth.error,
-//   loading: state.auth.loading,
-//   needVerify: state.auth.needVerify
-// })
-
 export default SignUp
-// export default connect(
-//   mapStateToProps,
-//   { signUp, sendVerify }
-// )(SignUp)
