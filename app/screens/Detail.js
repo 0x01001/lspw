@@ -1,19 +1,52 @@
 import React, { Component } from 'react'
-import { View, KeyboardAvoidingView, StyleSheet, Platform, Text, Keyboard } from 'react-native'
+import { View, KeyboardAvoidingView, StyleSheet, Platform, Text, Keyboard, TouchableOpacity, StatusBar } from 'react-native'
 import PropTypes from 'prop-types'
 import { observer } from 'mobx-react'
 import { Button } from 'react-native-elements'
+import Icon from 'react-native-vector-icons/SimpleLineIcons'
 
 import appStyle from '../utils/app_style'
 import style from '../utils/style_sheet'
 import { TextInput } from '../components/common'
 import AccountStore from '../models'
 import layout from '../utils/layout'
+import AppNav from '../AppNav'
 
-const top = layout.getExtraTop()
+const top = layout.getExtraTopAndroid()
 
 @observer
 class Detail extends Component {
+   static navigationOptions = ({ navigation }) => ({
+     title: (navigation.state.params && navigation.state.params.item) ? navigation.state.params.item.name : 'Create',
+     headerStyle: {
+       backgroundColor: appStyle.buttonBackgroundColor,
+       marginVertical: top
+     },
+     headerLeft: (
+       <TouchableOpacity onPress={() => {
+         AccountStore.showLoading(false)
+         AppNav.goBack()
+       }}
+       >
+         <Icon name="arrow-left" size={25} style={{ color: appStyle.mainColor, padding: 10 }} />
+       </TouchableOpacity>
+     ),
+     headerLeftContainerStyle: {
+       paddingLeft: 10
+     },
+     headerTitleStyle: {
+       fontSize: 18,
+       fontFamily: appStyle.mainFont,
+       fontWeight: '500',
+       color: appStyle.mainColor
+     },
+     headerTitleContainerStyle: {
+       justifyContent: 'center',
+       alignItems: 'center',
+       marginLeft: -60
+     }
+   });
+
   static propTypes = {
     navigation: PropTypes.object
   }
@@ -27,6 +60,7 @@ class Detail extends Component {
     url: '',
     email: '',
     password: '',
+    desc: '',
     emailError: '',
     passwordError: '',
     secureTextEntry: true,
@@ -52,7 +86,7 @@ class Detail extends Component {
 
   render() {
     const {
-      email, name, url, password, emailError, passwordError,
+      email, desc, url, password, emailError, passwordError,
       secureTextEntry, rightIconName
     } = this.state
     const { params } = this.props.navigation.state
@@ -64,14 +98,20 @@ class Detail extends Component {
     return (
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={[style.container, { justifyContent: 'flex-start', flexDirection: 'column', paddingTop: top }]}
+        style={[style.container, {
+          justifyContent: 'flex-start',
+          flexDirection: 'column',
+          marginTop: -top,
+          paddingTop: 10
+        }]}
       >
-        {this.renderDomain()}
+        <StatusBar backgroundColor={appStyle.buttonBackgroundColor} barStyle="light-content" translucent />
+        {/* {this.renderDomain()} */}
         <View style={style.field}>
           <TextInput
             multiline={true}
             numberOfLines={4}
-            label="Link"
+            placeholderText="Link"
             leftIconName="link-variant"
             value={url}
             onChangeText={(val) => {
@@ -82,7 +122,7 @@ class Detail extends Component {
 
         <View style={style.field}>
           <TextInput
-            label="Email"
+            placeholderText="Email"
             leftIconName="email-outline"
             errorMessage={emailError}
             value={email}
@@ -92,7 +132,7 @@ class Detail extends Component {
         <View style={style.field}>
           <TextInput
             secureTextEntry={secureTextEntry}
-            label="Password"
+            placeholderText="Password"
             leftIconName="lock-outline"
             rightIconName={rightIconName}
             errorMessage={passwordError}
@@ -103,6 +143,18 @@ class Detail extends Component {
                 secureTextEntry: !secureTextEntry,
                 rightIconName: secureTextEntry ? 'eye' : 'eye-off'
               })
+            }}
+          />
+        </View>
+        <View style={style.field}>
+          <TextInput
+            multiline={true}
+            numberOfLines={4}
+            placeholderText="Note"
+            leftIconName="note"
+            value={desc}
+            onChangeText={(val) => {
+              this.setState({ desc: val })
             }}
           />
         </View>

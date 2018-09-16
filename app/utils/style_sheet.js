@@ -21,7 +21,7 @@ export default StyleSheet.create({
   input: {
     fontSize: 14,
     fontFamily: appStyle.mainFont,
-    color: appStyle.mainColor
+    color: appStyle.mainColor 
   },
   button: {
     marginTop: 15,
@@ -74,5 +74,10 @@ export default StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'flex-end',
     paddingRight: 5
+  },
+  label: {
+    fontFamily: appStyle.mainFont,
+    fontWeight: 'normal',
+    color: appStyle.mainColor
   }
 })
