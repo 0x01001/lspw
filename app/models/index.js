@@ -263,6 +263,12 @@ const AccountStore = types.model({
 
   // ------------------------------------
 
+  searchData(val) {
+    return self.data.filter(x => _.includes(x.name, val) || _.includes(x.username, val))
+  },
+
+  // ------------------------------------
+
   async googleSignin() {
     // TODO: check accessToken !== null
     try {

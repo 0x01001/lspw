@@ -17,7 +17,7 @@ const top = layout.getExtraTopAndroid()
 @observer
 class Detail extends Component {
    static navigationOptions = ({ navigation }) => ({
-     title: (navigation.state.params && navigation.state.params.item) ? navigation.state.params.item.name : 'Create',
+     title: (navigation.state.params && navigation.state.params.item) ? navigation.state.params.item.name : 'Create Account',
      headerStyle: {
        backgroundColor: appStyle.buttonBackgroundColor,
        marginVertical: top
@@ -56,77 +56,64 @@ class Detail extends Component {
   }
 
   state = {
-    name: '',
     url: '',
-    email: '',
+    username: '',
     password: '',
     desc: '',
-    emailError: '',
+    urlError: '',
+    usernameError: '',
     passwordError: '',
     secureTextEntry: true,
     rightIconName: 'eye-off'
   };
 
+  componentWillMount() {
+    const { params } = this.props.navigation.state
+    if (params) {
+      const {
+        url, username, password, desc
+      } = params.item
+      this.setState({
+        url, username, password, desc
+      })
+    }
+  }
+
   onChangeText = (key, val) => {
     this.setState({ [key]: val, [`${key}Error`]: !val ? 'This field is required' : '' })
   };
 
-  renderDomain = () => {
-    const { params } = this.props.navigation.state
-    if (params && params.item) {
-      return (
-        <View style={[style.field, { flexDirection: 'row' }]}>
-          <Text style={{ fontFamily: appStyle.mainFont, fontWeight: '700', color: appStyle.mainColor }}>Domain: </Text>
-          <Text style={{ fontFamily: appStyle.mainFont, color: appStyle.mainColor, marginLeft: 10 }}>{params.item.name}
-          </Text>
-        </View>)
-    }
-    return null
-  }
-
   render() {
     const {
-      email, desc, url, password, emailError, passwordError,
+      username, desc, url, password, urlError, usernameError, passwordError,
       secureTextEntry, rightIconName
     } = this.state
-    const { params } = this.props.navigation.state
-    if (params) {
-      const { item } = params
-    }
-    const { isLoading } = AccountStore
 
     return (
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={[style.container, {
-          justifyContent: 'flex-start',
-          flexDirection: 'column',
-          marginTop: -top,
-          paddingTop: 10
-        }]}
+        style={[style.container, styles.content]}
       >
-        <StatusBar backgroundColor={appStyle.buttonBackgroundColor} barStyle="light-content" translucent />
-        {/* {this.renderDomain()} */}
+        <StatusBar backgroundColor={appStyle.backgroundColor} barStyle="light-content" translucent />
         <View style={style.field}>
           <TextInput
-            multiline={true}
-            numberOfLines={4}
+            // multiline={true}
+            // numberOfLines={4}
             placeholderText="Link"
             leftIconName="link-variant"
+            errorMessage={urlError}
             value={url}
-            onChangeText={(val) => {
-              this.setState({ url: val })
-            }}
+            onChangeText={val => this.onChangeText('url', val)}
           />
         </View>
 
         <View style={style.field}>
           <TextInput
-            placeholderText="Email"
-            leftIconName="email-outline"
-            errorMessage={emailError}
-            value={email}
-            onChangeText={val => this.onChangeText('email', val)}
+            placeholderText="Username"
+            leftIconName="account-outline"
+            errorMessage={usernameError}
+            value={username}
+            onChangeText={val => this.onChangeText('username', val)}
           />
         </View>
         <View style={style.field}>
@@ -148,10 +135,10 @@ class Detail extends Component {
         </View>
         <View style={style.field}>
           <TextInput
-            multiline={true}
-            numberOfLines={4}
+            // multiline={true}
+            // numberOfLines={4}
             placeholderText="Note"
-            leftIconName="note"
+            leftIconName="note-outline"
             value={desc}
             onChangeText={(val) => {
               this.setState({ desc: val })
@@ -164,7 +151,7 @@ class Detail extends Component {
             title="Save"
             buttonStyle={style.button}
             titleStyle={style.buttonTitle}
-            loading={isLoading}
+            loading={AccountStore.isLoading}
             loadingProps={{ size: 'small', color: appStyle.mainColor }}
             onPress={this.submitPress}
           />
@@ -175,15 +162,11 @@ class Detail extends Component {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'flex-start',
-    flexDirection: 'column'
-  },
   content: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center'
+    justifyContent: 'flex-start',
+    flexDirection: 'column',
+    marginTop: -top,
+    paddingTop: 10
   }
 })
 

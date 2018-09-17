@@ -1,10 +1,11 @@
 import React, { Component } from 'react'
-import { View, Text, TouchableOpacity, StyleSheet, LayoutAnimation, FlatList, Animated, PanResponder, Dimensions, Clipboard } from 'react-native'
-import { Button, Icon, Divider } from 'react-native-elements'
+import { View, Text, TouchableOpacity, StyleSheet, LayoutAnimation, FlatList, Animated, PanResponder, Image, Clipboard } from 'react-native'
+import { Button, Icon, Divider, ListItem } from 'react-native-elements'
 import * as Keychain from 'react-native-keychain'
-import { Toolbar, ActionButton, ListItem } from 'react-native-material-ui'
+import { Toolbar, ActionButton } from 'react-native-material-ui'
 import _ from 'lodash'
 import { observer } from 'mobx-react'
+import { observable } from 'mobx'
 
 import layout from '../utils/layout'
 import style from '../utils/style_sheet'
@@ -16,44 +17,14 @@ const marginTop = layout.getExtraTop()
 
 @observer
 class Home extends Component {
-  // static navigationOptions = {
-  //   title: 'Home',
-  //   drawerLabel: 'Home',
-  //   drawerIcon: ({ tintColor }) => <Icon name="list" size={24} color={tintColor} />
-  // };
-
   state = {
     selected: [],
-    searchText: '',
-    pan: new Animated.ValueXY() // Step 1
+    searchText: ''
   };
-
-  componentWillMount() {
-    // get all data
-    // AccountStore.fetchData()
-  }
-
-  panResponder = PanResponder.create({ // Step 2
-    onStartShouldSetPanResponder: () => true,
-    onPanResponderMove: Animated.event([null, { // Step 3
-      dx: this.state.pan.x,
-      dy: this.state.pan.y
-    }]),
-    onPanResponderRelease: (e, gesture) => {
-      // Animated.spring( // Step 1
-      //   this.state.pan, // Step 2
-      //   { toValue: { x: 0, y: 0 } } // Step 3
-      // ).start()
-    } // Step 4
-  });
-
-  reset = async () => {
-    try {
-      await Keychain.resetGenericPassword()
-    } catch (err) {
-      // this.setState({ status: 'Could not reset credentials, ' + err });
-    }
-  };
+  @observable
+  isSearching = false;
+  @observable
+  dataSearch = [];
 
   test = () => {
     const currentData = [{
@@ -126,6 +97,38 @@ class Home extends Component {
     // alert('Copied to Clipboard!')
   };
 
+  // renderAvatar = async (name) => {
+  //   try {
+  //     const url = `https://www.google.com/s2/favicons?domain=${name}`
+  //     const { data } = await axios.get(url, { responseType: 'arraybuffer' })
+  //     console.log('data: ', data, url)
+  //     const base64 = Buffer.from(data, 'binary').toString('base64')
+  //     console.log('base64: ', base64)
+  //     if (base64) {
+  //       return (
+  //         <Image
+  //           source={{ uri: `data:image/png;base64,${base64}` }}
+  //           style={{ height: 50, width: 50 }}
+  //         />)
+  //     }
+  //     return null
+  //   } catch (error) {
+  //     console.log(error)
+  //   }
+  // }
+
+  onSearch = (val) => {
+    console.log('onSearch')
+    this.isSearching = true
+    this.dataSearch = AccountStore.searchData(val)
+  }
+
+  onSearchClosed = () => {
+    console.log('onSearchClosed')
+    this.isSearching = false
+    this.dataSearch = []
+  }
+
   renderButton = (text, onPress) => (
     <TouchableOpacity onPress={onPress}>
       <View style={style.button}>
@@ -135,25 +138,25 @@ class Home extends Component {
   );
 
   renderItem = ({ item }) => (
-    // <ListItem
-    //   // contentContainerStyle={{justifyContent:'flex-start', alignContent:'flex-start'}}
-    //   title={item.name}
-    //   subtitle={item.username}
-    //   // leftAvatar={{
-    //   //   source: item.avatar_url && { uri: item.avatar_url },
-    //   //   title: item.name[0]
-    //   // }}
-    //   rightIcon={{ name: 'chevron-right' }}
-    // />
     <ListItem
-      divider
-      centerElement={{
-        primaryText: item.name,
-        secondaryText: item.username
+      containerStyle={{ backgroundColor: 'transparent', paddingVertical: 10 }}
+      title={item.name}
+      subtitle={item.username}
+      titleStyle={{ color: appStyle.mainColor, fontWeight: 'bold', height: 26 }}
+      subtitleStyle={{
+        color: appStyle.mainColor, fontSize: 12, fontStyle: 'italic', height: 20
       }}
+      leftAvatar={{
+        size: 26,
+        rounded: true,
+        source: { uri: `https://www.google.com/s2/favicons?domain=${item.name}` },
+        // title: 'N/A',
+        overlayContainerStyle: { backgroundColor: 'transparent' }
+      }}
+      rightIcon={{ name: 'chevron-right', color: appStyle.mainColor }}
       onPress={() => AppNav.pushToScreen('detail', { item })}
       onLongPress={() => this.writeToClipboard({ item })}
-      rightElement="chevron-right"
+      bottomDivider
     />
   )
 
@@ -161,18 +164,30 @@ class Home extends Component {
     <View style={styles.content}><Text style={{ color: appStyle.mainColor, fontSize: 18 }}>No data</Text></View>
   )
 
+  renderResultSearch = () => {
+    if (this.isSearching && this.dataSearch.length > 0) {
+      return (
+        <View>
+          <Text style={styles.resultText}>Result: {this.dataSearch.length}</Text>
+          <Divider style={{ backgroundColor: '#484558' }} />
+        </View>)
+    }
+    return null
+  }
+
   renderContent = () => {
     if (AccountStore.isFetching) {
       return (<View style={styles.content}><Text style={{ color: appStyle.mainColor, fontSize: 18 }}>Loading...</Text></View>)
     }
     return (
       <View style={{ flex: 1 }}>
+        {this.renderResultSearch()}
         <FlatList
-          data={AccountStore.data}
+          data={this.isSearching ? this.dataSearch : AccountStore.data}
           renderItem={this.renderItem}
           keyExtractor={(x, i) => i.toString()}
           ListEmptyComponent={this.renderEmptyContent}
-          contentContainerStyle={[{ flexGrow: 1 }, AccountStore.data.length ? null : { justifyContent: 'center' }]}
+          contentContainerStyle={[{ flexGrow: 1 }, this.isSearching && this.dataSearch.length === 0 ? { justifyContent: 'center' } : AccountStore.data.length ? null : { justifyContent: 'center' }]}
         />
       </View>
     )
@@ -183,8 +198,12 @@ class Home extends Component {
       <View style={styles.container}>
         <Toolbar
           style={{
-            container: { marginTop, backgroundColor: 'transparent' },
-            titleText: { fontSize: 18 }
+            container: { marginTop, backgroundColor: appStyle.buttonBackgroundColor },
+            titleText: { fontSize: 18, color: appStyle.mainColor },
+            leftElement: { color: appStyle.mainColor },
+            rightElement: { color: appStyle.mainColor },
+            leftElementContainer: { marginLeft: 8 },
+            centerElementContainer: { marginLeft: 12 }
           }}
           key="toolbar"
           leftElement="menu"
@@ -199,44 +218,15 @@ class Home extends Component {
           searchable={{
             autoFocus: true,
             placeholder: 'Search',
-            onChangeText: value => this.setState({ searchText: value }),
-            onSearchClosed: () => this.setState({ searchText: '' })
+            onChangeText: value => this.onSearch(value),
+            onSearchClosed: () => this.onSearchClosed()
           }}
         />
-        <Divider style={{ backgroundColor: appStyle.borderColor }} />
         {this.renderContent()}
-        {/* <View style={styles.draggableContainer}>
-          <Animated.View {...this.panResponder.panHandlers} style={[this.state.pan.getLayout(), styles.circle]}> */}
         <ActionButton
-          style={{ container: { backgroundColor: `${appStyle.redColor}80`, margin: 10 } }}
-          useNativeFeedback={false}
+          style={{ container: { backgroundColor: `${appStyle.redColor}80` } }}
           onPress={() => { AppNav.pushToScreen('detail') }}
         />
-        {/* </Animated.View>
-        </View> */}
-
-        {/* <Header
-          outerContainerStyles={{ marginTop }}
-          leftComponent={{ icon: 'menu', color: '#fff' }}
-          centerComponent={{ text: 'Home', style: { color: '#fff' } }}
-          rightComponent={{ icon: 'home', color: '#fff' }}
-        /> */}
-
-        {/* <Text style={{ alignSelf: 'center' }}> Home </Text> */}
-        {/* <Button
-          title="Test"
-          buttonStyle={[style.button, { width: 120 }]}
-          titleStyle={style.buttonTitle}
-          loading={this.props.loading}
-          loadingProps={{ size: 'small', color: appStyle.mainColor }}
-          onPress={this.test}
-        />
-        <Button title="Logout" onPress={() => {
-            this.reset();
-            firebase.auth().signOut();
-          }}
-        /> */}
-        {/* <Button title="Load" onPress={this.load} /> */}
       </View>
     )
   }
@@ -253,6 +243,12 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center'
+  },
+  resultText: {
+    color: appStyle.mainColor,
+    marginLeft: 23,
+    marginVertical: 5,
+    fontStyle: 'italic'
   }
 })
 
