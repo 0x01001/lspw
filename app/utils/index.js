@@ -103,10 +103,29 @@ export const getPassword = async () => {
   return ''
 }
 
+export const unixTimeStampToDateTime = (timestamp) => {
+  const currentDate = new Date(timestamp)
+
+  const date = `0${currentDate.getDate()}`
+  const month = `0${currentDate.getMonth() + 1}` // Be careful! January is 0 not 1
+  const year = currentDate.getFullYear()
+
+  // Hours part from the timestamp
+  const hours = currentDate.getHours()
+  // Minutes part from the timestamp
+  const minutes = `0${currentDate.getMinutes()}`
+  // Seconds part from the timestamp
+  const seconds = `0${currentDate.getSeconds()}`
+
+  const dateString = `${year}-${month.substr(-2)}-${date.substr(-2)} ${hours}:${minutes.substr(-2)}:${seconds.substr(-2)}`
+  return dateString
+}
+
 export default {
   encrypt,
   decrypt,
   extractDomain,
   getGoogleSheetData,
-  getPassword
+  getPassword,
+  unixTimeStampToDateTime
 }

@@ -95,6 +95,10 @@ class Home extends Component {
     await Clipboard.setString(item.password)
     AccountStore.showMsg(`Password of '${item.username}' from <${item.name}> copied.`)
     // alert('Copied to Clipboard!')
+    const date = new Date()
+    const timestamp = date.getTime()
+    console.log('timestamp: ', timestamp)
+    item.updateDate(timestamp)
   };
 
   // renderAvatar = async (name) => {
@@ -141,11 +145,11 @@ class Home extends Component {
     <ListItem
       containerStyle={{ backgroundColor: 'transparent', paddingVertical: 10 }}
       title={item.name}
-      subtitle={item.username}
+      subtitle={item.username ? item.username : null}
       titleStyle={{ color: appStyle.mainColor, fontWeight: 'bold', height: 26 }}
-      subtitleStyle={{
+      subtitleStyle={item.username ? {
         color: appStyle.mainColor, fontSize: 12, fontStyle: 'italic', height: 20
-      }}
+      } : null}
       leftAvatar={{
         size: 26,
         rounded: true,
@@ -154,7 +158,7 @@ class Home extends Component {
         overlayContainerStyle: { backgroundColor: 'transparent' }
       }}
       rightIcon={{ name: 'chevron-right', color: appStyle.mainColor }}
-      onPress={() => AppNav.pushToScreen('detail', { item })}
+      onPress={() => AppNav.pushToScreen('detail', { title: item.name, item })}
       onLongPress={() => this.writeToClipboard({ item })}
       bottomDivider
     />
@@ -185,7 +189,7 @@ class Home extends Component {
         <FlatList
           data={this.isSearching ? this.dataSearch : AccountStore.data}
           renderItem={this.renderItem}
-          keyExtractor={(x, i) => i.toString()}
+          keyExtractor={(x, i) => x.id}
           ListEmptyComponent={this.renderEmptyContent}
           contentContainerStyle={[{ flexGrow: 1 }, this.isSearching && this.dataSearch.length === 0 ? { justifyContent: 'center' } : AccountStore.data.length ? null : { justifyContent: 'center' }]}
         />
@@ -225,7 +229,9 @@ class Home extends Component {
         {this.renderContent()}
         <ActionButton
           style={{ container: { backgroundColor: `${appStyle.redColor}80` } }}
-          onPress={() => { AppNav.pushToScreen('detail') }}
+          onPress={() => {
+            AppNav.pushToScreen('detail', { title: 'Create' })
+          }}
         />
       </View>
     )

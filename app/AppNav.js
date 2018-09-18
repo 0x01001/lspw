@@ -1,5 +1,5 @@
 import { observable, action } from 'mobx'
-import { NavigationActions, DrawerActions } from 'react-navigation'
+import { NavigationActions, DrawerActions, StackActions } from 'react-navigation'
 import { DURATION } from '../app/components/common/Toast'
 
 class ObservableNav {
@@ -52,11 +52,6 @@ class ObservableNav {
   }
 
   @action
-  goBack() {
-    this.navigator.dispatch(NavigationActions.back())
-  }
-
-  @action
   closeMenu() {
     this.navigator.dispatch(DrawerActions.closeDrawer())
   }
@@ -64,6 +59,28 @@ class ObservableNav {
   @action
   openMenu() {
     this.navigator.dispatch(DrawerActions.openDrawer())
+  }
+
+  // const prevGetStateForAction = this.navigator.router.getStateForAction;
+
+  // this.navigator.router.getStateForAction = (action, state) => {
+  //   // Do not allow to go back from Home
+  //   if (action.type === 'Navigation/BACK' && state && state.routes[state.index].routeName === 'home') {
+  //     return null;
+  //   }
+
+  //   // Do not allow to go back to Login
+  //   if (action.type === 'Navigation/BACK' && state) {
+  //     const newRoutes = state.routes.filter(r => r.routeName !== 'loginStack');
+  //     const newIndex = newRoutes.length - 1;
+  //     return prevGetStateForAction(action, { index: newIndex, routes: newRoutes });
+  //   }
+  //   return prevGetStateForAction(action, state);
+  // };
+
+  @action
+  goBack() {
+    this.navigator.dispatch(NavigationActions.back())
   }
 
   @action pushToScreen(routeName, params = null) {
@@ -74,15 +91,21 @@ class ObservableNav {
   }
 
   @action reset() {
-    const resetAction = {
-      type: NavigationActions.NAVIGATE,
-      routeName: 'loginStack',
-      action: {
-        type: NavigationActions.RESET,
-        index: 0,
-        actions: [{ type: NavigationActions.NAVIGATE, routeName: 'loginStack' }]
-      }
-    }
+    // const resetAction = {
+    //   type: NavigationActions.NAVIGATE,
+    //   routeName: 'mainStack',
+    //   action: {
+    //     type: NavigationActions.RESET,
+    //     index: 0,
+    //     actions: [{ type: NavigationActions.NAVIGATE, routeName: 'mainStack' }]
+    //   }
+    // }
+    // this.navigator.dispatch(resetAction)
+    const resetAction = StackActions.reset({
+      index: 0,
+      key: null, // black magic
+      actions: [NavigationActions.navigate({ routeName: 'mainStack' })]
+    })
     this.navigator.dispatch(resetAction)
   }
 

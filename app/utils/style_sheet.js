@@ -21,7 +21,7 @@ export default StyleSheet.create({
   input: {
     fontSize: 14,
     fontFamily: appStyle.mainFont,
-    color: appStyle.mainColor 
+    color: appStyle.mainColor
   },
   button: {
     marginTop: 15,

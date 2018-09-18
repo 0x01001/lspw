@@ -48,13 +48,11 @@ class Login extends Component {
   onSignUpPress = () => {
     this.reset()
     AppNav.pushToScreen('signup')
-    // this.props.navigation.navigate('signup')
   };
 
   onForgotPasswordPress = () => {
     this.reset()
     AppNav.pushToScreen('forgotPassword')
-    // this.props.navigation.navigate('forgotPassword')
   };
 
   submitPress = () => {

@@ -100,7 +100,7 @@ class Router extends Component {
       contentComponent: MenuLeft
     })
 
-    const PrimaryNav = createStackNavigator({
+    const Nav = createStackNavigator({
       loginStack: { screen: AuthNav },
       mainStack: { screen: MainNav }
     }, {
@@ -108,7 +108,7 @@ class Router extends Component {
       headerMode: 'none',
       initialRouteName: 'loginStack'
     })
-    return <PrimaryNav ref={(ref) => { AppNav.navigator = ref }} />
+    return <Nav ref={(ref) => { AppNav.navigator = ref }} />
   }
 
   render() {

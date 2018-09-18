@@ -1,24 +1,40 @@
 import firebase from 'firebase'
 import axios from 'axios'
 import * as Keychain from 'react-native-keychain'
-import { types } from 'mobx-state-tree'
+import { types, getRoot, destroy } from 'mobx-state-tree'
 import { GoogleSignin } from 'react-native-google-signin'
 import _ from 'lodash'
 
 import constant from '../utils/constant'
 import AppNav from '../AppNav'
 import AppState from '../AppState'
-import { encrypt, decrypt, getPassword, extractDomain, getGoogleSheetData } from '../utils'
+import { encrypt, decrypt, getPassword, extractDomain, getGoogleSheetData, unixTimeStampToDateTime } from '../utils'
 
-const Account = types.model({
-  name: types.string,
+const uuidv4 = require('uuid/v4')
+
+export const Account = types.model({
+  id: types.string,
+  name: '',
   url: types.string,
-  username: types.string,
-  password: types.string,
-  desc: types.string
+  username: '',
+  password: '',
+  desc: '',
+  date: 0
 }).actions(self => ({
-  changeName(newName) {
-    self.name = newName
+  // changeName(newName) {
+  //   self.name = newName
+  // },
+
+  updateDate(date) {
+    self.date = date
+  },
+
+  remove() {
+    getRoot(self).remove(self)
+  },
+
+  update(model : Account) {
+    self = model
   }
 }))
 
@@ -38,14 +54,22 @@ const AccountStore = types.model({
   // afterCreate() {
   //   self.fetchData()
   // },
+  add(item) {
+    self.items.push(item)
+  },
+
+  remove(item) {
+    destroy(item)
+  },
 
   setItem(json) {
-    const list = []
     const result = JSON.parse(json)
-    result.forEach((x) => {
-      list.push(x)
-    })
-    self.items = list
+    // result.forEach((x) => {
+    //   // x.index = i
+    //   list.push(x)
+    // })
+    // filter list
+    self.items = result
   },
 
   setToken(token) {
@@ -62,7 +86,7 @@ const AccountStore = types.model({
 
   showMsg(msg) {
     self.showLoading(false)
-    const m = msg === undefined || msg === null ? 'Something went wrong.' : msg
+    const m = msg === undefined || msg === null || msg === '' ? 'Something went wrong.' : msg
     AppNav.showToast(m)
   },
 
@@ -85,7 +109,7 @@ const AccountStore = types.model({
       const emailVerified = data.user ? data.user.emailVerified : null
       // console.log('emailVerified: ', emailVerified)
       if (emailVerified) {
-        save({ email, password })
+        saveInfo({ email, password })
         callback()
       } else {
         self.showMsg('Your account is not activated.')
@@ -107,7 +131,7 @@ const AccountStore = types.model({
           // console.log('token: ', token)
           firebase.auth().signInWithCustomToken(token).then(() => {
             self.sendVerify(callback)
-            save({ email, password })
+            saveInfo({ email, password })
           }).catch(() => {
             self.showMsg()
           })
@@ -152,6 +176,8 @@ const AccountStore = types.model({
           const json = decrypt(data, pw)
           // console.log('load decrypt: ', json)
           self.setItem(json)
+        } else {
+          self.reset()
         }
       } catch (err) {
         console.log('load: ', err)
@@ -171,17 +197,13 @@ const AccountStore = types.model({
       AppNav.showLoading()
       // get data from gg sheets
       const result = await getDataImport(id[0], token)
-      console.log('data import: ', result)
+      // console.log('data import: ', result)
       if (result === null || (result !== null && result.length === 0)) {
         AppNav.hideLoading()
         self.showMsg('No data received to import.')
+        return
       }
-      // // extra domain
-      // const currentData = listData.map((x) => {
-      //   x.changeName(extractDomain(x.url))
-      //   return x
-      // })
-      console.log('current data: ', listData)
+      // console.log('current data: ', listData)
       // merge data
       self.mergeData(listData, result)
     } catch (err) {
@@ -194,14 +216,15 @@ const AccountStore = types.model({
   async mergeData(currentData, dataImport) {
     // let arrDuplicate = []
     const join = _.union(dataImport, currentData)
-    console.log('join: ', join)
+    // console.log('join: ', join)
     const listJoin = _.uniqWith(join, (x, y) => {
       // console.log('x: ', x)
       // console.log('y: ', y)
       // console.log('-----------------------------')
       if (x.username === y.username && x.name === y.name) {
-        // console.log('uid: ',y.uid, x.uid);
-        // y.uid = x.uid
+        // console.log('uid 1: ', `${y.id} - ${x.id}`)
+        y.id = x.id
+        // console.log('uid 2: ', `${y.id} - ${x.id}`)
         // if (x.password === y.password && x.desc === y.desc) {
         //   // console.log('duplicate: ',y);
         //   arrDuplicate = [...arrDuplicate, y]
@@ -214,7 +237,7 @@ const AccountStore = types.model({
     // arrDuplicate.forEach((x) => {
     //   _.pull(listJoin, x)
     // })
-    console.log('importData json ', listJoin)
+    // console.log('importData json ', listJoin)
     if (listJoin.length > 0) {
       const { currentUser } = firebase.auth()
       const pw = await getPassword()
@@ -222,8 +245,22 @@ const AccountStore = types.model({
       if (pw === '') {
         AppNav.hideLoading()
         self.showMsg()
+        return
       }
-      self.submitData(listJoin, pw, currentUser.uid)
+      // listJoin.forEach((x) => {
+      //   if (x.id === '') {
+      //     x.id = uuidv4()
+      //     console.log('x id: ', x.id)
+      //   }
+      // })
+      const list = listJoin.map((x) => {
+        if (x.id === '') {
+          x.id = uuidv4()
+          // console.log('x id: ', x.id)
+        }
+        return x
+      })
+      self.submitData(list, pw, currentUser.uid)
       // for (let i = 0; i < listJoin.length; i++) {
       //   const element = listJoin[i]
       //   await submitData(element, pw, currentUser.uid, element.uid)
@@ -241,7 +278,7 @@ const AccountStore = types.model({
     // delete temp.uid
     // const json = JSON.stringify(temp)
     const json = JSON.stringify(data)
-    console.log('submitData: ', json)
+    // console.log('submitData: ', json)
     // A post entry.
     const postData = encrypt(json, pw)
     // Get a key for a new Post.
@@ -260,15 +297,46 @@ const AccountStore = types.model({
         self.showMsg()
       })
   },
-
   // ------------------------------------
-
   searchData(val) {
     return self.data.filter(x => _.includes(x.name, val) || _.includes(x.username, val))
   },
 
-  // ------------------------------------
+  async saveData(model:Account) {
+    self.showLoading(true)
+    console.log('data: ', model.id)
 
+    // const dateString = unixTimeStampToDateTime(timestamp)
+    // console.log('dateString: ', dateString)
+
+    const json = JSON.stringify(model)
+    console.log('json: ', json)
+    if (json !== '') {
+      const pw = await getPassword()
+      // console.log('pw: ', pw)
+      if (pw === '') {
+        self.showLoading(false)
+        self.showMsg()
+        return
+      }
+      const data = encrypt(json, pw)
+      // console.log('post data: ', data)
+      firebase.auth().currentUser.getIdToken().then((token) => {
+        // console.log('token: ', token)
+        axios.post(`${constant.ROOT_URL}/save`, { token, data }).then((res) => {
+          // console.log(res)
+          if (res.data.code === '1') {
+            AppNav.goBack()
+            self.showMsg(`${model.id !== '' ? 'Edit' : 'Create'} success!`)
+          } else {
+            self.showMsg(res.data.msg)
+          }
+          self.showLoading(false)
+        })
+      })
+    }
+  },
+  // ------------------------------------
   async googleSignin() {
     // TODO: check accessToken !== null
     try {
@@ -291,15 +359,16 @@ const AccountStore = types.model({
         await GoogleSignin.signOut()
       }
       await Keychain.resetGenericPassword()
-      firebase.auth().signOut().then(() => {
-        AppNav.reset()
-      })
+      firebase.auth().signOut()
     } catch (error) {
       console.log(error)
       self.showMsg()
     }
-  }
+  },
 
+  reset() {
+    self.items = []
+  }
 })).create({
   items: []
 })
@@ -343,7 +412,7 @@ const getDataImport = async (id, token) => {
       // console.log(`${name_index} - ${url_index} - ${username_index} - ${password_index} - ${extra_index}`)
       } else {
         const model = {
-          // uid: '',
+          id: '',
           // name: getData(list, nameIndex),
           url: getGoogleSheetData(list, urlIndex),
           username: getGoogleSheetData(list, usernameIndex),
@@ -364,7 +433,7 @@ const getDataImport = async (id, token) => {
   }
 }
 
-const save = async ({ email, password }) => {
+const saveInfo = async ({ email, password }) => {
   try {
     // TODO: if pin code != null ? pinCode : uid;
     const { uid } = firebase.auth().currentUser

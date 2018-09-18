@@ -24,7 +24,7 @@ export default class App extends Component<Props> {
       if (user && user.emailVerified) {
         this.setState({ isSignIn: true })
         AccountStore.load()
-        AppNav.pushToScreen('mainStack')
+        AppNav.reset()
       } else {
         this.setState({ isSignIn: false })
       }
