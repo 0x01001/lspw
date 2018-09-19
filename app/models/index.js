@@ -4,18 +4,19 @@ import * as Keychain from 'react-native-keychain'
 import { types, getRoot, destroy } from 'mobx-state-tree'
 import { GoogleSignin } from 'react-native-google-signin'
 import _ from 'lodash'
+import prompt from 'react-native-prompt-android'
 
 import constant from '../utils/constant'
 import AppNav from '../AppNav'
 import AppState from '../AppState'
-import { encrypt, decrypt, getPassword, extractDomain, getGoogleSheetData, unixTimeStampToDateTime } from '../utils'
+import { encrypt, decrypt, getPassword, extractDomain, getGoogleSheetData } from '../utils'
 
 const uuidv4 = require('uuid/v4')
 
 export const Account = types.model({
   id: types.string,
   name: '',
-  url: types.string,
+  url: '',
   username: '',
   password: '',
   desc: '',
@@ -26,7 +27,7 @@ export const Account = types.model({
   // },
 
   updateDate(date) {
-    self.date = date
+    self.username = date.toString()
   },
 
   remove() {
@@ -42,6 +43,7 @@ const AccountStore = types.model({
   items: types.array(Account),
   accessToken: '',
   isLoading: false,
+  isDeleting: false,
   isFetching: false
 }).views(self => ({
   get data() {
@@ -82,6 +84,10 @@ const AccountStore = types.model({
 
   showLoading(val) {
     self.isLoading = val
+  },
+
+  showDeleting(val) {
+    self.isDeleting = val
   },
 
   showMsg(msg) {
@@ -186,6 +192,17 @@ const AccountStore = types.model({
     })
   },
 
+  importLink(url) {
+    if (!url) {
+      self.showMsg('Link is required.')
+      return
+    }
+     
+    console.log(`OK Pressed: ${url}`)
+    // console.log('import: ', token, data)
+    self.importData(url, self.token, self.data)
+  },
+
   async importData(url, token, listData) {
     try {
       const content = url.split('d/')
@@ -268,7 +285,7 @@ const AccountStore = types.model({
       // }
     } else {
       AppNav.hideLoading()
-      AppNav.hideImport()
+      // AppNav.hideImport()
       self.showMsg('Import success.')
     }
   },
@@ -289,7 +306,7 @@ const AccountStore = types.model({
     updates[`/data/${uid}/b`] = postData
     firebase.database().ref().update(updates).then(() => {
       AppNav.hideLoading()
-      AppNav.hideImport()
+      // AppNav.hideImport()
       self.showMsg('Import success.')
     })
       .catch((err) => {
@@ -302,7 +319,9 @@ const AccountStore = types.model({
     return self.data.filter(x => _.includes(x.name, val) || _.includes(x.username, val))
   },
 
-  async saveData(model:Account) {
+  async saveData(model:Account, isShowNotify = true) {
+    // TODO: check duplicate
+
     self.showLoading(true)
     console.log('data: ', model.id)
 
@@ -316,7 +335,7 @@ const AccountStore = types.model({
       // console.log('pw: ', pw)
       if (pw === '') {
         self.showLoading(false)
-        self.showMsg()
+        if (isShowNotify) self.showMsg()
         return
       }
       const data = encrypt(json, pw)
@@ -327,8 +346,10 @@ const AccountStore = types.model({
           // console.log(res)
           if (res.data.code === '1') {
             AppNav.goBack()
-            self.showMsg(`${model.id !== '' ? 'Edit' : 'Create'} success!`)
-          } else {
+            if (isShowNotify) {
+              self.showMsg(`${model.id !== '' ? 'Edit' : 'Create'} success!`)
+            }
+          } else if (isShowNotify) {
             self.showMsg(res.data.msg)
           }
           self.showLoading(false)
@@ -336,6 +357,39 @@ const AccountStore = types.model({
       })
     }
   },
+
+  async removeData(model:Account) {
+    self.showDeleting(true)
+    console.log('data: ', model.id)
+ 
+    const json = JSON.stringify(model)
+    console.log('json: ', json)
+    if (json !== '') {
+      const pw = await getPassword()
+      // console.log('pw: ', pw)
+      if (pw === '') {
+        self.showDeleting(false)
+        self.showMsg()
+        return
+      }
+      const data = encrypt(json, pw)
+      // console.log('post data: ', data)
+      firebase.auth().currentUser.getIdToken().then((token) => {
+        // console.log('token: ', token)
+        axios.post(`${constant.ROOT_URL}/remove`, { token, data }).then((res) => {
+          console.log(res)
+          if (res.data.code === '1') {
+            AppNav.goBack()
+            self.showMsg('Delete success!') 
+          } else {
+            self.showMsg(res.data.msg)
+          }
+          self.showDeleting(false)
+        })
+      })
+    }
+  },
+
   // ------------------------------------
   async googleSignin() {
     // TODO: check accessToken !== null
@@ -344,7 +398,21 @@ const AccountStore = types.model({
       const userInfo = await GoogleSignin.signIn()
       // console.log(`token: ${userInfo.accessToken}`)
       self.setToken(userInfo.accessToken)
-      AppNav.showImport()
+      // AppNav.showImport()
+      prompt(
+        'Import Data',
+        'Enter your link from google sheets\n\n(*) Automatic remove duplicates',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'OK', onPress: url => self.importLink(url) }
+        ],
+        {
+          // type: 'secure-text',
+          cancelable: false,
+          defaultValue: '',
+          placeholder: 'Link'
+        }
+      )
     } catch (error) {
       self.showMsg()
     }

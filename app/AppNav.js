@@ -7,8 +7,8 @@ class ObservableNav {
   navigator = null;
   @observable.ref
   loading = null;
-  @observable.ref
-  import = null;
+  // @observable.ref
+  // import = null;
   @observable.ref
   toast = null;
   @observable.ref
@@ -24,13 +24,13 @@ class ObservableNav {
     this.loading && this.loading.hide()
   }
 
-  showImport() {
-    this.import && this.import.show()
-  }
+  // showImport() {
+  //   this.import && this.import.show()
+  // }
 
-  hideImport() {
-    this.import && this.import.hide()
-  }
+  // hideImport() {
+  //   this.import && this.import.hide()
+  // }
 
   @action
   showToast(msg) {

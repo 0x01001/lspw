@@ -99,6 +99,7 @@ class Home extends Component {
     const timestamp = date.getTime()
     console.log('timestamp: ', timestamp)
     item.updateDate(timestamp)
+    AccountStore.saveData(item, false)
   };
 
   // renderAvatar = async (name) => {

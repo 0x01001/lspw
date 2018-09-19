@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import { View, Text, StyleSheet } from 'react-native'
-import Modal from 'react-native-modal'
 import PropTypes from 'prop-types'
 import { Button } from 'react-native-elements'
 import style from '../../utils/style_sheet'
@@ -87,8 +86,8 @@ class ImportPopup extends Component {
       return null
     }
     return (
-      <View style={styles.wrapper}>
-        <Modal
+      <View style={styles.wrapper}>       
+        {/* <Modal
           isVisible={visible}
           onBackdropPress={() => this.setState({ visible: false })}
           // animationIn="slideInLeft"
@@ -97,7 +96,7 @@ class ImportPopup extends Component {
           onModalHide={this.resetModal}
         >
           {this.renderModalContent()}
-        </Modal>
+        </Modal> */}
       </View>
     )
   }

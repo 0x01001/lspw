@@ -7,7 +7,7 @@ import { initializeApp } from './reference'
 import Loading from './app/components/common/Loading'
 import AppNav from './app/AppNav'
 import AppState from './app/AppState'
-import ImportPopup from './app/components/home/ImportPopup'
+// import ImportPopup from './app/components/home/ImportPopup'
 import appStyle from './app/utils/app_style'
 import Notify from './app/components/common/Notify'
 import AccountStore from './app/models'
@@ -56,7 +56,7 @@ export default class App extends Component<Props> {
       <View style={{ flex: 1, backgroundColor: appStyle.backgroundColor }}>
         <StatusBar backgroundColor="transparent" barStyle="light-content" translucent />
         {this.renderContent()}
-        <ImportPopup ref={(ref) => { AppNav.import = ref }} />
+        {/* <ImportPopup ref={(ref) => { AppNav.import = ref }} /> */}
         <Notify ref={(ref) => { AppNav.notify = ref }} />
         <Toast
           ref={(ref) => { AppNav.toast = ref }}

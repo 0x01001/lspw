@@ -1,5 +1,8 @@
 import React, { Component } from 'react'
-import { View, KeyboardAvoidingView, StyleSheet, Platform, Text, Keyboard, TouchableOpacity, StatusBar, Dimensions } from 'react-native'
+import {
+  View, KeyboardAvoidingView, StyleSheet, Platform, Text, Keyboard, TouchableOpacity,
+  StatusBar, Dimensions, Alert
+} from 'react-native'
 import PropTypes from 'prop-types'
 import { observer } from 'mobx-react'
 import { Button } from 'react-native-elements'
@@ -136,6 +139,30 @@ class Detail extends Component {
     AccountStore.saveData(model)
   }
 
+  onDelete = () => {
+    Alert.alert(
+      'Are you sure?',
+      'You want to delete this record?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'OK',
+          onPress: () => {
+            console.log('OK Pressed')
+            let id = ''
+            const { item } = this.props.navigation.state.params
+            if (item) {
+              id = item.id
+            }
+            const model = Account.create({ id })
+            AccountStore.removeData(model)
+          }
+        }
+      ],
+      { cancelable: false }
+    )
+  }
+
   renderDate = () => {
     const { date } = this.state
     if (date > 0 && this.state.isShowDate) {
@@ -218,6 +245,16 @@ class Detail extends Component {
             loading={AccountStore.isLoading}
             loadingProps={{ size: 'small', color: appStyle.mainColor }}
             onPress={this.onSave}
+          />
+        </View>
+        <View style={style.field}>
+          <Button
+            title="Delete"
+            buttonStyle={[style.button, { backgroundColor: appStyle.redColor }]}
+            titleStyle={style.buttonTitle}
+            loading={AccountStore.isDeleting}
+            loadingProps={{ size: 'small', color: appStyle.mainColor }}
+            onPress={this.onDelete}
           />
         </View>
         {this.renderDate()}

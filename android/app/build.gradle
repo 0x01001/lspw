@@ -168,6 +168,7 @@ dependencies {
     compile 'com.google.android.gms:play-services-auth:15.0.1' 
     compile project(':react-native-vector-icons')
     compile project(':react-native-keychain')
+    compile project(':react-native-prompt-android')
     compile 'org.webkit:android-jsc:r174650'    // ADDED THIS
 }
 
