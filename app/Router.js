@@ -11,7 +11,6 @@ import Detail from './screens/Detail'
 import appStyle from './utils/app_style'
 import Layout from './utils/layout'
 import MenuLeft from './components/home/MenuLeft'
-import AccountStore from './models'
 import AppNav from '../app/AppNav'
 
 class Router extends Component {
@@ -41,7 +40,7 @@ class Router extends Component {
     const navigationOptions = ({ navigation }) => ({
       headerLeft: (
         <TouchableOpacity onPress={() => {
-          AccountStore.showLoading(false)
+          // AccountStore.showLoading(false)
           navigation.goBack()
         }}
         >

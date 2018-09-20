@@ -1,12 +1,9 @@
 import React, { Component } from 'react'
 import { KeyboardAvoidingView, Platform, View, Text, Keyboard } from 'react-native'
 import { Button } from 'react-native-elements'
-// import { connect } from 'react-redux'
 import { observable } from 'mobx'
 import { observer } from 'mobx-react'
 
-// import { signUp, sendVerify } from '../actions'
-import appStyle from '../utils/app_style'
 import style from '../utils/style_sheet'
 import { TextInput, Logo } from '../components/common'
 import AccountStore from '../models'
@@ -32,22 +29,9 @@ class SignUp extends Component {
   @observable
   countdown = COUNTDOWN;
 
-  // componentWillReceiveProps(nextProps) {
-  //   this.onComplete(nextProps)
-  // }
-
   componentWillUnmount() {
     timer.clearTimeout('startTimer')
   }
-
-  // onComplete(props) {
-  //   // console.log('onComplete: ', props.needVerify);
-  //   if (props.needVerify > 0) {
-  //     this.countdown = COUNTDOWN
-  //     this.isCountDown = true
-  //     this.startTimer()
-  //   }
-  // }
 
   startTimer = () => {
     // console.log('startTimer');
@@ -69,7 +53,7 @@ class SignUp extends Component {
 
   submitPress = () => {
     const { email, password, name } = this.state
-    const { isLoading } = AccountStore
+    // const { isLoading } = AccountStore
     let check = false
     if (!email) {
       this.setState({ emailError: !email ? 'This field is required' : '' })
@@ -79,7 +63,7 @@ class SignUp extends Component {
       this.setState({ passwordError: !password ? 'This field is required' : '' })
       check = true
     }
-    if (check || isLoading) {
+    if (check) {
       return
     }
     Keyboard.dismiss()
@@ -106,7 +90,7 @@ class SignUp extends Component {
       email, name, password, emailError, passwordError,
       secureTextEntry, rightIconName, isShowVerify
     } = this.state
-    const { isLoading } = AccountStore
+    // const { isLoading } = AccountStore
     if (isShowVerify) {
       return (
         <View style={style.container}>
@@ -123,8 +107,8 @@ class SignUp extends Component {
               title={`Send ${this.countdown >= 0 ? `(${this.countdown}s)` : ''}`}
               buttonStyle={style.button}
               titleStyle={style.buttonTitle}
-              loading={isLoading}
-              loadingProps={{ size: 'small', color: appStyle.mainColor }}
+              // loading={isLoading}
+              // loadingProps={{ size: 'small', color: appStyle.mainColor }}
               onPress={this.submitAgainPress}
             />
           </View>
@@ -181,8 +165,8 @@ class SignUp extends Component {
             title="Sign Up"
             buttonStyle={style.button}
             titleStyle={style.buttonTitle}
-            loading={isLoading}
-            loadingProps={{ size: 'small', color: appStyle.mainColor }}
+            // loading={isLoading}
+            // loadingProps={{ size: 'small', color: appStyle.mainColor }}
             onPress={this.submitPress}
           />
         </View>

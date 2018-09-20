@@ -7,6 +7,7 @@ import PropTypes from 'prop-types'
 import { observer } from 'mobx-react'
 import { Button } from 'react-native-elements'
 import Icon from 'react-native-vector-icons/SimpleLineIcons'
+import IconMaterialCommunity from 'react-native-vector-icons/MaterialCommunityIcons'
 
 import appStyle from '../utils/app_style'
 import style from '../utils/style_sheet'
@@ -14,7 +15,7 @@ import { TextInput } from '../components/common'
 import AccountStore, { Account } from '../models'
 import layout from '../utils/layout'
 import AppNav from '../AppNav'
-import { extractDomain, unixTimeStampToDateTime } from '../utils'
+import { extractDomain, unixTimeStampToDateTime, writeToClipboard } from '../utils'
 
 const top = layout.getExtraTopAndroid()
 
@@ -27,16 +28,20 @@ class Detail extends Component {
        marginVertical: top
      },
      headerLeft: (
-       <TouchableOpacity onPress={() => {
-         AccountStore.showLoading(false)
-         AppNav.goBack()
-       }}
-       >
+       <TouchableOpacity onPress={() => { AppNav.goBack() }}>
          <Icon name="arrow-left" size={25} style={{ color: appStyle.mainColor, padding: 10 }} />
        </TouchableOpacity>
      ),
+     headerRight: navigation.state.params.item ? (
+       <TouchableOpacity onPress={() => writeToClipboard(navigation.state.params.item)}>
+         <IconMaterialCommunity name="content-copy" size={25} style={{ color: appStyle.mainColor, padding: 10 }} />
+       </TouchableOpacity>
+     ) : null,
      headerLeftContainerStyle: {
        paddingLeft: 10
+     },
+     headerRightContainerStyle: {
+       paddingRight: 10
      },
      headerTitleStyle: {
        fontSize: 18,
@@ -47,7 +52,7 @@ class Detail extends Component {
      headerTitleContainerStyle: {
        justifyContent: 'center',
        alignItems: 'center',
-       marginLeft: -60
+       marginLeft: navigation.state.params.item ? 0 : -60
      }
    });
 
@@ -119,10 +124,6 @@ class Detail extends Component {
       this.setState({ urlError: 'This field is required' })
       return
     }
-    if (AccountStore.isLoading) {
-      // console.log('loading.............................')
-      return
-    }
     let id = ''
     const { item } = this.props.navigation.state.params
     if (item) {
@@ -133,10 +134,10 @@ class Detail extends Component {
     const {
       username, desc, url, password, date
     } = this.state
-    const model = Account.create({
+    const data = Account.create({
       id, name, url, username, password, desc, date
     })
-    AccountStore.saveData(model)
+    AccountStore.saveData(data)
   }
 
   onDelete = () => {
@@ -154,8 +155,8 @@ class Detail extends Component {
             if (item) {
               id = item.id
             }
-            const model = Account.create({ id })
-            AccountStore.removeData(model)
+            const data = Account.create({ id })
+            AccountStore.removeData(data)
           }
         }
       ],
@@ -171,6 +172,23 @@ class Detail extends Component {
           <Text style={[style.label, { fontSize: 12, fontStyle: 'italic' }]}>Last use: {unixTimeStampToDateTime(date)}</Text>
         </View>
       )
+    }
+    return null
+  }
+
+  renderDelete = () => {
+    if (this.props.navigation.state.params.item) {
+      return (
+        <View style={style.field}>
+          <Button
+            title="Delete"
+            buttonStyle={[style.button, { backgroundColor: `${appStyle.redColor}50` }]}
+            titleStyle={style.buttonTitle}
+            // loading={AccountStore.isDeleting}
+            // loadingProps={{ size: 'small', color: appStyle.mainColor }}
+            onPress={this.onDelete}
+          />
+        </View>)
     }
     return null
   }
@@ -242,21 +260,12 @@ class Detail extends Component {
             title="Save"
             buttonStyle={style.button}
             titleStyle={style.buttonTitle}
-            loading={AccountStore.isLoading}
-            loadingProps={{ size: 'small', color: appStyle.mainColor }}
+            // loading={AccountStore.isLoading}
+            // loadingProps={{ size: 'small', color: appStyle.mainColor }}
             onPress={this.onSave}
           />
         </View>
-        <View style={style.field}>
-          <Button
-            title="Delete"
-            buttonStyle={[style.button, { backgroundColor: appStyle.redColor }]}
-            titleStyle={style.buttonTitle}
-            loading={AccountStore.isDeleting}
-            loadingProps={{ size: 'small', color: appStyle.mainColor }}
-            onPress={this.onDelete}
-          />
-        </View>
+        {this.renderDelete()}
         {this.renderDate()}
       </KeyboardAvoidingView>
     )

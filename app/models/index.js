@@ -27,7 +27,7 @@ export const Account = types.model({
   // },
 
   updateDate(date) {
-    self.username = date.toString()
+    self.date = date
   },
 
   remove() {
@@ -42,8 +42,8 @@ export const Account = types.model({
 const AccountStore = types.model({
   items: types.array(Account),
   accessToken: '',
-  isLoading: false,
-  isDeleting: false,
+  // isLoading: false,
+  // isDeleting: false,
   isFetching: false
 }).views(self => ({
   get data() {
@@ -66,12 +66,8 @@ const AccountStore = types.model({
 
   setItem(json) {
     const result = JSON.parse(json)
-    // result.forEach((x) => {
-    //   // x.index = i
-    //   list.push(x)
-    // })
-    // filter list
-    self.items = result
+    // filter list descending order
+    self.items = result.sort((x, y) => y.date - x.date)
   },
 
   setToken(token) {
@@ -82,25 +78,25 @@ const AccountStore = types.model({
     self.isFetching = val
   },
 
-  showLoading(val) {
-    self.isLoading = val
-  },
+  // showLoading(val) {
+  //   self.isLoading = val
+  // },
 
-  showDeleting(val) {
-    self.isDeleting = val
-  },
+  // showDeleting(val) {
+  //   self.isDeleting = val
+  // },
 
   showMsg(msg) {
-    self.showLoading(false)
+    AppNav.hideLoading()
     const m = msg === undefined || msg === null || msg === '' ? 'Something went wrong.' : msg
     AppNav.showToast(m)
   },
 
   sendVerify(callback) {
-    self.showLoading(true)
+    AppNav.showLoading()
     firebase.auth().currentUser.sendEmailVerification().then(() => {
       // console.log('sendVerify done')
-      self.showLoading(false)
+      AppNav.hideLoading()
       callback()
     }).catch(() => {
       self.showMsg()
@@ -108,9 +104,10 @@ const AccountStore = types.model({
   },
 
   login(email, password, callback) {
-    self.showLoading(true)
+    AppNav.showLoading()
+
     firebase.auth().signInWithEmailAndPassword(email, password).then((data) => {
-      self.showLoading(false)
+      AppNav.hideLoading()
       // console.log('user: ', data.user)
       const emailVerified = data.user ? data.user.emailVerified : null
       // console.log('emailVerified: ', emailVerified)
@@ -127,7 +124,7 @@ const AccountStore = types.model({
 
   async signUp(name, email, password, callback) {
     if (AppState.internetConnect !== 'online') { return }
-    self.showLoading(true)
+    AppNav.showLoading()
     try {
       const { data } = await axios.post(`${constant.ROOT_URL}/signup`, { name, email, password })
       // console.log('data: ', data)
@@ -154,9 +151,9 @@ const AccountStore = types.model({
   },
 
   forgotPassword(email, callback) {
-    self.showLoading(true)
+    AppNav.showLoading()
     firebase.auth().sendPasswordResetEmail(email).then(() => {
-      self.showLoading(false)
+      AppNav.hideLoading()
       callback()
     }).catch(() => {
       // console.log(err)
@@ -197,7 +194,7 @@ const AccountStore = types.model({
       self.showMsg('Link is required.')
       return
     }
-     
+
     console.log(`OK Pressed: ${url}`)
     // console.log('import: ', token, data)
     self.importData(url, self.token, self.data)
@@ -319,23 +316,26 @@ const AccountStore = types.model({
     return self.data.filter(x => _.includes(x.name, val) || _.includes(x.username, val))
   },
 
-  async saveData(model:Account, isShowNotify = true) {
+  async saveData(item:Account, isShowNotify = true) {
     // TODO: check duplicate
 
-    self.showLoading(true)
-    console.log('data: ', model.id)
-
-    // const dateString = unixTimeStampToDateTime(timestamp)
-    // console.log('dateString: ', dateString)
-
-    const json = JSON.stringify(model)
-    console.log('json: ', json)
+    if (isShowNotify) { AppNav.showLoading() }
+    // console.log('data: ', item.id)
+    if (item.id === '') {
+      const date = new Date()
+      const timestamp = date.getTime()
+      item.updateDate(timestamp)
+    }
+    const json = JSON.stringify(item)
+    // console.log('json: ', json)
     if (json !== '') {
       const pw = await getPassword()
       // console.log('pw: ', pw)
       if (pw === '') {
-        self.showLoading(false)
-        if (isShowNotify) self.showMsg()
+        if (isShowNotify) {
+          AppNav.hideLoading()
+          self.showMsg()
+        }
         return
       }
       const data = encrypt(json, pw)
@@ -344,26 +344,25 @@ const AccountStore = types.model({
         // console.log('token: ', token)
         axios.post(`${constant.ROOT_URL}/save`, { token, data }).then((res) => {
           // console.log(res)
-          if (res.data.code === '1') {
-            AppNav.goBack()
-            if (isShowNotify) {
-              self.showMsg(`${model.id !== '' ? 'Edit' : 'Create'} success!`)
+          if (isShowNotify) {
+            if (res.data.code === '1') {
+              AppNav.goBack()
+              self.showMsg(`${item.id !== '' ? 'Edit' : 'Create'} success!`)
+            } else {
+              self.showMsg(res.data.msg)
             }
-          } else if (isShowNotify) {
-            self.showMsg(res.data.msg)
+            AppNav.hideLoading()
           }
-          self.showLoading(false)
         })
       })
     }
   },
 
-  async removeData(model:Account) {
-    self.showDeleting(true)
-    console.log('data: ', model.id)
- 
-    const json = JSON.stringify(model)
-    console.log('json: ', json)
+  async removeData(item:Account) {
+    AppNav.showLoading()
+    // console.log('data: ', item.id)
+    const json = JSON.stringify(item)
+    // console.log('json: ', json)
     if (json !== '') {
       const pw = await getPassword()
       // console.log('pw: ', pw)
@@ -377,14 +376,14 @@ const AccountStore = types.model({
       firebase.auth().currentUser.getIdToken().then((token) => {
         // console.log('token: ', token)
         axios.post(`${constant.ROOT_URL}/remove`, { token, data }).then((res) => {
-          console.log(res)
+          // console.log(res)
           if (res.data.code === '1') {
             AppNav.goBack()
-            self.showMsg('Delete success!') 
+            self.showMsg('Delete success!')
           } else {
             self.showMsg(res.data.msg)
           }
-          self.showDeleting(false)
+          AppNav.hideLoading()
         })
       })
     }

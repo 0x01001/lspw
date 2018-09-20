@@ -35,9 +35,16 @@ class MenuLeft extends Component {
             </Text>
             <View style={styles.navSectionStyle}>
               <Icon name="database-import" size={20} />
-              <Text style={styles.navItemStyle} onPress={this.showImport}>Import Data</Text>
+              <Text style={styles.navItemStyle} onPress={this.showImport}>Import data</Text>
             </View>
-
+            <View style={styles.navSectionStyle}>
+              <Icon name="lock-outline" size={20} />
+              <Text style={styles.navItemStyle}>Change password</Text>
+            </View>
+            <View style={styles.navSectionStyle}>
+              <Icon name="fingerprint" size={20} />
+              <Text style={styles.navItemStyle}>Change pincode</Text>
+            </View>
           </View>
         </ScrollView>
 

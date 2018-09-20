@@ -9,10 +9,8 @@ import {
   TouchableWithoutFeedback
 } from 'react-native'
 import { Button } from 'react-native-elements'
-// import { connect } from 'react-redux'
 import { observer } from 'mobx-react'
 
-// import { login, reset } from '../actions'
 import appStyle from '../utils/app_style'
 import style from '../utils/style_sheet'
 import { TextInput, Logo } from '../components/common'
@@ -57,7 +55,7 @@ class Login extends Component {
 
   submitPress = () => {
     const { email, password } = this.state
-    const { isLoading } = AccountStore
+    // const { isLoading } = AccountStore
     let check = false
     if (!email) {
       this.setState({ emailError: !email ? 'This field is required' : '' })
@@ -67,7 +65,8 @@ class Login extends Component {
       this.setState({ passwordError: !password ? 'This field is required' : '' })
       check = true
     }
-    if (check || isLoading) {
+    // if (check || isLoading) {
+    if (check) {
       return
     }
     Keyboard.dismiss()
@@ -83,7 +82,7 @@ class Login extends Component {
       emailError: '',
       passwordError: ''
     })
-    AccountStore.showLoading(false)
+    AppNav.hideLoading()
   };
 
   _keyboardDidShow(e) {
@@ -128,7 +127,7 @@ class Login extends Component {
     const {
       email, password, emailError, passwordError
     } = this.state
-    const { isLoading } = AccountStore
+    // const { isLoading } = AccountStore
     return (
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -161,8 +160,8 @@ class Login extends Component {
             title="Log In"
             buttonStyle={style.button}
             titleStyle={style.buttonTitle}
-            loading={isLoading}
-            loadingProps={{ size: 'small', color: appStyle.mainColor }}
+            // loading={isLoading}
+            // loadingProps={{ size: 'small', color: appStyle.mainColor }}
             onPress={this.submitPress}
           />
         </View>
@@ -181,13 +180,4 @@ class Login extends Component {
   }
 }
 
-// const mapStateToProps = state => ({
-//   error: state.auth.error,
-//   loading: state.auth.loading
-// })
-
 export default Login
-// export default connect(
-//   mapStateToProps,
-//   { login, reset }
-// )(Login)

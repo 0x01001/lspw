@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { View, Text, StyleSheet } from 'react-native'
 import PropTypes from 'prop-types'
 import { Button } from 'react-native-elements'
+// import Modal from 'react-native-modal'
 import style from '../../utils/style_sheet'
 import appStyle from '../../utils/app_style'
 import { TextInput } from '../../components/common'
@@ -86,7 +87,7 @@ class ImportPopup extends Component {
       return null
     }
     return (
-      <View style={styles.wrapper}>       
+      <View style={styles.wrapper}>
         {/* <Modal
           isVisible={visible}
           onBackdropPress={() => this.setState({ visible: false })}

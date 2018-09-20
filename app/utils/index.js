@@ -1,5 +1,8 @@
 import * as Keychain from 'react-native-keychain'
 import firebase from 'firebase'
+import { Clipboard } from 'react-native'
+
+import AccountStore from '../models'
 
 const CryptoJS = require('crypto-js')
 
@@ -121,11 +124,23 @@ export const unixTimeStampToDateTime = (timestamp) => {
   return dateString
 }
 
+export const writeToClipboard = async (item) => {
+  await Clipboard.setString(item.password)
+  AccountStore.showMsg(`Password of '${item.username}' from <${item.name}> copied.`)
+  // alert('Copied to Clipboard!')
+  const date = new Date()
+  const timestamp = date.getTime()
+  // console.log('timestamp: ', timestamp)
+  item.updateDate(timestamp)
+  AccountStore.saveData(item, false)
+}
+
 export default {
   encrypt,
   decrypt,
   extractDomain,
   getGoogleSheetData,
   getPassword,
-  unixTimeStampToDateTime
+  unixTimeStampToDateTime,
+  writeToClipboard
 }

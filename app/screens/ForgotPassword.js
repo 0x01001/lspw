@@ -100,7 +100,7 @@ class ForgotPassword extends Component {
 
   render() {
     const { email, emailErrorMessage, isShowVerify } = this.state
-    const { isLoading } = AccountStore
+    // const { isLoading } = AccountStore
     if (isShowVerify) {
       return (
         <View style={style.container}>
@@ -117,8 +117,8 @@ class ForgotPassword extends Component {
               title={`Send ${this.countdown >= 0 ? `(${this.countdown}s)` : ''}`}
               buttonStyle={style.button}
               titleStyle={style.buttonTitle}
-              loading={isLoading}
-              loadingProps={{ size: 'small', color: appStyle.mainColor }}
+              // loading={isLoading}
+              // loadingProps={{ size: 'small', color: appStyle.mainColor }}
               onPress={this.submitAgainPress}
             />
           </View>
@@ -154,8 +154,8 @@ class ForgotPassword extends Component {
             title="Send"
             buttonStyle={style.button}
             titleStyle={style.buttonTitle}
-            loading={isLoading}
-            loadingProps={{ size: 'small', color: appStyle.mainColor }}
+            // loading={isLoading}
+            // loadingProps={{ size: 'small', color: appStyle.mainColor }}
             onPress={this.submitPress}
           />
         </View>

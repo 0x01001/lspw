@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import { View, Text, TouchableOpacity, StyleSheet, LayoutAnimation, FlatList, Animated, PanResponder, Image, Clipboard } from 'react-native'
 import { Button, Icon, Divider, ListItem } from 'react-native-elements'
-import * as Keychain from 'react-native-keychain'
 import { Toolbar, ActionButton } from 'react-native-material-ui'
 import _ from 'lodash'
 import { observer } from 'mobx-react'
@@ -12,6 +11,7 @@ import style from '../utils/style_sheet'
 import appStyle from '../utils/app_style'
 import AppNav from '../AppNav'
 import AccountStore from '../models'
+import { writeToClipboard } from '../utils'
 
 const marginTop = layout.getExtraTop()
 
@@ -91,17 +91,6 @@ class Home extends Component {
     // console.log('------> ', arrPush, arrUpdate);
   };
 
-  writeToClipboard = async ({ item }) => {
-    await Clipboard.setString(item.password)
-    AccountStore.showMsg(`Password of '${item.username}' from <${item.name}> copied.`)
-    // alert('Copied to Clipboard!')
-    const date = new Date()
-    const timestamp = date.getTime()
-    console.log('timestamp: ', timestamp)
-    item.updateDate(timestamp)
-    AccountStore.saveData(item, false)
-  };
-
   // renderAvatar = async (name) => {
   //   try {
   //     const url = `https://www.google.com/s2/favicons?domain=${name}`
@@ -160,7 +149,7 @@ class Home extends Component {
       }}
       rightIcon={{ name: 'chevron-right', color: appStyle.mainColor }}
       onPress={() => AppNav.pushToScreen('detail', { title: item.name, item })}
-      onLongPress={() => this.writeToClipboard({ item })}
+      onLongPress={() => writeToClipboard(item)}
       bottomDivider
     />
   )
@@ -217,7 +206,7 @@ class Home extends Component {
           rightElement={{
             menu: {
               icon: 'more-vert',
-              labels: ['item 1', 'item 2']
+              labels: ['Import', 'Export', 'Delete All']
             }
           }}
           searchable={{
