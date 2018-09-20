@@ -10,6 +10,11 @@ class MenuLeft extends Component {
     AccountStore.googleSignin()
   }
 
+  showPincode = () => {
+    AppNav.closeMenu()
+    AppNav.pushToScreen('unlockStack')
+  }
+
   logout = () => {
     AppNav.closeMenu()
     AccountStore.signOut()
@@ -43,7 +48,7 @@ class MenuLeft extends Component {
             </View>
             <View style={styles.navSectionStyle}>
               <Icon name="fingerprint" size={20} />
-              <Text style={styles.navItemStyle}>Change pincode</Text>
+              <Text style={styles.navItemStyle} onPress={this.showPincode}>Change pincode</Text>
             </View>
           </View>
         </ScrollView>

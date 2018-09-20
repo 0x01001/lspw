@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, StatusBar, NetInfo } from 'react-native'
+import { View, NetInfo } from 'react-native'
 import Toast from './app/components/common/Toast'
 
 import Router from './app/Router'
@@ -54,7 +54,6 @@ export default class App extends Component<Props> {
   render() {
     return (
       <View style={{ flex: 1, backgroundColor: appStyle.backgroundColor }}>
-        <StatusBar backgroundColor="transparent" barStyle="light-content" translucent />
         {this.renderContent()}
         {/* <ImportPopup ref={(ref) => { AppNav.import = ref }} /> */}
         <Notify ref={(ref) => { AppNav.notify = ref }} />

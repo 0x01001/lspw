@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Animated, Easing, View, TouchableOpacity } from 'react-native'
+import { Animated, Easing, View, TouchableOpacity, StatusBar, StyleSheet } from 'react-native'
 import { createDrawerNavigator, createStackNavigator } from 'react-navigation'
 import Icon from 'react-native-vector-icons/SimpleLineIcons'
 
@@ -12,6 +12,9 @@ import appStyle from './utils/app_style'
 import Layout from './utils/layout'
 import MenuLeft from './components/home/MenuLeft'
 import AppNav from '../app/AppNav'
+import Unlock from '../app/screens/Unlock'
+
+const top = Layout.getExtraTopAndroid()
 
 class Router extends Component {
   renderContent = () => {
@@ -39,11 +42,7 @@ class Router extends Component {
 
     const navigationOptions = ({ navigation }) => ({
       headerLeft: (
-        <TouchableOpacity onPress={() => {
-          // AccountStore.showLoading(false)
-          navigation.goBack()
-        }}
-        >
+        <TouchableOpacity onPress={() => { navigation.goBack() }}>
           <Icon name="arrow-left" size={25} style={{ color: appStyle.mainColor, padding: 10 }} />
         </TouchableOpacity>
       ),
@@ -51,10 +50,10 @@ class Router extends Component {
         backgroundColor: appStyle.backgroundColor,
         elevation: 0,
         shadowColor: 'transparent',
-        paddingTop: Layout.getExtraTopAndroid()
+        marginTop: top
       },
       headerLeftContainerStyle: {
-        paddingLeft: 45
+        paddingLeft: 10 // 45
       }
     })
 
@@ -86,7 +85,13 @@ class Router extends Component {
           header: null
         }
       },
-      detail: { screen: Detail }
+      detail: { screen: Detail },
+      unlockStack: {
+        screen: Unlock,
+        navigationOptions: {
+          header: null
+        }
+      }
     }, {
       navigationOptions,
       transitionConfig
@@ -112,11 +117,18 @@ class Router extends Component {
 
   render() {
     return (
-      <View style={{ flex: 1 }}>
+      <View style={styles.content}>
+        <StatusBar backgroundColor={appStyle.backgroundColor} barStyle="light-content" translucent />
         {this.renderContent()}
       </View>
     )
   }
 }
+
+const styles = StyleSheet.create({
+  content: {
+    flex: 1
+  }
+})
 
 export default Router

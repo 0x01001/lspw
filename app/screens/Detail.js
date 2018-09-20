@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import {
   View, KeyboardAvoidingView, StyleSheet, Platform, Text, Keyboard, TouchableOpacity,
-  StatusBar, Dimensions, Alert
+  Dimensions, Alert
 } from 'react-native'
 import PropTypes from 'prop-types'
 import { observer } from 'mobx-react'
@@ -25,7 +25,7 @@ class Detail extends Component {
      title: navigation.state.params.title || (navigation.state.params.item ? 'Edit' : 'Create'),
      headerStyle: {
        backgroundColor: appStyle.buttonBackgroundColor,
-       marginVertical: top
+       marginTop: top
      },
      headerLeft: (
        <TouchableOpacity onPress={() => { AppNav.goBack() }}>
@@ -137,6 +137,7 @@ class Detail extends Component {
     const data = Account.create({
       id, name, url, username, password, desc, date
     })
+    Keyboard.dismiss()
     AccountStore.saveData(data)
   }
 
@@ -204,8 +205,6 @@ class Detail extends Component {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={[style.container, styles.content]}
       >
-        <StatusBar backgroundColor={appStyle.backgroundColor} barStyle="light-content" translucent />
-
         <View style={style.field}>
           <TextInput
             // multiline={true}
@@ -276,7 +275,7 @@ const styles = StyleSheet.create({
   content: {
     justifyContent: 'flex-start',
     flexDirection: 'column',
-    marginTop: -top,
+    // marginTop: -top,
     paddingTop: 10
   },
   dateContainer: {
