@@ -14,7 +14,7 @@ import { observer } from 'mobx-react'
 import appStyle from '../utils/app_style'
 import style from '../utils/style_sheet'
 import { TextInput, Logo } from '../components/common'
-import AccountStore from '../models'
+import AccountStore from '../models/AccountStore'
 import AppNav from '../AppNav'
 
 @observer
@@ -137,6 +137,7 @@ class Login extends Component {
 
         <View style={style.field}>
           <TextInput
+            keyboardType="email-address"
             placeholderText="Email"
             leftIconName="email-outline"
             errorMessage={emailError}

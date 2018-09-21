@@ -85,13 +85,7 @@ class Router extends Component {
           header: null
         }
       },
-      detail: { screen: Detail },
-      unlockStack: {
-        screen: Unlock,
-        navigationOptions: {
-          header: null
-        }
-      }
+      detail: { screen: Detail }
     }, {
       navigationOptions,
       transitionConfig
@@ -106,9 +100,16 @@ class Router extends Component {
 
     const Nav = createStackNavigator({
       loginStack: { screen: AuthNav },
-      mainStack: { screen: MainNav }
+      mainStack: { screen: MainNav },
+      unlockStack: {
+        screen: Unlock,
+        navigationOptions: {
+          header: null
+        }
+      }
     }, {
       // Default config for all screens
+      mode: 'card',
       headerMode: 'none',
       initialRouteName: 'loginStack'
     })

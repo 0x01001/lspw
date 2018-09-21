@@ -10,7 +10,7 @@ import AppState from './app/AppState'
 // import ImportPopup from './app/components/home/ImportPopup'
 import appStyle from './app/utils/app_style'
 import Notify from './app/components/common/Notify'
-import AccountStore from './app/models'
+import AccountStore from './app/models/AccountStore'
 
 type Props = {};
 export default class App extends Component<Props> {
@@ -24,7 +24,7 @@ export default class App extends Component<Props> {
       if (user && user.emailVerified) {
         this.setState({ isSignIn: true })
         AccountStore.load()
-        AppNav.reset()
+        AppNav.reset('mainStack')
       } else {
         this.setState({ isSignIn: false })
       }

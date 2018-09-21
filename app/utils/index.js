@@ -2,7 +2,7 @@ import * as Keychain from 'react-native-keychain'
 import firebase from 'firebase'
 import { Clipboard } from 'react-native'
 
-import AccountStore from '../models'
+import AccountStore from '../models/AccountStore'
 
 const CryptoJS = require('crypto-js')
 

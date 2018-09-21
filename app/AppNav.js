@@ -90,7 +90,7 @@ class ObservableNav {
     }))
   }
 
-  @action reset() {
+  @action reset(routeName, params = null) {
     // const resetAction = {
     //   type: NavigationActions.NAVIGATE,
     //   routeName: 'mainStack',
@@ -104,7 +104,7 @@ class ObservableNav {
     const resetAction = StackActions.reset({
       index: 0,
       key: null, // black magic
-      actions: [NavigationActions.navigate({ routeName: 'mainStack' })]
+      actions: [NavigationActions.navigate({ routeName, params })]
     })
     this.navigator.dispatch(resetAction)
   }

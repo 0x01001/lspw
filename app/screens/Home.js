@@ -10,7 +10,7 @@ import layout from '../utils/layout'
 import style from '../utils/style_sheet'
 import appStyle from '../utils/app_style'
 import AppNav from '../AppNav'
-import AccountStore from '../models'
+import AccountStore from '../models/AccountStore'
 import { writeToClipboard } from '../utils'
 
 const marginTop = layout.getExtraTop()

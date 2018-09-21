@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { ScrollView, Text, View, StyleSheet } from 'react-native'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
-import AccountStore from '../../models'
+import AccountStore from '../../models/AccountStore'
 import AppNav from '../../AppNav'
 
 class MenuLeft extends Component {
@@ -12,7 +12,8 @@ class MenuLeft extends Component {
 
   showPincode = () => {
     AppNav.closeMenu()
-    AppNav.pushToScreen('unlockStack')
+    const data = { title: 'Set screen lock', description: 'For security, set PIN code' }
+    AppNav.reset('unlockStack', data)
   }
 
   logout = () => {

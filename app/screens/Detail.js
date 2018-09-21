@@ -12,7 +12,7 @@ import IconMaterialCommunity from 'react-native-vector-icons/MaterialCommunityIc
 import appStyle from '../utils/app_style'
 import style from '../utils/style_sheet'
 import { TextInput } from '../components/common'
-import AccountStore, { Account } from '../models'
+import AccountStore, { Account } from '../models/AccountStore'
 import layout from '../utils/layout'
 import AppNav from '../AppNav'
 import { extractDomain, unixTimeStampToDateTime, writeToClipboard } from '../utils'
