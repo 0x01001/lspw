@@ -6,17 +6,17 @@ import {
   KeyboardAvoidingView,
   StatusBar,
   Text,
-  Animated,
-  TouchableOpacity
+  BackHandler
 } from 'react-native'
 import { observer } from 'mobx-react/native'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
-import PropTypes from 'prop-types'
 
 import appStyle from '../utils/app_style'
 import style from '../utils/style_sheet'
 import { TextInput } from '../components/common'
-import PincodeStore from '../models/PincodeStore'
+import PinCodeStore from '../models/PinCodeStore'
+import AccountStore from '../models/AccountStore'
+import AppNav from '../AppNav'
 
 @observer
 export default class Unlock extends Component {
@@ -25,12 +25,20 @@ export default class Unlock extends Component {
     pinCodeError: ''
   }
 
-  static propTypes = {
-    navigation: PropTypes.object
+  componentDidMount() {
+    BackHandler.addEventListener('hardwareBackPress', this.handleBackPress)
   }
 
-  static defaultProps = {
-    navigation: {}
+  componentWillUnmount() {
+    BackHandler.removeEventListener('hardwareBackPress', this.handleBackPress)
+  }
+
+  handleBackPress = () => {
+    if (PinCodeStore.type === 0 || PinCodeStore.type === 1) {
+      AppNav.reset('mainStack')
+    }
+    // TODO: show popup quit
+    return true
   }
 
   onChangeText = (key, val) => {
@@ -38,13 +46,89 @@ export default class Unlock extends Component {
   };
 
   onSubmitEditing = () => {
-    console.log('done: ', this.state.pinCode)
+    // console.log(`onSubmitEditing: ${this.state.pinCode} - ${PinCodeStore.oldPinCode} - ${PinCodeStore.confirmPinCode}
+    // - ${PinCodeStore.pinCode} - ${PinCodeStore.type} - ${PinCodeStore.step}`)
+    if (this.state.pinCode === '') {
+      this.setState({ pinCodeError: 'This field is required' })
+      return
+    }
+
+    let check = false
+    const msg = 'PIN code don\'t match'
+    switch (PinCodeStore.type) {
+      case 0: // create
+        switch (PinCodeStore.step) {
+          case 1:
+            PinCodeStore.setConfirmPinCodePinCode(this.state.pinCode)
+            break
+          case 2:
+            if (this.state.pinCode !== PinCodeStore.confirmPinCode) {
+              check = true
+              this.setState({ pinCodeError: msg })
+            }
+            break
+          default:
+            break
+        }
+        break
+      case 1: // change
+        switch (PinCodeStore.step) {
+          case 0:
+            if (this.state.pinCode !== PinCodeStore.pinCode) {
+              check = true
+              this.setState({ pinCodeError: msg })
+            }
+            break
+          case 1:
+            PinCodeStore.setConfirmPinCodePinCode(this.state.pinCode)
+            break
+          case 2:
+            if (this.state.pinCode !== PinCodeStore.confirmPinCode) {
+              check = true
+              this.setState({ pinCodeError: msg })
+            }
+            break
+          default:
+            break
+        }
+        break
+      case 2: // unlock
+        if (this.state.pinCode !== PinCodeStore.pinCode) {
+          check = true
+          this.setState({ pinCodeError: msg })
+        }
+        break
+
+      default:
+        break
+    }
+    if (check) {
+      return
+    }
+    if (PinCodeStore.type === 2) {
+      let count = 0
+      AppNav.showLoading()
+      AccountStore.load(() => {
+        // console.log('load data 2')
+        if (count === 0) {
+          // console.log('hideLoading 2')
+          AppNav.hideLoading()
+          count++
+          AppNav.reset('mainStack')
+        }
+      })
+    } else if (PinCodeStore.step < 2) {
+      PinCodeStore.setStep(PinCodeStore.step + 1)
+      this.setState({ pinCode: '', pinCodeError: '' })
+    } else {
+      PinCodeStore.updatePinCode(this.state.pinCode)
+    }
   }
 
   render() {
+    const { title, description } = PinCodeStore
     const { pinCode, pinCodeError } = this.state
-    const { title, description } = this.props.navigation.state.params
-    // console.log('title: ', title, description)
+    // console.log(`title: ${title} - ${description}`)
     return (
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -63,12 +147,12 @@ export default class Unlock extends Component {
             autoFocus={true}
             keyboardType="numeric"
             secureTextEntry={true}
-            inputStyle={{ marginLeft: 0, textAlign: 'center' }}
+            inputStyle={{ marginLeft: 0, textAlign: 'center', fontSize: 16 }}
             errorMessage={pinCodeError}
             value={pinCode}
             onChangeText={val => this.onChangeText('pinCode', val)}
             onSubmitEditing={this.onSubmitEditing}
-            returnKeyType="next"
+            blurOnSubmit={false}
           />
         </View>
       </KeyboardAvoidingView>

@@ -26,6 +26,10 @@ class Home extends Component {
   @observable
   dataSearch = [];
 
+  componentWillUpdate() {
+    LayoutAnimation.spring()
+  }
+
   test = () => {
     const currentData = [{
       uid: '1', url: 'a1.com', username: 'test1', password: '123', desc: '1'
@@ -169,23 +173,21 @@ class Home extends Component {
     return null
   }
 
-  renderContent = () => {
-    if (AccountStore.isFetching) {
-      return (<View style={styles.content}><Text style={{ color: appStyle.mainColor, fontSize: 18 }}>Loading...</Text></View>)
-    }
-    return (
-      <View style={{ flex: 1 }}>
-        {this.renderResultSearch()}
-        <FlatList
-          data={this.isSearching ? this.dataSearch : AccountStore.data}
-          renderItem={this.renderItem}
-          keyExtractor={(x, i) => x.id}
-          ListEmptyComponent={this.renderEmptyContent}
-          contentContainerStyle={[{ flexGrow: 1 }, this.isSearching && this.dataSearch.length === 0 ? { justifyContent: 'center' } : AccountStore.data.length ? null : { justifyContent: 'center' }]}
-        />
-      </View>
-    )
-  }
+  renderContent = () => (
+    // if (AccountStore.isFetching) {
+    //   return (<View style={styles.content}><Text style={{ color: appStyle.mainColor, fontSize: 18 }}>Loading...</Text></View>)
+    // }
+    <View style={{ flex: 1 }}>
+      {this.renderResultSearch()}
+      <FlatList
+        data={this.isSearching ? this.dataSearch : AccountStore.data}
+        renderItem={this.renderItem}
+        keyExtractor={(x, i) => x.id}
+        ListEmptyComponent={this.renderEmptyContent}
+        contentContainerStyle={[{ flexGrow: 1 }, this.isSearching && this.dataSearch.length === 0 ? { justifyContent: 'center' } : AccountStore.data.length ? null : { justifyContent: 'center' }]}
+      />
+    </View>
+  )
 
   render() {
     return (

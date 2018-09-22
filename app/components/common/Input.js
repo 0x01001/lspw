@@ -7,6 +7,7 @@ import style from '../../utils/style_sheet'
 import appStyle from '../../utils/app_style'
 
 const TextInput = ({
+  blurOnSubmit,
   inputStyle,
   containerStyle,
   keyboardType,
@@ -26,6 +27,7 @@ const TextInput = ({
   returnKeyType
 }) => (
   <Input
+    blurOnSubmit={blurOnSubmit}
     keyboardType={keyboardType || 'default'}
     autoFocus={autoFocus}
     label={label}

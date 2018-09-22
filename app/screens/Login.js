@@ -70,9 +70,7 @@ class Login extends Component {
       return
     }
     Keyboard.dismiss()
-    AccountStore.login(email, password, () => {
-      this.reset()
-    })
+    AccountStore.login(email, password)
   };
 
   reset = () => {
@@ -82,7 +80,6 @@ class Login extends Component {
       emailError: '',
       passwordError: ''
     })
-    AppNav.hideLoading()
   };
 
   _keyboardDidShow(e) {

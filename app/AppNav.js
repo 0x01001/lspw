@@ -61,23 +61,6 @@ class ObservableNav {
     this.navigator.dispatch(DrawerActions.openDrawer())
   }
 
-  // const prevGetStateForAction = this.navigator.router.getStateForAction;
-
-  // this.navigator.router.getStateForAction = (action, state) => {
-  //   // Do not allow to go back from Home
-  //   if (action.type === 'Navigation/BACK' && state && state.routes[state.index].routeName === 'home') {
-  //     return null;
-  //   }
-
-  //   // Do not allow to go back to Login
-  //   if (action.type === 'Navigation/BACK' && state) {
-  //     const newRoutes = state.routes.filter(r => r.routeName !== 'loginStack');
-  //     const newIndex = newRoutes.length - 1;
-  //     return prevGetStateForAction(action, { index: newIndex, routes: newRoutes });
-  //   }
-  //   return prevGetStateForAction(action, state);
-  // };
-
   @action
   goBack() {
     this.navigator.dispatch(NavigationActions.back())
@@ -101,6 +84,7 @@ class ObservableNav {
     //   }
     // }
     // this.navigator.dispatch(resetAction)
+
     const resetAction = StackActions.reset({
       index: 0,
       key: null, // black magic
@@ -108,6 +92,23 @@ class ObservableNav {
     })
     this.navigator.dispatch(resetAction)
   }
+
+  // const prevGetStateForAction = this.navigator.router.getStateForAction;
+
+  // this.navigator.router.getStateForAction = (action, state) => {
+  //   // Do not allow to go back from Home
+  //   if (action.type === 'Navigation/BACK' && state && state.routes[state.index].routeName === 'home') {
+  //     return null;
+  //   }
+
+  //   // Do not allow to go back to Login
+  //   if (action.type === 'Navigation/BACK' && state) {
+  //     const newRoutes = state.routes.filter(r => r.routeName !== 'loginStack');
+  //     const newIndex = newRoutes.length - 1;
+  //     return prevGetStateForAction(action, { index: newIndex, routes: newRoutes });
+  //   }
+  //   return prevGetStateForAction(action, state);
+  // };
 
   // @action reset() {
   //   // This will reset back to loginStack

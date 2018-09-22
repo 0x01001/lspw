@@ -11,6 +11,7 @@ import AppState from './app/AppState'
 import appStyle from './app/utils/app_style'
 import Notify from './app/components/common/Notify'
 import AccountStore from './app/models/AccountStore'
+import PinCodeStore from './app/models/PinCodeStore'
 
 type Props = {};
 export default class App extends Component<Props> {
@@ -22,10 +23,27 @@ export default class App extends Component<Props> {
 
     firebase.auth().onAuthStateChanged((user) => {
       if (user && user.emailVerified) {
-        this.setState({ isSignIn: true })
-        AccountStore.load()
-        AppNav.reset('mainStack')
+        PinCodeStore.getPinCode(() => {
+          if (!PinCodeStore.isUnlocked) {
+            PinCodeStore.setUnlock(true)
+            this.setState({ isSignIn: true })
+            AppNav.reset('unlockStack')
+          } else {
+            let count = 0
+            AccountStore.load(() => {
+              // console.log('load data 1')
+              if (count === 0) {
+                // console.log('hideLoading 1')
+                AppNav.hideLoading()
+                count++
+                this.setState({ isSignIn: true })
+                AppNav.reset('mainStack')
+              }
+            })
+          }
+        })
       } else {
+        // console.log('change.....')
         this.setState({ isSignIn: false })
       }
       // console.log('app: ', this.state.isSignIn, user)

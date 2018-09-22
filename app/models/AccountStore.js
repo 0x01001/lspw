@@ -32,19 +32,15 @@ export const Account = types.model({
 
   remove() {
     getRoot(self).remove(self)
-  },
-
-  update(model : Account) {
-    self = model
   }
 }))
 
 const AccountStore = types.model({
   items: types.array(Account),
-  accessToken: '',
+  accessToken: ''
   // isLoading: false,
   // isDeleting: false,
-  isFetching: false
+  // isFetching: false
 }).views(self => ({
   get data() {
     return self.items
@@ -103,17 +99,15 @@ const AccountStore = types.model({
     })
   },
 
-  login(email, password, callback) {
+  login(email, password) {
     AppNav.showLoading()
 
     firebase.auth().signInWithEmailAndPassword(email, password).then((data) => {
-      AppNav.hideLoading()
       // console.log('user: ', data.user)
       const emailVerified = data.user ? data.user.emailVerified : null
       // console.log('emailVerified: ', emailVerified)
       if (emailVerified) {
         saveInfo({ email, password })
-        callback()
       } else {
         self.showMsg('Your account is not activated.')
       }
@@ -162,8 +156,7 @@ const AccountStore = types.model({
   },
 
   // -----------------------------------------------
-  async load() {
-    self.setFetch(true)
+  async load(callback) {
     const { currentUser } = firebase.auth()
     const pw = await getPassword()
     if (pw === '') {
@@ -171,7 +164,7 @@ const AccountStore = types.model({
       return
     }
     firebase.database().ref(`/data/${currentUser.uid}/b`).on('value', (snapshot) => {
-      self.setFetch(false)
+      AppNav.hideLoading()
       try {
         const data = snapshot.val()
         console.log('load: ', data)
@@ -181,6 +174,9 @@ const AccountStore = types.model({
           self.setItem(json)
         } else {
           self.reset()
+        }
+        if (callback) {
+          callback()
         }
       } catch (err) {
         console.log('load: ', err)

@@ -109,7 +109,7 @@ class Router extends Component {
       }
     }, {
       // Default config for all screens
-      mode: 'card',
+      mode: 'modal',
       headerMode: 'none',
       initialRouteName: 'loginStack'
     })
@@ -117,6 +117,7 @@ class Router extends Component {
   }
 
   render() {
+    // console.log('render change.....')
     return (
       <View style={styles.content}>
         <StatusBar backgroundColor={appStyle.backgroundColor} barStyle="light-content" translucent />
