@@ -24,8 +24,7 @@ export default class App extends Component<Props> {
     firebase.auth().onAuthStateChanged((user) => {
       if (user && user.emailVerified) {
         PinCodeStore.getPinCode(() => {
-          if (!PinCodeStore.isUnlocked) {
-            PinCodeStore.setUnlock(true)
+          if (PinCodeStore.pinCode !== '') {
             this.setState({ isSignIn: true })
             AppNav.reset('unlockStack')
           } else {
@@ -50,7 +49,7 @@ export default class App extends Component<Props> {
     })
 
     NetInfo.addEventListener('connectionChange', this.connectionChange)
-
+    // firebase.auth().signOut()
     console.disableYellowBox = true
   }
 

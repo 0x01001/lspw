@@ -2,14 +2,14 @@ import firebase from 'firebase'
 import axios from 'axios'
 import * as Keychain from 'react-native-keychain'
 import { types, getRoot, destroy } from 'mobx-state-tree'
-import { GoogleSignin } from 'react-native-google-signin'
+import { GoogleSignin, statusCodes } from 'react-native-google-signin'
 import _ from 'lodash'
 import prompt from 'react-native-prompt-android'
 
 import constant from '../utils/constant'
 import AppNav from '../AppNav'
 import AppState from '../AppState'
-import { encrypt, decrypt, getPassword, extractDomain, getGoogleSheetData } from '../utils'
+import { encrypt, decrypt, getPassword, savePassword, extractDomain, getGoogleSheetData } from '../utils'
 
 const uuidv4 = require('uuid/v4')
 
@@ -66,13 +66,13 @@ const AccountStore = types.model({
     self.items = result.sort((x, y) => y.date - x.date)
   },
 
-  setToken(token) {
-    self.accessToken = token
+  setToken(val) {
+    self.accessToken = val
   },
 
-  setFetch(val) {
-    self.isFetching = val
-  },
+  // setFetch(val) {
+  //   self.isFetching = val
+  // },
 
   // showLoading(val) {
   //   self.isLoading = val
@@ -105,9 +105,9 @@ const AccountStore = types.model({
     firebase.auth().signInWithEmailAndPassword(email, password).then((data) => {
       // console.log('user: ', data.user)
       const emailVerified = data.user ? data.user.emailVerified : null
-      // console.log('emailVerified: ', emailVerified)
+      // console.log('login emailVerified: ', emailVerified)
       if (emailVerified) {
-        saveInfo({ email, password })
+        savePassword(password)
       } else {
         self.showMsg('Your account is not activated.')
       }
@@ -128,7 +128,7 @@ const AccountStore = types.model({
           // console.log('token: ', token)
           firebase.auth().signInWithCustomToken(token).then(() => {
             self.sendVerify(callback)
-            saveInfo({ email, password })
+            savePassword(password)
           }).catch(() => {
             self.showMsg()
           })
@@ -363,7 +363,6 @@ const AccountStore = types.model({
       const pw = await getPassword()
       // console.log('pw: ', pw)
       if (pw === '') {
-        self.showDeleting(false)
         self.showMsg()
         return
       }
@@ -391,9 +390,8 @@ const AccountStore = types.model({
     try {
       await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true })
       const userInfo = await GoogleSignin.signIn()
-      // console.log(`token: ${userInfo.accessToken}`)
+      console.log(`token: ${userInfo.accessToken}`)
       self.setToken(userInfo.accessToken)
-      // AppNav.showImport()
       prompt(
         'Import Data',
         'Enter your link from google sheets\n\n(*) Automatic remove duplicates',
@@ -409,12 +407,24 @@ const AccountStore = types.model({
         }
       )
     } catch (error) {
-      self.showMsg()
+      console.log('error.code: ', error.code)
+
+      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+        // user cancelled the login flow
+      } else if (error.code === statusCodes.IN_PROGRESS) {
+        // operation (f.e. sign in) is in progress already
+      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        // play services not available or outdated
+      } else {
+        // some other error happened
+        self.showMsg()
+      }
     }
   },
 
   async signOut() {
     try {
+      AppNav.showLoading()
       const isSignedIn = await GoogleSignin.isSignedIn()
       // console.log('isSignedIn: ', isSignedIn)
       if (isSignedIn) {
@@ -423,6 +433,7 @@ const AccountStore = types.model({
       }
       await Keychain.resetGenericPassword()
       firebase.auth().signOut()
+      AppNav.hideLoading()
     } catch (error) {
       console.log(error)
       self.showMsg()
@@ -493,16 +504,5 @@ const getDataImport = async (id, token) => {
   } catch (error) {
     console.log('getDataImport: ', error)
     return []
-  }
-}
-
-const saveInfo = async ({ email, password }) => {
-  try {
-    // TODO: if pin code != null ? pinCode : uid;
-    const { uid } = firebase.auth().currentUser
-    const pw = encrypt(password, uid)
-    await Keychain.setGenericPassword(email, pw)
-  } catch (err) {
-    console.log(err)
   }
 }

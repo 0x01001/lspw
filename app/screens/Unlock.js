@@ -33,14 +33,6 @@ export default class Unlock extends Component {
     BackHandler.removeEventListener('hardwareBackPress', this.handleBackPress)
   }
 
-  handleBackPress = () => {
-    if (PinCodeStore.type === 0 || PinCodeStore.type === 1) {
-      AppNav.reset('mainStack')
-    }
-    // TODO: show popup quit
-    return true
-  }
-
   onChangeText = (key, val) => {
     this.setState({ [key]: val, [`${key}Error`]: !val ? 'This field is required' : '' })
   };
@@ -123,6 +115,15 @@ export default class Unlock extends Component {
     } else {
       PinCodeStore.updatePinCode(this.state.pinCode)
     }
+  }
+
+  handleBackPress = () => {
+    if (PinCodeStore.type === 0 || PinCodeStore.type === 1) {
+      AppNav.reset('mainStack')
+    } else {
+      BackHandler.exitApp()
+    }
+    return true
   }
 
   render() {

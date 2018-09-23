@@ -94,8 +94,17 @@ class Router extends Component {
     const MainNav = createDrawerNavigator({
       main: Main
     }, {
+      drawerBackgroundColor: 'rgba(49, 46, 63, 0.9)',
       headerMode: 'none',
-      contentComponent: MenuLeft
+      contentComponent: MenuLeft,
+      contentOptions: {
+        itemsContainerStyle: {
+          marginVertical: 0
+        },
+        iconContainerStyle: {
+          opacity: 0.5
+        }
+      }
     })
 
     const Nav = createStackNavigator({

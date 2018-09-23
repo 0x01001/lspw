@@ -3,6 +3,8 @@ import firebase from 'firebase'
 import { Clipboard } from 'react-native'
 
 import AccountStore from '../models/AccountStore'
+import PinCodeStore from '../models/PinCodeStore'
+import constant from './constant'
 
 const CryptoJS = require('crypto-js')
 
@@ -90,6 +92,17 @@ export const getGoogleSheetData = (list, i) => {
   return ''
 }
 
+export const savePassword = async (password) => {
+  try {
+    // TODO: if pin code != null ? pinCode : uid;
+    const { uid } = firebase.auth().currentUser
+    const pw = encrypt(password, uid)
+    await Keychain.setGenericPassword(constant.DATA_ENCRYPTED, pw)
+  } catch (err) {
+    console.log(err)
+  }
+}
+
 export const getPassword = async () => {
   try {
     const credentials = await Keychain.getGenericPassword()
@@ -105,6 +118,17 @@ export const getPassword = async () => {
   }
   return ''
 }
+
+// export const updatePassword = async (pincode) => {
+//   try {
+//     const pw = await getPassword()
+//     await savePassword(pw, pincode)
+//     console.log('No credentials stored.')
+//   } catch (err) {
+//     console.log(err)
+//   }
+//   return ''
+// }
 
 export const unixTimeStampToDateTime = (timestamp) => {
   const currentDate = new Date(timestamp)
@@ -140,7 +164,9 @@ export default {
   decrypt,
   extractDomain,
   getGoogleSheetData,
-  getPassword,
   unixTimeStampToDateTime,
-  writeToClipboard
+  writeToClipboard,
+  getPassword,
+  // updatePassword,
+  savePassword
 }

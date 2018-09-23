@@ -66,6 +66,11 @@ class ObservableNav {
     this.navigator.dispatch(NavigationActions.back())
   }
 
+  @action
+  goTop() {
+    this.navigator.dispatch(StackActions.popToTop())
+  }
+
   @action pushToScreen(routeName, params = null) {
     this.navigator.dispatch(NavigationActions.navigate({
       routeName,

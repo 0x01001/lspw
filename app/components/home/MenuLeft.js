@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { ScrollView, Text, View, StyleSheet } from 'react-native'
+import { ScrollView, Text, View, StyleSheet, findNodeHandle, Image } from 'react-native'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import { observer } from 'mobx-react/native'
 import prompt from 'react-native-prompt-android'
@@ -7,7 +7,11 @@ import prompt from 'react-native-prompt-android'
 import AccountStore from '../../models/AccountStore'
 import AppNav from '../../AppNav'
 import PinCodeStore from '../../models/PinCodeStore'
+import { Logo } from '../common'
+import Layout from '../../utils/layout'
+import appStyle from '../../utils/app_style'
 
+const top = Layout.getExtraTopAndroid()
 @observer
 class MenuLeft extends Component {
   showImport = () => {
@@ -20,6 +24,11 @@ class MenuLeft extends Component {
     AppNav.reset('unlockStack')
   }
 
+  homePress = () => {
+    AppNav.closeMenu()
+    AppNav.goTop()
+  }
+
   createPincode = () => {
     this.showPincode(0)
   }
@@ -28,17 +37,14 @@ class MenuLeft extends Component {
     this.showPincode(1)
   }
 
-  removePincode = (val) => {
-
-  }
-
   showPopupRemovePincode = () => {
+    AppNav.closeMenu()
     prompt(
       'Remove PIN code',
       'Enter your password to remove PIN code',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'OK', onPress: val => this.removePincode(val) }
+        { text: 'OK', onPress: val => PinCodeStore.removePinCode(val) }
       ],
       {
         type: 'secure-text',
@@ -61,7 +67,7 @@ class MenuLeft extends Component {
     if (PinCodeStore.pinCode === '') {
       return (
         <View style={styles.navSectionStyle}>
-          <Icon name="fingerprint" size={20} />
+          <Icon name="security-lock" size={20} color={appStyle.mainColor} />
           <Text style={styles.navItemStyle} onPress={this.createPincode}>Create pincode</Text>
         </View>
       )
@@ -69,11 +75,11 @@ class MenuLeft extends Component {
     return (
       <View>
         <View style={styles.navSectionStyle}>
-          <Icon name="fingerprint" size={20} />
+          <Icon name="lock-reset" size={20} color={appStyle.mainColor} />
           <Text style={styles.navItemStyle} onPress={this.changePincode}>Change pincode</Text>
         </View>
         <View style={styles.navSectionStyle}>
-          <Icon name="fingerprint" size={20} />
+          <Icon name="lock-open-outline" size={20} color={appStyle.mainColor} />
           <Text style={styles.navItemStyle} onPress={this.showPopupRemovePincode}>Remove pincode</Text>
         </View>
       </View>
@@ -83,31 +89,36 @@ class MenuLeft extends Component {
   render () {
     return (
       <View style={styles.container}>
+        <Logo styleCustom={{ marginBottom: 10, marginTop: 30 }} />
         <ScrollView>
-          <View>
-            <Text style={styles.sectionHeadingStyle}>
+          {/* <View>
+            <Text style={[styles.sectionHeadingStyle, { borderTopWidth: 1, borderTopColor: appStyle.borderColor }]}>
               Home
             </Text>
-          </View>
+          </View> */}
           <View>
-            <Text style={styles.sectionHeadingStyle}>
+            {/* <Text style={styles.sectionHeadingStyle}>
               Setting
-            </Text>
+            </Text> */}
+            <View style={[styles.navSectionStyle, { borderTopWidth: 1, borderTopColor: appStyle.borderColor }]}>
+              <Icon name="home" size={20} color={appStyle.mainColor} />
+              <Text style={styles.navItemStyle} onPress={this.homePress}>Home</Text>
+            </View>
             <View style={styles.navSectionStyle}>
-              <Icon name="database-import" size={20} />
+              <Icon name="database-import" size={20} color={appStyle.mainColor} />
               <Text style={styles.navItemStyle} onPress={this.showImport}>Import data</Text>
             </View>
             <View style={styles.navSectionStyle}>
-              <Icon name="lock-outline" size={20} />
+              <Icon name="lastpass" size={20} color={appStyle.mainColor} />
               <Text style={styles.navItemStyle}>Change password</Text>
             </View>
             {this.renderPinCode()}
           </View>
         </ScrollView>
 
-        <View style={styles.navSectionStyle}>
-          <Icon name="logout" size={20} />
-          <Text style={[styles.navItemStyle]} onPress={this.logout}>Logout</Text>
+        <View style={[styles.navSectionStyle, { borderTopWidth: 1, borderTopColor: appStyle.borderColor, backgroundColor: appStyle.buttonBackgroundColor }]}>
+          <Icon name="logout" size={20} color={appStyle.mainColor} />
+          <Text style={styles.navItemStyle} onPress={this.logout}>Logout</Text>
         </View>
 
       </View>
@@ -117,28 +128,29 @@ class MenuLeft extends Component {
 
 const styles = StyleSheet.create({
   container: {
-    paddingTop: 20,
     flex: 1
   },
   navItemStyle: {
     paddingTop: 15,
     paddingBottom: 15,
     paddingLeft: 10,
-    flex: 1
+    flex: 1,
+    color: appStyle.mainColor
   },
   navSectionStyle: {
-    backgroundColor: 'lightgrey',
     flexDirection: 'row',
     alignItems: 'center',
-    paddingLeft: 10
-  },
-  sectionHeadingStyle: {
-    paddingVertical: 10,
-    paddingHorizontal: 10
-  },
-  footerContainer: {
-    backgroundColor: 'lightgrey'
+    paddingLeft: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: appStyle.borderColor
   }
+  // sectionHeadingStyle: {
+  //   paddingVertical: 15,
+  //   paddingHorizontal: 10,
+  //   color: appStyle.mainColor,
+  //   borderBottomWidth: 1,
+  //   borderBottomColor: appStyle.borderColor
+  // }
 })
 
 export default MenuLeft

@@ -21,5 +21,6 @@ export default {
 
   AUTH_LOADING: 'auth_loading',
   MAIN_LOADING: 'main_loading',
-  RESET: 'reset'
+  RESET: 'reset',
+  DATA_ENCRYPTED: 'data_encrypted'
 }

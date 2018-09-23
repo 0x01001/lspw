@@ -1,7 +1,11 @@
 import { types } from 'mobx-state-tree'
 import firebase from 'firebase'
+import axios from 'axios'
+
 import AppState from '../AppState'
 import AppNav from '../AppNav'
+import constant from '../utils/constant'
+import { encrypt, getPassword } from '../utils'
 
 const PinCodeStore = types.model({
   title: '',
@@ -9,17 +13,13 @@ const PinCodeStore = types.model({
   type: 0, // 0: cerate pin code (2)  1: change pin code (3) 2: unlock (1)
   step: 0,
   pinCode: '',
-  isUnlocked: false,
   oldPinCode: '',
   confirmPinCode: ''
+
 }).actions(self => ({
 
   setPinCode(val) {
     self.pinCode = val
-  },
-
-  setUnlock(val) {
-    self.isUnlocked = val
   },
 
   setType(val) {
@@ -64,15 +64,21 @@ const PinCodeStore = types.model({
     self.confirmPinCode = val
   },
 
+  showMsg(msg) {
+    AppNav.hideLoading()
+    const m = msg === undefined || msg === null || msg === '' ? 'Something went wrong.' : msg
+    AppNav.showToast(m)
+  },
+
   getPinCode(callback) {
-    // AppNav.showLoading()
     const { currentUser } = firebase.auth()
     firebase.database().ref(`/data/${currentUser.uid}/e`).once('value', (snapshot) => {
-      const data = snapshot.val()
-      console.log('getPinCode: ', data)
-      if (data && !self.isUnlocked) { // check login = user khac
+      const pincode = snapshot.val()
+      console.log('getPinCode: ', pincode)
+      if (pincode) {
+        // await updatePassword(pincode)
         AppNav.hideLoading()
-        self.setPinCode(data)
+        self.setPinCode(pincode)
         self.setType(2)
       }
       callback()
@@ -82,15 +88,39 @@ const PinCodeStore = types.model({
   updatePinCode(pincode) {
     if (AppState.internetConnect !== 'online') { return }
     AppNav.showLoading()
+
     const { currentUser } = firebase.auth()
     firebase.database().ref(`/data/${currentUser.uid}`).update({ e: pincode })
       .then(() => {
+        // await updatePassword(pincode)
         AppNav.hideLoading()
         self.setPinCode(pincode)
         AppNav.reset('mainStack')
         self.showMsg(`${self.type === 0 ? 'Create' : 'Update'} PIN code success.`)
       })
       .catch(() => { self.showMsg() })
+  },
+
+  removePinCode(pw) {
+    if (!pw) {
+      self.showMsg('Password is required.')
+      return
+    }
+    AppNav.showLoading()
+    const password = encrypt(pw, self.pinCode)
+    firebase.auth().currentUser.getIdToken().then((token) => {
+      // console.log('token: ', token)
+      axios.post(`${constant.ROOT_URL}/removepincode`, { token, password }).then((res) => {
+        // console.log(res)
+        if (res.data.code === '1') {
+          // await updatePassword(self.pincode)
+          self.setPinCode('')
+          self.showMsg('Remove PIN code success!')
+        } else {
+          self.showMsg(res.data.msg)
+        }
+      })
+    })
   }
 
 })).create({

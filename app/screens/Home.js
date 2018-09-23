@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { PureComponent } from 'react'
 import { View, Text, TouchableOpacity, StyleSheet, LayoutAnimation, FlatList, Animated, PanResponder, Image, Clipboard } from 'react-native'
 import { Button, Icon, Divider, ListItem } from 'react-native-elements'
 import { Toolbar, ActionButton } from 'react-native-material-ui'
@@ -16,7 +16,7 @@ import { writeToClipboard } from '../utils'
 const marginTop = layout.getExtraTop()
 
 @observer
-class Home extends Component {
+class Home extends PureComponent {
   state = {
     selected: [],
     searchText: ''
