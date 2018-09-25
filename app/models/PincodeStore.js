@@ -13,7 +13,7 @@ const PinCodeStore = types.model({
   type: 0, // 0: cerate pin code (2)  1: change pin code (3) 2: unlock (1)
   step: 0,
   pinCode: '',
-  oldPinCode: '',
+  // oldPinCode: '',
   confirmPinCode: ''
 
 }).actions(self => ({
@@ -24,7 +24,6 @@ const PinCodeStore = types.model({
 
   setType(val) {
     self.type = val
-    self.oldPinCode = ''
     self.confirmPinCode = ''
     if (val === 0) {
       self.setStep(1)
@@ -57,9 +56,6 @@ const PinCodeStore = types.model({
     }
   },
 
-  setOldPinCode(val) {
-    self.oldPinCode = val
-  },
   setConfirmPinCodePinCode(val) {
     self.confirmPinCode = val
   },

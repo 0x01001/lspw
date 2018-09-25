@@ -8,10 +8,10 @@ import AccountStore from '../../models/AccountStore'
 import AppNav from '../../AppNav'
 import PinCodeStore from '../../models/PinCodeStore'
 import { Logo } from '../common'
-import Layout from '../../utils/layout'
+// import Layout from '../../utils/layout'
 import appStyle from '../../utils/app_style'
 
-const top = Layout.getExtraTopAndroid()
+// const top = Layout.getExtraTopAndroid()
 @observer
 class MenuLeft extends Component {
   showImport = () => {
@@ -24,17 +24,17 @@ class MenuLeft extends Component {
     AppNav.reset('unlockStack')
   }
 
-  homePress = () => {
-    AppNav.closeMenu()
-    AppNav.goTop()
-  }
-
   createPincode = () => {
     this.showPincode(0)
   }
 
   changePincode = () => {
     this.showPincode(1)
+  }
+
+  homePress = () => {
+    AppNav.closeMenu()
+    AppNav.goTop()
   }
 
   showPopupRemovePincode = () => {
@@ -68,7 +68,7 @@ class MenuLeft extends Component {
       return (
         <View style={styles.navSectionStyle}>
           <Icon name="security-lock" size={20} color={appStyle.mainColor} />
-          <Text style={styles.navItemStyle} onPress={this.createPincode}>Create pincode</Text>
+          <Text style={styles.navItemStyle} onPress={this.createPincode}>Set pincode</Text>
         </View>
       )
     }

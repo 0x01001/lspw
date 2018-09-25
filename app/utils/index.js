@@ -3,7 +3,7 @@ import firebase from 'firebase'
 import { Clipboard } from 'react-native'
 
 import AccountStore from '../models/AccountStore'
-import PinCodeStore from '../models/PinCodeStore'
+// import PinCodeStore from '../models/PinCodeStore'
 import constant from './constant'
 
 const CryptoJS = require('crypto-js')
@@ -156,8 +156,10 @@ export const writeToClipboard = async (item) => {
   const timestamp = date.getTime()
   // console.log('timestamp: ', timestamp)
   item.updateDate(timestamp)
-  AccountStore.saveData(item, false)
+  AccountStore.saveData(item, 'update', null, false)
 }
+
+export const capitalizeFirstLetter = val => val.charAt(0).toUpperCase() + val.slice(1)
 
 export default {
   encrypt,
@@ -168,5 +170,6 @@ export default {
   writeToClipboard,
   getPassword,
   // updatePassword,
-  savePassword
+  savePassword,
+  capitalizeFirstLetter
 }

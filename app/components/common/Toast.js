@@ -27,6 +27,10 @@ export default class Toast extends Component {
     }
   }
 
+  componentWillUnmount() {
+    this.timer && clearTimeout(this.timer)
+  }
+
   show(text, duration, callback) {
     this.duration = typeof duration === 'number' ? duration : DURATION.SHORT
     this.callback = callback
@@ -73,10 +77,6 @@ export default class Toast extends Component {
     }, delay)
   }
 
-  componentWillUnmount() {
-    this.timer && clearTimeout(this.timer)
-  }
-
   render() {
     const { height } = Dimensions.get('window')
 
@@ -91,14 +91,18 @@ export default class Toast extends Component {
       case 'bottom':
         pos = height - this.props.positionValue
         break
+      default:
+        break
     }
 
     const view = this.state.isShow
-      ? (<View style={[styles.container, { top: pos }]} pointerEvents="none">
-        <Animated.View style={[styles.content, { opacity: this.state.opacityValue }, this.props.style]}>
-          {React.isValidElement(this.state.text) ? this.state.text : <Text style={this.props.textStyle}>{this.state.text}</Text>}
-        </Animated.View>
-      </View>) : null
+      ? (
+        <View style={[styles.container, { top: pos }]} pointerEvents="none">
+          <Animated.View style={[styles.content, { opacity: this.state.opacityValue }, this.props.style]}>
+            {React.isValidElement(this.state.text) ? this.state.text : <Text style={this.props.textStyle}>{this.state.text}</Text>}
+          </Animated.View>
+        </View>
+      ) : null
     return view
   }
 }

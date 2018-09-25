@@ -18,6 +18,7 @@ import AppNav from '../AppNav'
 import { extractDomain, unixTimeStampToDateTime, writeToClipboard } from '../utils'
 
 const top = layout.getExtraTopAndroid()
+const uuidv4 = require('uuid/v4')
 
 @observer
 class Detail extends Component {
@@ -28,7 +29,13 @@ class Detail extends Component {
        marginTop: top
      },
      headerLeft: (
-       <TouchableOpacity onPress={() => { AppNav.goBack() }}>
+       <TouchableOpacity onPress={() => {
+         if (navigation.state.params.item) {
+           navigation.state.params.onNavigateBack(navigation.state.params.item)
+         }
+         AppNav.goBack()
+       }}
+       >
          <Icon name="arrow-left" size={25} style={{ color: appStyle.mainColor, padding: 10 }} />
        </TouchableOpacity>
      ),
@@ -129,6 +136,10 @@ class Detail extends Component {
     if (item) {
       id = item.id
     }
+    const act = id === '' ? 'create' : 'update'
+    if (id === '') {
+      id = uuidv4()
+    }
     const name = extractDomain(this.state.url)
     // console.log('name: ', name)
     const {
@@ -138,7 +149,11 @@ class Detail extends Component {
       id, name, url, username, password, desc, date
     })
     Keyboard.dismiss()
-    AccountStore.saveData(data)
+    AccountStore.saveData(data, act, (x) => {
+      // console.log('x: ', x)
+      this.props.navigation.state.params.onNavigateBack(x)
+      AppNav.goBack()
+    })
   }
 
   onDelete = () => {
@@ -150,14 +165,18 @@ class Detail extends Component {
         {
           text: 'OK',
           onPress: () => {
-            console.log('OK Pressed')
             let id = ''
             const { item } = this.props.navigation.state.params
             if (item) {
               id = item.id
             }
+            // console.log('delete: ', id)
             const data = Account.create({ id })
-            AccountStore.removeData(data)
+            const act = 'delete'
+            AccountStore.saveData(data, act, (x) => {
+              this.props.navigation.state.params.onNavigateBack(x, false)
+              AppNav.goBack()
+            })
           }
         }
       ],

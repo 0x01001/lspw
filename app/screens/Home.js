@@ -1,6 +1,6 @@
-import React, { PureComponent } from 'react'
-import { View, Text, TouchableOpacity, StyleSheet, LayoutAnimation, FlatList, Animated, PanResponder, Image, Clipboard } from 'react-native'
-import { Button, Icon, Divider, ListItem } from 'react-native-elements'
+import React, { Component } from 'react'
+import { View, Text, TouchableOpacity, StyleSheet, LayoutAnimation, FlatList } from 'react-native'
+import { Divider } from 'react-native-elements'
 import { Toolbar, ActionButton } from 'react-native-material-ui'
 import _ from 'lodash'
 import { observer } from 'mobx-react'
@@ -11,20 +11,23 @@ import style from '../utils/style_sheet'
 import appStyle from '../utils/app_style'
 import AppNav from '../AppNav'
 import AccountStore from '../models/AccountStore'
-import { writeToClipboard } from '../utils'
+// import { writeToClipboard } from '../utils'
+import List from '../components/home/List'
 
 const marginTop = layout.getExtraTop()
 
 @observer
-class Home extends PureComponent {
-  state = {
-    selected: [],
-    searchText: ''
-  };
+class Home extends Component {
+  // state = {
+  //   selected: [],
+  //   searchText: ''
+  // };
   @observable
   isSearching = false;
   @observable
   dataSearch = [];
+  @observable
+  keyword = '';
 
   componentWillUpdate() {
     LayoutAnimation.spring()
@@ -115,14 +118,26 @@ class Home extends PureComponent {
   //   }
   // }
 
+  checkSearch = x => _.includes(x.name, this.keyword) || _.includes(x.username, this.keyword)
+
+  handleOnNavigateBack = (item, act = true) => {
+    // console.log('handleOnNavigateBack: ', item)
+    if (act && item && this.isSearching && this.checkSearch(item)) {
+      // console.log('add dataSearch...')
+      this.dataSearch = [item, ...this.dataSearch]
+      this.dataSearch = this.dataSearch.sort((x, y) => y.date - x.date)
+    }
+  }
+
   onSearch = (val) => {
-    console.log('onSearch')
+    // console.log('onSearch')
+    this.keyword = val
     this.isSearching = true
     this.dataSearch = AccountStore.searchData(val)
   }
 
   onSearchClosed = () => {
-    console.log('onSearchClosed')
+    // console.log('onSearchClosed')
     this.isSearching = false
     this.dataSearch = []
   }
@@ -136,25 +151,14 @@ class Home extends PureComponent {
   );
 
   renderItem = ({ item }) => (
-    <ListItem
-      containerStyle={{ backgroundColor: 'transparent', paddingVertical: 10 }}
-      title={item.name}
-      subtitle={item.username ? item.username : null}
-      titleStyle={{ color: appStyle.mainColor, fontWeight: 'bold', height: 26 }}
-      subtitleStyle={item.username ? {
-        color: appStyle.mainColor, fontSize: 12, fontStyle: 'italic', height: 20
-      } : null}
-      leftAvatar={{
-        size: 26,
-        rounded: true,
-        source: { uri: `https://www.google.com/s2/favicons?domain=${item.name}` },
-        // title: 'N/A',
-        overlayContainerStyle: { backgroundColor: 'transparent' }
+    <List
+      item={item}
+      onPress={() => {
+        if (this.isSearching) {
+          this.dataSearch.splice(this.dataSearch.indexOf(item), 1)
+        }
+        AppNav.pushToScreen('detail', { title: item.name, item, onNavigateBack: this.handleOnNavigateBack })
       }}
-      rightIcon={{ name: 'chevron-right', color: appStyle.mainColor }}
-      onPress={() => AppNav.pushToScreen('detail', { title: item.name, item })}
-      onLongPress={() => writeToClipboard(item)}
-      bottomDivider
     />
   )
 
@@ -167,19 +171,17 @@ class Home extends PureComponent {
       return (
         <View>
           <Text style={styles.resultText}>Result: {this.dataSearch.length}</Text>
-          <Divider style={{ backgroundColor: '#484558' }} />
+          <Divider style={{ backgroundColor: appStyle.borderColor }} />
         </View>)
     }
     return null
   }
 
   renderContent = () => (
-    // if (AccountStore.isFetching) {
-    //   return (<View style={styles.content}><Text style={{ color: appStyle.mainColor, fontSize: 18 }}>Loading...</Text></View>)
-    // }
     <View style={{ flex: 1 }}>
       {this.renderResultSearch()}
       <FlatList
+        // initialNumToRender={1}
         data={this.isSearching ? this.dataSearch : AccountStore.data}
         renderItem={this.renderItem}
         keyExtractor={(x, i) => x.id}
@@ -222,7 +224,7 @@ class Home extends PureComponent {
         <ActionButton
           style={{ container: { backgroundColor: `${appStyle.redColor}80` } }}
           onPress={() => {
-            AppNav.pushToScreen('detail', { title: 'Create' })
+            AppNav.pushToScreen('detail', { title: 'Create', onNavigateBack: this.handleOnNavigateBack })
           }}
         />
       </View>

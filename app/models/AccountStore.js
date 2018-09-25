@@ -9,7 +9,7 @@ import prompt from 'react-native-prompt-android'
 import constant from '../utils/constant'
 import AppNav from '../AppNav'
 import AppState from '../AppState'
-import { encrypt, decrypt, getPassword, savePassword, extractDomain, getGoogleSheetData } from '../utils'
+import { encrypt, decrypt, getPassword, savePassword, extractDomain, getGoogleSheetData, capitalizeFirstLetter } from '../utils'
 
 const uuidv4 = require('uuid/v4')
 
@@ -25,14 +25,21 @@ export const Account = types.model({
   // changeName(newName) {
   //   self.name = newName
   // },
+  // createId() {
+  //   self.id = uuidv4()
+  // },
 
   updateDate(date) {
     self.date = date
-  },
-
-  remove() {
-    getRoot(self).remove(self)
   }
+
+  // remove() {
+  //   getRoot(self).remove(self)
+  // },
+
+  // update() {
+  //   getRoot(self).update(self)
+  // }
 }))
 
 const AccountStore = types.model({
@@ -43,27 +50,68 @@ const AccountStore = types.model({
   // isFetching: false
 }).views(self => ({
   get data() {
-    return self.items
+    return self.items.slice()
   },
   get token() {
     return self.accessToken
   }
 })).actions(self => ({
-  // afterCreate() {
-  //   self.fetchData()
-  // },
+
   add(item) {
-    self.items.push(item)
+    self.items = [...self.items, item]
+    // self.items.push(item)
+    // unshift/push - add an element to the beginning/end of an array
+    // shift/pop - remove and return the first/last element of and array
   },
 
   remove(item) {
+    // self.items.splice(self.items.indexOf(item), 1)
     destroy(item)
+  },
+
+  sort() {
+    // filter list descending order
+    self.items = self.items.slice().sort((x, y) => y.date - x.date)
   },
 
   setItem(json) {
     const result = JSON.parse(json)
-    // filter list descending order
-    self.items = result.sort((x, y) => y.date - x.date)
+    // console.log('result: ', result)
+
+    if (self.items.slice().length > 0) {
+      // const copiedList = self.items.slice()
+      // console.log('self.items: ', copiedList)
+
+      // delete
+      const listDelete = _.differenceWith(self.items.slice(), result, (x, y) => x.id === y.id)
+      self.items.map((x) => {
+        if (listDelete.includes(x)) {
+          console.log('delete: ', listDelete)
+          self.remove(x)
+        }
+        return null
+      })
+
+      // add
+      const listAdd = _.differenceWith(result, self.items.slice(), (x, y) => x.id === y.id)
+      listAdd.map((x) => {
+        console.log('add: ', x)
+        self.add(x)
+        return x
+      })
+
+      // const copiedList2 = self.items.slice()
+      // console.log('self.items 2: ', copiedList2)
+      console.log('listDelete.length: ', listDelete.length)
+      console.log('listAdd.length: ', listAdd.length)
+      self.sort()
+    } else {
+      result.map((x) => {
+        self.add(x)
+        return x
+      })
+      self.sort()
+    }
   },
 
   setToken(val) {
@@ -167,7 +215,7 @@ const AccountStore = types.model({
       AppNav.hideLoading()
       try {
         const data = snapshot.val()
-        console.log('load: ', data)
+        // console.log('load: ', data)
         if (data) {
           const json = decrypt(data, pw)
           // console.log('load decrypt: ', json)
@@ -309,21 +357,24 @@ const AccountStore = types.model({
   },
   // ------------------------------------
   searchData(val) {
-    return self.data.filter(x => _.includes(x.name, val) || _.includes(x.username, val))
+    return self.data.filter(x => _.includes(x.name, val) || _.includes(x.username, val)).sort((x, y) => y.date - x.date)
   },
 
-  async saveData(item:Account, isShowNotify = true) {
-    // TODO: check duplicate
+  async saveData(item:Account, action, callback = null, isShowNotify = true) {
+    // TODO: check duplicate -> show alert
 
     if (isShowNotify) { AppNav.showLoading() }
-    // console.log('data: ', item.id)
-    if (item.id === '') {
+
+    if (action === 'create' || action === 'update') {
       const date = new Date()
       const timestamp = date.getTime()
       item.updateDate(timestamp)
     }
+
+    console.log(`${action} : ${item.id}`)
     const json = JSON.stringify(item)
-    // console.log('json: ', json)
+    // console.log('data: ', json)
+
     if (json !== '') {
       const pw = await getPassword()
       // console.log('pw: ', pw)
@@ -338,47 +389,25 @@ const AccountStore = types.model({
       // console.log('post data: ', data)
       firebase.auth().currentUser.getIdToken().then((token) => {
         // console.log('token: ', token)
-        axios.post(`${constant.ROOT_URL}/save`, { token, data }).then((res) => {
+        axios.post(`${constant.ROOT_URL}/save`, { token, data, action }).then((res) => {
           // console.log(res)
           if (isShowNotify) {
             if (res.data.code === '1') {
-              AppNav.goBack()
-              self.showMsg(`${item.id !== '' ? 'Edit' : 'Create'} success!`)
+              if (action === 'update') {
+                const model = _.find(self.items, ['id', item.id])
+                if (model) {
+                  self.remove(model)
+                }
+              }
+              self.showMsg(`${capitalizeFirstLetter(action)} success!`)
+              if (callback) {
+                callback(item)
+              }
             } else {
               self.showMsg(res.data.msg)
             }
             AppNav.hideLoading()
           }
-        })
-      })
-    }
-  },
-
-  async removeData(item:Account) {
-    AppNav.showLoading()
-    // console.log('data: ', item.id)
-    const json = JSON.stringify(item)
-    // console.log('json: ', json)
-    if (json !== '') {
-      const pw = await getPassword()
-      // console.log('pw: ', pw)
-      if (pw === '') {
-        self.showMsg()
-        return
-      }
-      const data = encrypt(json, pw)
-      // console.log('post data: ', data)
-      firebase.auth().currentUser.getIdToken().then((token) => {
-        // console.log('token: ', token)
-        axios.post(`${constant.ROOT_URL}/remove`, { token, data }).then((res) => {
-          // console.log(res)
-          if (res.data.code === '1') {
-            AppNav.goBack()
-            self.showMsg('Delete success!')
-          } else {
-            self.showMsg(res.data.msg)
-          }
-          AppNav.hideLoading()
         })
       })
     }
@@ -444,7 +473,8 @@ const AccountStore = types.model({
     self.items = []
   }
 })).create({
-  items: []
+  items: [],
+  dataSearch: []
 })
 
 export default AccountStore
