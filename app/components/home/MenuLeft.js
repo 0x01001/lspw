@@ -8,10 +8,8 @@ import AccountStore from '../../models/AccountStore'
 import AppNav from '../../AppNav'
 import PinCodeStore from '../../models/PinCodeStore'
 import { Logo } from '../common'
-// import Layout from '../../utils/layout'
 import appStyle from '../../utils/app_style'
 
-// const top = Layout.getExtraTopAndroid()
 @observer
 class MenuLeft extends Component {
   showImport = () => {
@@ -144,13 +142,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: appStyle.borderColor
   }
-  // sectionHeadingStyle: {
-  //   paddingVertical: 15,
-  //   paddingHorizontal: 10,
-  //   color: appStyle.mainColor,
-  //   borderBottomWidth: 1,
-  //   borderBottomColor: appStyle.borderColor
-  // }
 })
 
 export default MenuLeft

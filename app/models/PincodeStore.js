@@ -92,7 +92,7 @@ const PinCodeStore = types.model({
         AppNav.hideLoading()
         self.setPinCode(pincode)
         AppNav.reset('mainStack')
-        self.showMsg(`${self.type === 0 ? 'Create' : 'Update'} PIN code success.`)
+        self.showMsg(`${self.type === 0 ? 'Set' : 'Update'} PIN code success.`)
       })
       .catch(() => { self.showMsg() })
   },

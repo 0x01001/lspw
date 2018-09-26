@@ -31,11 +31,11 @@ export const Account = types.model({
 
   updateDate(date) {
     self.date = date
-  }
+  },
 
-  // remove() {
-  //   getRoot(self).remove(self)
-  // },
+  remove() {
+    getRoot(self).remove(self)
+  }
 
   // update() {
   //   getRoot(self).update(self)
@@ -64,9 +64,18 @@ const AccountStore = types.model({
     // shift/pop - remove and return the first/last element of and array
   },
 
+  addFirst(item) {
+    self.items = [item, ...self.items]
+  },
+
   remove(item) {
     // self.items.splice(self.items.indexOf(item), 1)
     destroy(item)
+  },
+
+  update(item) {
+    const index = self.items.findIndex(x => x.id == item.id)
+    self.items[index] = item
   },
 
   sort() {
@@ -79,9 +88,6 @@ const AccountStore = types.model({
     // console.log('result: ', result)
 
     if (self.items.slice().length > 0) {
-      // const copiedList = self.items.slice()
-      // console.log('self.items: ', copiedList)
-
       // delete
       const listDelete = _.differenceWith(self.items.slice(), result, (x, y) => x.id === y.id)
       self.items.map((x) => {
@@ -100,8 +106,6 @@ const AccountStore = types.model({
         return x
       })
 
-      // const copiedList2 = self.items.slice()
-      // console.log('self.items 2: ', copiedList2)
       console.log('listDelete.length: ', listDelete.length)
       console.log('listAdd.length: ', listAdd.length)
       self.sort()
@@ -117,18 +121,6 @@ const AccountStore = types.model({
   setToken(val) {
     self.accessToken = val
   },
-
-  // setFetch(val) {
-  //   self.isFetching = val
-  // },
-
-  // showLoading(val) {
-  //   self.isLoading = val
-  // },
-
-  // showDeleting(val) {
-  //   self.isDeleting = val
-  // },
 
   showMsg(msg) {
     AppNav.hideLoading()
@@ -371,7 +363,7 @@ const AccountStore = types.model({
       item.updateDate(timestamp)
     }
 
-    console.log(`${action} : ${item.id}`)
+    console.log(`${action}: ${item.id}`)
     const json = JSON.stringify(item)
     // console.log('data: ', json)
 
@@ -394,11 +386,15 @@ const AccountStore = types.model({
           if (isShowNotify) {
             if (res.data.code === '1') {
               if (action === 'update') {
-                const model = _.find(self.items, ['id', item.id])
-                if (model) {
-                  self.remove(model)
-                }
+                self.update(item)
               }
+              // else if (action === 'delete') {
+              //   console.log('????/')
+
+              //   self.remove(item)
+              // } else {
+              //   self.addFirst(item)
+              // }
               self.showMsg(`${capitalizeFirstLetter(action)} success!`)
               if (callback) {
                 callback(item)
@@ -473,8 +469,7 @@ const AccountStore = types.model({
     self.items = []
   }
 })).create({
-  items: [],
-  dataSearch: []
+  items: []
 })
 
 export default AccountStore

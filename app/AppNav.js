@@ -24,14 +24,6 @@ class ObservableNav {
     this.loading && this.loading.hide()
   }
 
-  // showImport() {
-  //   this.import && this.import.show()
-  // }
-
-  // hideImport() {
-  //   this.import && this.import.hide()
-  // }
-
   @action
   showToast(msg) {
     this.toast.show(msg, DURATION.SHORT)

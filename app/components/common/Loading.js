@@ -15,7 +15,7 @@ class Loading extends Component {
 
   static defaultProps = {
     visible: false,
-    size: 'normal' // 'normal',
+    size: 'normal'
   }
 
   state = {
