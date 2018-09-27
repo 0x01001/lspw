@@ -1,8 +1,8 @@
 import * as Keychain from 'react-native-keychain'
 import firebase from 'firebase'
-import { Clipboard } from 'react-native'
+import { Clipboard, Alert } from 'react-native'
 
-import AccountStore from '../models/AccountStore'
+import AccountStore, { Account } from '../models/AccountStore'
 // import PinCodeStore from '../models/PinCodeStore'
 import constant from './constant'
 
@@ -156,7 +156,37 @@ export const writeToClipboard = async (item) => {
   const timestamp = date.getTime()
   // console.log('timestamp: ', timestamp)
   item.updateDate(timestamp)
-  AccountStore.saveData(item, 'update', null, false)
+  AccountStore.saveData(item, 'update', false)
+}
+
+export const deleteData = (item:Account, okCallback = null, cancelCallback = null) => {
+  Alert.alert(
+    'Are you sure?',
+    'You want to delete this record?',
+    [
+      {
+        text: 'Cancel',
+        style: 'cancel',
+        onPress: () => {
+          if (cancelCallback) {
+            cancelCallback()
+          }
+        }
+      },
+      {
+        text: 'OK',
+        onPress: () => {
+          const act = 'delete'
+          AccountStore.saveData(item, act, true, () => {
+            if (okCallback) {
+              okCallback()
+            }
+          })
+        }
+      }
+    ],
+    { cancelable: false }
+  )
 }
 
 export const capitalizeFirstLetter = val => val.charAt(0).toUpperCase() + val.slice(1)
@@ -171,5 +201,6 @@ export default {
   getPassword,
   // updatePassword,
   savePassword,
-  capitalizeFirstLetter
+  capitalizeFirstLetter,
+  deleteData
 }

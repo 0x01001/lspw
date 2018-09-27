@@ -20,7 +20,8 @@ export const Account = types.model({
   username: '',
   password: '',
   desc: '',
-  date: 0
+  date: 0,
+  state: false // local: 1: normal -1: delete
 }).actions(self => ({
   // changeName(newName) {
   //   self.name = newName
@@ -29,8 +30,14 @@ export const Account = types.model({
   //   self.id = uuidv4()
   // },
 
-  updateDate(date) {
-    self.date = date
+  updateDate(val) {
+    self.date = val
+  },
+
+  updateState(val) {
+    console.log('updateState: ', val)
+
+    self.state = val
   },
 
   remove() {
@@ -44,33 +51,71 @@ export const Account = types.model({
 
 const AccountStore = types.model({
   items: types.array(Account),
-  accessToken: ''
+  accessToken: '',
+  isSelecting: false
   // isLoading: false,
   // isDeleting: false,
   // isFetching: false
 }).views(self => ({
   get data() {
-    return self.items.slice()
+    return self.items.slice().sort((x, y) => y.date - x.date)
   },
   get token() {
     return self.accessToken
   }
 })).actions(self => ({
 
+  setItem(json) {
+    const result = JSON.parse(json)
+    // // console.log('result: ', result)
+    // if (self.items.slice().length > 0) {
+    //   // delete
+    //   const listDelete = _.differenceWith(self.items.slice(), result, (x, y) => x.id === y.id)
+    //   self.items.map((x) => {
+    //     if (listDelete.includes(x)) {
+    //       console.log('delete: ', listDelete)
+    //       self.remove(x)
+    //     }
+    //     return null
+    //   })
+
+    //   // add
+    //   const listAdd = _.differenceWith(result, self.items.slice(), (x, y) => x.id === y.id)
+    //   listAdd.map((x) => {
+    //     console.log('add: ', x)
+    //     self.add(x)
+    //     return x
+    //   })
+
+    //   console.log('listDelete.length: ', listDelete.length)
+    //   console.log('listAdd.length: ', listAdd.length)
+    //   self.sort()
+    // } else {
+    result.map((x) => {
+      x.state = false
+      self.add(x)
+      return x
+    })
+    // const copiedList = self.items.slice()
+    // console.log('self.items: ', copiedList)
+    // }
+  },
+
   add(item) {
     self.items = [...self.items, item]
     // self.items.push(item)
+  },
+
+  addFirst(item) {
+    self.items.unshift(item)
     // unshift/push - add an element to the beginning/end of an array
     // shift/pop - remove and return the first/last element of and array
   },
 
-  addFirst(item) {
-    self.items = [item, ...self.items]
-  },
-
   remove(item) {
     // self.items.splice(self.items.indexOf(item), 1)
-    destroy(item)
+    const index = self.items.findIndex(x => x.id == item.id)
+    destroy(self.items[index])
   },
 
   update(item) {
@@ -78,48 +123,27 @@ const AccountStore = types.model({
     self.items[index] = item
   },
 
-  sort() {
-    // filter list descending order
-    self.items = self.items.slice().sort((x, y) => y.date - x.date)
-  },
-
-  setItem(json) {
-    const result = JSON.parse(json)
-    // console.log('result: ', result)
-
-    if (self.items.slice().length > 0) {
-      // delete
-      const listDelete = _.differenceWith(self.items.slice(), result, (x, y) => x.id === y.id)
-      self.items.map((x) => {
-        if (listDelete.includes(x)) {
-          console.log('delete: ', listDelete)
-          self.remove(x)
-        }
-        return null
-      })
-
-      // add
-      const listAdd = _.differenceWith(result, self.items.slice(), (x, y) => x.id === y.id)
-      listAdd.map((x) => {
-        console.log('add: ', x)
-        self.add(x)
-        return x
-      })
-
-      console.log('listDelete.length: ', listDelete.length)
-      console.log('listAdd.length: ', listAdd.length)
-      self.sort()
-    } else {
-      result.map((x) => {
-        self.add(x)
-        return x
-      })
-      self.sort()
-    }
-  },
+  // sort() {
+  //   // filter list descending order
+  //   self.items = self.items.slice().sort((x, y) => y.date - x.date)
+  // },
 
   setToken(val) {
     self.accessToken = val
+  },
+
+  setSelect(val) {
+    self.isSelecting = val
+  },
+
+  setSelectAll(val) {
+    self.items.map(x => x.state = val)
+    // const copiedList = self.items.slice()
+    // console.log('self.items: ', copiedList)
+  },
+
+  dataDelete() {
+    return self.items.filter(x => x.state === true)
   },
 
   showMsg(msg) {
@@ -203,7 +227,7 @@ const AccountStore = types.model({
       self.showMsg()
       return
     }
-    firebase.database().ref(`/data/${currentUser.uid}/b`).on('value', (snapshot) => {
+    firebase.database().ref(`/data/${currentUser.uid}/b`).once('value', (snapshot) => {
       AppNav.hideLoading()
       try {
         const data = snapshot.val()
@@ -352,7 +376,7 @@ const AccountStore = types.model({
     return self.data.filter(x => _.includes(x.name, val) || _.includes(x.username, val)).sort((x, y) => y.date - x.date)
   },
 
-  async saveData(item:Account, action, callback = null, isShowNotify = true) {
+  async saveData(item:Account, action, isShowNotify = true, callback = null) {
     // TODO: check duplicate -> show alert
 
     if (isShowNotify) { AppNav.showLoading() }
@@ -364,7 +388,7 @@ const AccountStore = types.model({
     }
 
     console.log(`${action}: ${item.id}`)
-    const json = JSON.stringify(item)
+    const json = JSON.stringify(item, ['id', 'name', 'url', 'username', 'password', 'desc'])
     // console.log('data: ', json)
 
     if (json !== '') {
@@ -383,27 +407,25 @@ const AccountStore = types.model({
         // console.log('token: ', token)
         axios.post(`${constant.ROOT_URL}/save`, { token, data, action }).then((res) => {
           // console.log(res)
-          if (isShowNotify) {
-            if (res.data.code === '1') {
-              if (action === 'update') {
-                self.update(item)
-              }
-              // else if (action === 'delete') {
-              //   console.log('????/')
-
-              //   self.remove(item)
-              // } else {
-              //   self.addFirst(item)
-              // }
-              self.showMsg(`${capitalizeFirstLetter(action)} success!`)
-              if (callback) {
-                callback(item)
-              }
+          if (res.data.code === '1') {
+            if (action === 'update') {
+              self.update(item)
+            } else if (action === 'delete') {
+              self.remove(item)
+              // const copiedList = self.items.slice()
+              // console.log('self.items: ', copiedList)
             } else {
-              self.showMsg(res.data.msg)
+              self.addFirst(item)
             }
-            AppNav.hideLoading()
-          }
+            if (isShowNotify) {
+              self.showMsg(`${capitalizeFirstLetter(action)} success!`)
+              AppNav.goBack()
+              if (callback) {
+                callback()
+              }
+            }
+          } else if (isShowNotify) { self.showMsg(res.data.msg) }
+          if (isShowNotify) AppNav.hideLoading()
         })
       })
     }

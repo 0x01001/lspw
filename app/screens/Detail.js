@@ -15,7 +15,7 @@ import { TextInput } from '../components/common'
 import AccountStore, { Account } from '../models/AccountStore'
 import layout from '../utils/layout'
 import AppNav from '../AppNav'
-import { extractDomain, unixTimeStampToDateTime, writeToClipboard } from '../utils'
+import { extractDomain, unixTimeStampToDateTime, writeToClipboard, deleteData } from '../utils'
 
 const top = layout.getExtraTopAndroid()
 const uuidv4 = require('uuid/v4')
@@ -30,9 +30,9 @@ class Detail extends Component {
      },
      headerLeft: (
        <TouchableOpacity onPress={() => {
-         if (navigation.state.params.item) {
-           navigation.state.params.onNavigateBack(navigation.state.params.item)
-         }
+         //  if (navigation.state.params.item) {
+         //    navigation.state.params.onNavigateBack(navigation.state.params.item)
+         //  }
          AppNav.goBack()
        }}
        >
@@ -149,39 +149,16 @@ class Detail extends Component {
       id, name, url, username, password, desc, date
     })
     Keyboard.dismiss()
-    AccountStore.saveData(data, act, (x) => {
-      // console.log('x: ', x)
-      this.props.navigation.state.params.onNavigateBack(x)
-      AppNav.goBack()
-    })
+    AccountStore.saveData(data, act)
+    // , (x) => {
+    //   // console.log('x: ', x)
+    //   this.props.navigation.state.params.onNavigateBack(x)
+    //   AppNav.goBack()
+    // })
   }
 
   onDelete = () => {
-    Alert.alert(
-      'Are you sure?',
-      'You want to delete this record?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'OK',
-          onPress: () => {
-            let id = ''
-            const { item } = this.props.navigation.state.params
-            if (item) {
-              id = item.id
-            }
-            // console.log('delete: ', id)
-            const data = Account.create({ id })
-            const act = 'delete'
-            AccountStore.saveData(data, act, (x) => {
-              this.props.navigation.state.params.onNavigateBack(x, false)
-              AppNav.goBack()
-            })
-          }
-        }
-      ],
-      { cancelable: false }
-    )
+    deleteData(this.props.navigation.state.params.item)
   }
 
   renderDate = () => {

@@ -1,19 +1,20 @@
 import React, { Component } from 'react'
-import { View, Text, Dimensions, StyleSheet, LayoutAnimation, FlatList } from 'react-native'
+import { View, Text, Dimensions, StyleSheet, LayoutAnimation, TouchableOpacity, Alert } from 'react-native'
 import { Divider } from 'react-native-elements'
 import { Toolbar, ActionButton } from 'react-native-material-ui'
 import _ from 'lodash'
 import { observer } from 'mobx-react'
 import { observable, reaction } from 'mobx'
 import { RecyclerListView, LayoutProvider, DataProvider } from 'recyclerlistview'
+import Swipeable from 'react-native-swipeable-row'
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 
 import layout from '../utils/layout'
-import style from '../utils/style_sheet'
 import appStyle from '../utils/app_style'
 import AppNav from '../AppNav'
 import AccountStore from '../models/AccountStore'
-// import { writeToClipboard } from '../utils'
-import List from '../components/home/List'
+import Item from '../components/home/Item'
+import { deleteData } from '../utils'
 
 const marginTop = layout.getExtraTop()
 
@@ -26,7 +27,6 @@ class Home extends Component {
     this.state = {
       selected: [],
       searchText: '',
-      activeRowId: '',
       dataProvider: new DataProvider((r1, r2) => r1 !== r2).cloneWithRows(AccountStore.data)
     }
 
@@ -37,33 +37,27 @@ class Home extends Component {
 
     reaction(() => AccountStore.data, (newItems) => {
       console.log('change....')
-
-      if (this.isSearching) {
-        // this.setState({ dataProvider: this.state.dataProvider.cloneWithRows(AccountStore.searchData(this.keyword)) })
-        this.setState(prevState => ({
-          dataProvider: prevState.dataProvider.cloneWithRows(AccountStore.searchData(this.keyword))
-        }))
-        return
-      }
-      // this.setState({ dataProvider: this.state.dataProvider.cloneWithRows(AccountStore.data) })
       // const data = this.state.dataProvider.getAllData()
-      // const nextData = [...AccountStore.data, ...data]
+      const dataUpdate = this.isSearching ? AccountStore.searchData(this.keyword) : AccountStore.data
+      // const nextData = [...dataUpdate, ...data]
       // const nextProvider = this.state.dataProvider.cloneWithRows(nextData)
       // this.setState({
       //   dataProvider: nextProvider
       // })
       this.setState(prevState => ({
-        dataProvider: prevState.dataProvider.cloneWithRows(AccountStore.data)
+        dataProvider: prevState.dataProvider.cloneWithRows(dataUpdate)
       }))
     })
   }
 
   @observable
   isSearching = false;
-  // @observable
-  // dataSearch = [];
+  @observable
+  swipeable: null;
   @observable
   keyword = '';
+  @observable
+  leftElement = 'menu';
 
   componentWillUpdate() {
     LayoutAnimation.spring()
@@ -71,24 +65,14 @@ class Home extends Component {
 
   checkSearch = x => _.includes(x.name, this.keyword) || _.includes(x.username, this.keyword)
 
-  handleOnNavigateBack = (item, act = true) => {
-    console.log('handleOnNavigateBack: ', item)
-    // if (this.isSearching) {
-    //   // console.log('add dataSearch...')
-    //   // this.dataSearch = [item, ...this.dataSearch]
-    //   // this.dataSearch = this.dataSearch.sort((x, y) => y.date - x.date)
-    //   this.setState({ dataProvider: this.state.dataProvider.cloneWithRows(AccountStore.searchData(this.keyword)) })
-    //   return
-    // }
-    // this.setState({ dataProvider: this.state.dataProvider.cloneWithRows(AccountStore.data) })
-  }
-
   onSearch = (val) => {
     // console.log('onSearch')
     this.keyword = val
     this.isSearching = true
     // this.dataSearch = AccountStore.searchData(val)
-    this.setState({ dataProvider: this.state.dataProvider.cloneWithRows(AccountStore.searchData(val)) })
+    this.setState(prevState => ({
+      dataProvider: prevState.dataProvider.cloneWithRows(AccountStore.searchData(val))
+    }))
   }
 
   onSearchClosed = () => {
@@ -97,40 +81,6 @@ class Home extends Component {
     // this.dataSearch = []
     this.setState({ dataProvider: this.state.dataProvider.cloneWithRows(AccountStore.data) })
   }
-
-  onRefresh = () => {
-    alert('refresh')
-  }
-
-  onSwipeOpen(item, rowId, direction) {
-    this.setState({ activeRowId: item.id })
-  }
-
-  onSwipeClose(item, rowId, direction) {
-    if (item.id === this.state.activeRowId && typeof direction !== 'undefined') {
-      this.setState({ activeRowId: '' })
-    }
-  }
-
-  onDeleteItem = (item) => {
-    alert(`delete: ${item.id}`)
-  }
-
-  // renderItem = ({ item }) => (
-  //   <List
-  //     item={item}
-  //     onPress={() => {
-  //       if (this.isSearching) {
-  //         this.dataSearch.splice(this.dataSearch.indexOf(item), 1)
-  //       }
-  //       AppNav.pushToScreen('detail', { title: item.name, item, onNavigateBack: this.handleOnNavigateBack })
-  //     }}
-  //     // activeRowId={this.state.activeRowId}
-  //     // onSwipeOpen={(x, rowId, direction) => this.onSwipeOpen(x, rowId, direction)}
-  //     // onSwipeClose={(x, rowId, direction) => this.onSwipeClose(x, rowId, direction)}
-  //     // onDeleteItem={x => this.onDeleteItem(x)}
-  //   />
-  // )
 
   renderEmptyContent = () => (
     <View style={styles.content}><Text style={{ color: appStyle.mainColor, fontSize: 18 }}>No data</Text></View>
@@ -147,57 +97,135 @@ class Home extends Component {
     return null
   }
 
-  // _changeRows = () => {
-  //   this.setState(prevState => ({
-  //     dataProvider: prevState.dataProvider.cloneWithRows(makeRows(20))
-  //   }), () => {
-  //     this._recyclerListView._refreshViewability()
-  //     this.setState({
-  //       dataProvider: this.state.dataProvider.cloneWithRows(makeRows(24)),
-  //       indexes: this._recyclerListView.getCurrentScrollOffset()
-  //     })
-  //   })
-  // }
+  handleScroll = () => {
+    if (this.swipeable) {
+      this.swipeable.recenter()
+    }
+  }
 
-  _renderRow = item => (<List
-    item={item}
-    onPress={() => {
-      // if (this.isSearching) {
-      //   this.dataSearch.splice(this.dataSearch.indexOf(item), 1)
-      // }
-      AppNav.pushToScreen('detail', { title: item.name, item, onNavigateBack: this.handleOnNavigateBack })
-    }}
-  />)
+  onOpen = (event, gestureState, sw) => {
+    if (this.swipeable && this.undefined !== 'undefined' && this.swipeable !== sw) {
+      this.swipeable.recenter()
+    }
+    this.swipeable = sw
+  }
+
+  onClose = () => { this.swipeable = null }
+
+  closeSwipe = () => {
+    if (this.swipeable) {
+      this.swipeable.recenter()
+      this.swipeable = null
+    }
+  }
+
+  onDelete = (item) => {
+    deleteData(item, () => {
+      this.closeSwipe()
+    }, () => {
+      this.closeSwipe()
+    })
+  }
+
+  _renderRow = item => (
+    <Swipeable
+      rightButtonWidth={70}
+      rightButtons={[
+        <TouchableOpacity style={[styles.rightSwipeItem, { backgroundColor: `${appStyle.redColor}80` }]} onPress={() => this.onDelete(item)}>
+          {/* <Text style={{ textAlign: 'center' }}>Delete</Text> */}
+          <Icon name="delete-forever" size={25} color={appStyle.mainColor} />
+        </TouchableOpacity>
+      ]}
+      onRightButtonsOpenRelease={this.onOpen}
+      onRightButtonsCloseRelease={this.onClose}
+      swipeStartMinRightEdgeClearance={10}
+    >
+      <Item
+        data={item}
+        onPress={() => {
+          this.closeSwipe()
+          AppNav.pushToScreen('detail', { title: item.name, item })
+          // AppNav.pushToScreen('detail', { title: item.name, item, onNavigateBack: this.handleOnNavigateBack })
+        }}
+      />
+    </Swipeable>
+  )
 
   renderList = () => {
     if (this.state.dataProvider.getSize() === 0) {
       return this.renderEmptyContent()
     }
-    return (<RecyclerListView
-      ref={ref => this._recyclerListView = ref}
-      layoutProvider={this._layoutProvider}
-      dataProvider={this.state.dataProvider}
-      rowRenderer={this._renderRow}
-      optimizeForInsertDeleteAnimations={true}
-    />)
+    return (
+      <RecyclerListView
+        // ref={ref => this._recyclerListView = ref}
+        layoutProvider={this._layoutProvider}
+        dataProvider={this.state.dataProvider}
+        rowRenderer={this._renderRow}
+        onScroll={this.handleScroll}
+        optimizeForInsertDeleteAnimations={false}
+      />)
   }
 
-  renderContent = () => (
-    <View style={{ flex: 1 }}>
-      {this.renderResultSearch()}
-      {this.renderList()}
-      {/* <FlatList
-        // initialNumToRender={10}
-        data={this.isSearching ? this.dataSearch : AccountStore.data}
-        renderItem={this.renderItem}
-        keyExtractor={item => item.id}
-        ListEmptyComponent={this.renderEmptyContent}
-        contentContainerStyle={[{ flexGrow: 1 }, this.isSearching && this.dataSearch.length === 0 ? { justifyContent: 'center' } : AccountStore.data.length ? null : { justifyContent: 'center' }]}
-        // refreshing={true}
-        // onRefresh={this.onRefresh}
-      /> */}
-    </View>
-  )
+  onLeftToolBarPress = () => {
+    if (AccountStore.isSelecting) {
+      if (this.leftElement === 'check-box-outline-blank') {
+        AccountStore.setSelectAll(true)
+        this.leftElement = 'check-box'
+      } else {
+        AccountStore.setSelectAll(false)
+        this.leftElement = 'check-box-outline-blank'
+      }
+      return
+    }
+    AppNav.openMenu()
+  }
+
+  onComplete = () => {
+    AccountStore.setSelect(false)
+    AccountStore.setSelectAll(false)
+    this.leftElement = 'menu'
+  }
+
+  onRightToolBarPress = (index) => {
+    // console.log('onRightToolBarPress: ', index)
+    if (AccountStore.isSelecting) {
+      const count = AccountStore.dataDelete().length
+      if (count > 0) {
+        Alert.alert(
+          'Are you sure?',
+          `You want to delete ${count} records?`,
+          [
+            { text: 'Cancel', style: 'cancel', onPress: () => { this.onComplete() } },
+            {
+              text: 'OK',
+              onPress: () => {
+                // TODO: delete all
+                this.onComplete()
+              }
+            }
+          ],
+          { cancelable: false }
+        )
+      } else {
+        this.onComplete()
+      }
+      return
+    }
+    switch (index) {
+      case 0:
+        AccountStore.googleSignin()
+        break
+      case 1:
+
+        break
+      case 2:
+        AccountStore.setSelect(true)
+        this.leftElement = 'check-box-outline-blank'
+        break
+      default:
+        break
+    }
+  }
 
   render() {
     return (
@@ -212,28 +240,30 @@ class Home extends Component {
             centerElementContainer: { marginLeft: 12 }
           }}
           key="toolbar"
-          leftElement="menu"
-          onLeftElementPress={() => AppNav.openMenu()}
+          leftElement={this.leftElement}
+          onLeftElementPress={() => this.onLeftToolBarPress()}
           centerElement="Home"
-          rightElement={{
-            menu: {
-              icon: 'more-vert',
-              labels: ['Import', 'Export', 'Delete All']
-            }
-          }}
           searchable={{
             autoFocus: true,
             placeholder: 'Search',
             onChangeText: value => this.onSearch(value),
             onSearchClosed: () => this.onSearchClosed()
           }}
+          rightElement={AccountStore.isSelecting ? 'check' : {
+            menu: {
+              icon: 'more-vert',
+              labels: ['Import', 'Export', 'Delete Selected']
+            }
+          }}
+          onRightElementPress={({ action, result, index }) => this.onRightToolBarPress(index)}
         />
         {this.renderResultSearch()}
         {this.renderList()}
         <ActionButton
-          style={{ container: { backgroundColor: `${appStyle.redColor}80` } }}
+          style={{ container: { backgroundColor: `${appStyle.redColor}50` } }}
           onPress={() => {
-            AppNav.pushToScreen('detail', { title: 'Create', onNavigateBack: this.handleOnNavigateBack })
+            this.closeSwipe()
+            AppNav.pushToScreen('detail', { title: 'Create' })
           }}
         />
       </View>
@@ -258,10 +288,43 @@ const styles = StyleSheet.create({
     marginLeft: 23,
     marginVertical: 5,
     fontStyle: 'italic'
+  },
+  rightSwipeItem: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingLeft: 25
   }
 })
 
 export default Home
+
+// handleOnNavigateBack = (item, act = true) => {
+//   console.log('handleOnNavigateBack: ', item)
+//   // if (this.isSearching) {
+//   //   // console.log('add dataSearch...')
+//   //   // this.dataSearch = [item, ...this.dataSearch]
+//   //   // this.dataSearch = this.dataSearch.sort((x, y) => y.date - x.date)
+//   //   this.setState({ dataProvider: this.state.dataProvider.cloneWithRows(AccountStore.searchData(this.keyword)) })
+//   //   return
+//   // }
+//   // this.setState({ dataProvider: this.state.dataProvider.cloneWithRows(AccountStore.data) })
+// }
+
+// renderContent = () => (
+//   <View style={{ flex: 1 }}>
+//     {this.renderResultSearch()}
+//     <FlatList
+//       // initialNumToRender={10}
+//       data={this.isSearching ? this.dataSearch : AccountStore.data}
+//       renderItem={this.renderItem}
+//       keyExtractor={item => item.id}
+//       ListEmptyComponent={this.renderEmptyContent}
+//       contentContainerStyle={[{ flexGrow: 1 }, this.isSearching && this.dataSearch.length === 0 ? { justifyContent: 'center' } : AccountStore.data.length ? null : { justifyContent: 'center' }]}
+//       // refreshing={true}
+//       // onRefresh={this.onRefresh}
+//     />
+//   </View>
+// )
 
 // test = () => {
 //   const currentData = [{
