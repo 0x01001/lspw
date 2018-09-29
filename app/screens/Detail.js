@@ -16,6 +16,7 @@ import AccountStore, { Account } from '../models/AccountStore'
 import layout from '../utils/layout'
 import AppNav from '../AppNav'
 import { extractDomain, unixTimeStampToDateTime, writeToClipboard, deleteData } from '../utils'
+import constant from '../utils/constant'
 
 const top = layout.getExtraTopAndroid()
 const uuidv4 = require('uuid/v4')
@@ -136,7 +137,7 @@ class Detail extends Component {
     if (item) {
       id = item.id
     }
-    const act = id === '' ? 'create' : 'update'
+    const act = id === '' ? constant.DATA_CREATE : constant.DATA_UPDATE
     if (id === '') {
       id = uuidv4()
     }

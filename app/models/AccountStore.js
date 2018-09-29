@@ -23,30 +23,18 @@ export const Account = types.model({
   date: 0,
   state: false // local: 1: normal -1: delete
 }).actions(self => ({
-  // changeName(newName) {
-  //   self.name = newName
-  // },
-  // createId() {
-  //   self.id = uuidv4()
-  // },
-
   updateDate(val) {
     self.date = val
   },
 
   updateState(val) {
-    console.log('updateState: ', val)
-
+    // console.log('updateState: ', val)
     self.state = val
   },
 
   remove() {
     getRoot(self).remove(self)
   }
-
-  // update() {
-  //   getRoot(self).update(self)
-  // }
 }))
 
 const AccountStore = types.model({
@@ -91,6 +79,7 @@ const AccountStore = types.model({
     //   console.log('listAdd.length: ', listAdd.length)
     //   self.sort()
     // } else {
+    self.items.clear()
     result.map((x) => {
       x.state = false
       self.add(x)
@@ -123,6 +112,10 @@ const AccountStore = types.model({
     self.items[index] = item
   },
 
+  deleteAll(list) {
+    self.items = _.differenceWith(self.data, list, (x, y) => x.id === y)
+  },
+
   // sort() {
   //   // filter list descending order
   //   self.items = self.items.slice().sort((x, y) => y.date - x.date)
@@ -137,7 +130,10 @@ const AccountStore = types.model({
   },
 
   setSelectAll(val) {
-    self.items.map(x => x.state = val)
+    self.items.map((x) => {
+      x.state = val
+      return x
+    })
     // const copiedList = self.items.slice()
     // console.log('self.items: ', copiedList)
   },
@@ -220,7 +216,7 @@ const AccountStore = types.model({
   },
 
   // -----------------------------------------------
-  async load(callback) {
+  async load(callback, msg = '') {
     const { currentUser } = firebase.auth()
     const pw = await getPassword()
     if (pw === '') {
@@ -238,6 +234,9 @@ const AccountStore = types.model({
           self.setItem(json)
         } else {
           self.reset()
+        }
+        if (msg !== '') {
+          self.showMsg(msg)
         }
         if (callback) {
           callback()
@@ -362,9 +361,10 @@ const AccountStore = types.model({
     // updates[`/data/${uid}/b/${newKey}`] = postData
     updates[`/data/${uid}/b`] = postData
     firebase.database().ref().update(updates).then(() => {
-      AppNav.hideLoading()
-      // AppNav.hideImport()
-      self.showMsg('Import success.')
+      // AppNav.hideLoading()
+      // // AppNav.hideImport()
+      // self.showMsg('Import success.')
+      self.load(null, 'Import success.')
     })
       .catch((err) => {
         console.log(err)
@@ -376,20 +376,25 @@ const AccountStore = types.model({
     return self.data.filter(x => _.includes(x.name, val) || _.includes(x.username, val)).sort((x, y) => y.date - x.date)
   },
 
-  async saveData(item:Account, action, isShowNotify = true, callback = null) {
+  async saveData(item:Account, action, isShowNotify = true, callback = null, list = []) {
     // TODO: check duplicate -> show alert
 
     if (isShowNotify) { AppNav.showLoading() }
 
-    if (action === 'create' || action === 'update') {
+    if (action === constant.DATA_CREATE || action === constant.DATA_UPDATE) {
       const date = new Date()
       const timestamp = date.getTime()
       item.updateDate(timestamp)
     }
 
-    console.log(`${action}: ${item.id}`)
-    const json = JSON.stringify(item, ['id', 'name', 'url', 'username', 'password', 'desc'])
-    // console.log('data: ', json)
+    let json = ''
+    if (action === constant.DATA_DELETE_ALL) {
+      json = JSON.stringify(list)
+    } else {
+      console.log(`${action}: ${item.id}`)
+      json = JSON.stringify(item, ['id', 'name', 'url', 'username', 'password', 'desc'])
+    }
+    console.log('data: ', json)
 
     if (json !== '') {
       const pw = await getPassword()
@@ -406,19 +411,23 @@ const AccountStore = types.model({
       firebase.auth().currentUser.getIdToken().then((token) => {
         // console.log('token: ', token)
         axios.post(`${constant.ROOT_URL}/save`, { token, data, action }).then((res) => {
-          // console.log(res)
+          console.log(res)
           if (res.data.code === '1') {
-            if (action === 'update') {
+            if (action === constant.DATA_UPDATE) {
               self.update(item)
-            } else if (action === 'delete') {
+            } else if (action === constant.DATA_DELETE) {
               self.remove(item)
+              // const copiedList = self.items.slice()
+              // console.log('self.items: ', copiedList)
+            } else if (action === constant.DATA_DELETE_ALL) {
+              self.deleteAll(list)
               // const copiedList = self.items.slice()
               // console.log('self.items: ', copiedList)
             } else {
               self.addFirst(item)
             }
             if (isShowNotify) {
-              self.showMsg(`${capitalizeFirstLetter(action)} success!`)
+              self.showMsg(`${action === constant.DATA_DELETE_ALL ? 'Delete' : capitalizeFirstLetter(action)} success!`)
               AppNav.goBack()
               if (callback) {
                 callback()

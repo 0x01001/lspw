@@ -21,7 +21,7 @@ class Item extends Component {
 
     render() {
       const { data } = this.props
-      console.log(`render: ${data.id} ### ${data.username}`)
+      console.log(`render: ${data.id}`) // ### ${data.username}
 
       return (
         <ListItem
@@ -40,8 +40,7 @@ class Item extends Component {
             overlayContainerStyle: { backgroundColor: 'transparent' }
           }}
           rightIcon={{ name: 'chevron-right', color: appStyle.mainColor }}
-          leftIcon={AccountStore.isSelecting ? { name: data.state ? 'check-box' : 'check-box-outline-blank', color: appStyle.mainColor, paddingLeft: 8 } : null}
-          // onPress={this.props.onPress}
+          leftIcon={AccountStore.isSelecting ? { name: data.state ? 'check-circle' : 'radio-button-unchecked', color: appStyle.mainColor, paddingLeft: 8 } : null}
           onPress={() => { AccountStore.isSelecting ? data.updateState(!data.state) : this.props.onPress() }}
           onLongPress={() => writeToClipboard(data)}
           bottomDivider

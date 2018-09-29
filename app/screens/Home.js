@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, Text, Dimensions, StyleSheet, LayoutAnimation, TouchableOpacity, Alert } from 'react-native'
+import { View, Text, Dimensions, StyleSheet, LayoutAnimation, TouchableOpacity, Alert, RefreshControl } from 'react-native'
 import { Divider } from 'react-native-elements'
 import { Toolbar, ActionButton } from 'react-native-material-ui'
 import _ from 'lodash'
@@ -15,19 +15,29 @@ import AppNav from '../AppNav'
 import AccountStore from '../models/AccountStore'
 import Item from '../components/home/Item'
 import { deleteData } from '../utils'
+import constant from '../utils/constant'
 
 const marginTop = layout.getExtraTop()
 
 @observer
 class Home extends Component {
+  @observable
+  isSearching = false;
+  @observable
+  swipeable = null;
+  @observable
+  keyword = '';
+  @observable
+  leftElement = 'menu';
+  didMount = false;
+
   constructor(args) {
     super(args)
     const { width } = Dimensions.get('window')
 
     this.state = {
-      selected: [],
-      searchText: '',
-      dataProvider: new DataProvider((r1, r2) => r1 !== r2).cloneWithRows(AccountStore.data)
+      dataProvider: new DataProvider((r1, r2) => r1 !== r2).cloneWithRows(AccountStore.data),
+      refreshing: false
     }
 
     this._layoutProvider = new LayoutProvider(i => this.state.dataProvider.getDataForIndex(i), (type, dim) => {
@@ -36,7 +46,7 @@ class Home extends Component {
     })
 
     reaction(() => AccountStore.data, (newItems) => {
-      console.log('change....')
+      console.log('change....: ', this.didMount)
       // const data = this.state.dataProvider.getAllData()
       const dataUpdate = this.isSearching ? AccountStore.searchData(this.keyword) : AccountStore.data
       // const nextData = [...dataUpdate, ...data]
@@ -44,23 +54,24 @@ class Home extends Component {
       // this.setState({
       //   dataProvider: nextProvider
       // })
-      this.setState(prevState => ({
-        dataProvider: prevState.dataProvider.cloneWithRows(dataUpdate)
-      }))
+      if (this.didMount) {
+        this.setState(prevState => ({
+          dataProvider: prevState.dataProvider.cloneWithRows(dataUpdate)
+        }))
+      }
     })
   }
 
-  @observable
-  isSearching = false;
-  @observable
-  swipeable: null;
-  @observable
-  keyword = '';
-  @observable
-  leftElement = 'menu';
+  componentDidMount() {
+    this.didMount = true
+  }
 
   componentWillUpdate() {
     LayoutAnimation.spring()
+  }
+
+  componentWillUnmount() {
+    this.didMount = false
   }
 
   checkSearch = x => _.includes(x.name, this.keyword) || _.includes(x.username, this.keyword)
@@ -114,7 +125,9 @@ class Home extends Component {
 
   closeSwipe = () => {
     if (this.swipeable) {
-      this.swipeable.recenter()
+      if (this.state.dataProvider.getSize() > 0) { // fix: Can't call setState (or forceUpdate) on an unmounted component
+        this.swipeable.recenter()
+      }
       this.swipeable = null
     }
   }
@@ -151,6 +164,16 @@ class Home extends Component {
     </Swipeable>
   )
 
+  _onRefresh = () => {
+    this.setState({ refreshing: true })
+    AccountStore.load(() => {
+      this.setState({ refreshing: false })
+      if (AccountStore.isSelecting) {
+        this.leftElement = 'radio-button-unchecked'
+      }
+    })
+  }
+
   renderList = () => {
     if (this.state.dataProvider.getSize() === 0) {
       return this.renderEmptyContent()
@@ -163,17 +186,24 @@ class Home extends Component {
         rowRenderer={this._renderRow}
         onScroll={this.handleScroll}
         optimizeForInsertDeleteAnimations={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={this.state.refreshing}
+            onRefresh={this._onRefresh}
+            colors={[appStyle.redColor]}
+          />
+        }
       />)
   }
 
   onLeftToolBarPress = () => {
     if (AccountStore.isSelecting) {
-      if (this.leftElement === 'check-box-outline-blank') {
+      if (this.leftElement === 'radio-button-unchecked') {
         AccountStore.setSelectAll(true)
-        this.leftElement = 'check-box'
+        this.leftElement = 'check-circle'
       } else {
         AccountStore.setSelectAll(false)
-        this.leftElement = 'check-box-outline-blank'
+        this.leftElement = 'radio-button-unchecked'
       }
       return
     }
@@ -189,18 +219,21 @@ class Home extends Component {
   onRightToolBarPress = (index) => {
     // console.log('onRightToolBarPress: ', index)
     if (AccountStore.isSelecting) {
-      const count = AccountStore.dataDelete().length
-      if (count > 0) {
+      const data = AccountStore.dataDelete()
+      if (data.length > 0) {
         Alert.alert(
           'Are you sure?',
-          `You want to delete ${count} records?`,
+          `You want to delete ${data.length} records?`,
           [
             { text: 'Cancel', style: 'cancel', onPress: () => { this.onComplete() } },
             {
               text: 'OK',
               onPress: () => {
-                // TODO: delete all
-                this.onComplete()
+                const list = data.map(x => x.id)
+                // console.log('list: ', list)
+                AccountStore.saveData(null, constant.DATA_DELETE_ALL, true, () => {
+                  this.onComplete()
+                }, list)
               }
             }
           ],
@@ -220,7 +253,7 @@ class Home extends Component {
         break
       case 2:
         AccountStore.setSelect(true)
-        this.leftElement = 'check-box-outline-blank'
+        this.leftElement = 'radio-button-unchecked'
         break
       default:
         break

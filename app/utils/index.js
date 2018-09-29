@@ -149,14 +149,14 @@ export const unixTimeStampToDateTime = (timestamp) => {
 }
 
 export const writeToClipboard = async (item) => {
+  if (item.password === '') {
+    AccountStore.showMsg('Password is empty.')
+    return
+  }
   await Clipboard.setString(item.password)
   AccountStore.showMsg(`Password of '${item.username}' from <${item.name}> copied.`)
   // alert('Copied to Clipboard!')
-  const date = new Date()
-  const timestamp = date.getTime()
-  // console.log('timestamp: ', timestamp)
-  item.updateDate(timestamp)
-  AccountStore.saveData(item, 'update', false)
+  AccountStore.saveData(item, constant.DATA_UPDATE, false)
 }
 
 export const deleteData = (item:Account, okCallback = null, cancelCallback = null) => {
@@ -176,8 +176,7 @@ export const deleteData = (item:Account, okCallback = null, cancelCallback = nul
       {
         text: 'OK',
         onPress: () => {
-          const act = 'delete'
-          AccountStore.saveData(item, act, true, () => {
+          AccountStore.saveData(item, constant.DATA_DELETE, true, () => {
             if (okCallback) {
               okCallback()
             }

@@ -22,5 +22,9 @@ export default {
   AUTH_LOADING: 'auth_loading',
   MAIN_LOADING: 'main_loading',
   RESET: 'reset',
-  DATA_ENCRYPTED: 'data_encrypted'
+  DATA_ENCRYPTED: 'data_encrypted',
+  DATA_UPDATE: 'update',
+  DATA_DELETE: 'delete',
+  DATA_DELETE_ALL: 'delete_all',
+  DATA_CREATE: 'create'
 }
