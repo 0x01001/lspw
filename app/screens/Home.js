@@ -54,7 +54,7 @@ class Home extends Component {
       // this.setState({
       //   dataProvider: nextProvider
       // })
-      if (this.didMount) {
+      if (this.didMount) { // fix: Can't call setState (or forceUpdate) on an unmounted component
         this.setState(prevState => ({
           dataProvider: prevState.dataProvider.cloneWithRows(dataUpdate)
         }))

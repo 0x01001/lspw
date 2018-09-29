@@ -46,7 +46,8 @@ const AccountStore = types.model({
   // isFetching: false
 }).views(self => ({
   get data() {
-    return self.items.slice().sort((x, y) => y.date - x.date)
+    // return self.items.slice().sort((x, y) => y.date - x.date)
+    return _.orderBy(self.items.slice(), ['date', 'name'], ['desc', 'asc'])
   },
   get token() {
     return self.accessToken
@@ -85,8 +86,8 @@ const AccountStore = types.model({
       self.add(x)
       return x
     })
-    // const copiedList = self.items.slice()
-    // console.log('self.items: ', copiedList)
+    const copiedList = self.items.slice()
+    console.log('self.items: ', JSON.stringify(copiedList))
     // }
   },
 
@@ -216,6 +217,11 @@ const AccountStore = types.model({
   },
 
   // -----------------------------------------------
+  searchData(val) {
+    const result = self.items.slice().filter(x => _.includes(x.name, val) || _.includes(x.username, val))
+    return _.orderBy(result, ['date', 'name'], ['desc', 'asc'])
+  },
+
   async load(callback, msg = '') {
     const { currentUser } = firebase.auth()
     const pw = await getPassword()
@@ -230,7 +236,7 @@ const AccountStore = types.model({
         // console.log('load: ', data)
         if (data) {
           const json = decrypt(data, pw)
-          // console.log('load decrypt: ', json)
+          console.log('load decrypt: ', json)
           self.setItem(json)
         } else {
           self.reset()
@@ -372,9 +378,6 @@ const AccountStore = types.model({
       })
   },
   // ------------------------------------
-  searchData(val) {
-    return self.data.filter(x => _.includes(x.name, val) || _.includes(x.username, val)).sort((x, y) => y.date - x.date)
-  },
 
   async saveData(item:Account, action, isShowNotify = true, callback = null, list = []) {
     // TODO: check duplicate -> show alert
@@ -392,7 +395,7 @@ const AccountStore = types.model({
       json = JSON.stringify(list)
     } else {
       console.log(`${action}: ${item.id}`)
-      json = JSON.stringify(item, ['id', 'name', 'url', 'username', 'password', 'desc'])
+      json = JSON.stringify(item, ['id', 'name', 'url', 'username', 'password', 'desc', 'date'])
     }
     console.log('data: ', json)
 
