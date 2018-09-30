@@ -30,10 +30,11 @@ class Home extends Component {
   @observable
   leftElement = 'menu';
   didMount = false;
+  @observable w = 0
 
   constructor(args) {
     super(args)
-    const { width } = Dimensions.get('window')
+    this.w = Dimensions.get('window').width
 
     this.state = {
       dataProvider: new DataProvider((r1, r2) => r1 !== r2).cloneWithRows(AccountStore.data),
@@ -41,10 +42,9 @@ class Home extends Component {
     }
 
     this._layoutProvider = new LayoutProvider(i => this.state.dataProvider.getDataForIndex(i), (type, dim) => {
-      dim.width = width
+      dim.width = this.w
       dim.height = 66
     })
-
     reaction(() => AccountStore.data, (newItems) => {
       console.log('change....: ', this.didMount)
       // const data = this.state.dataProvider.getAllData()
@@ -180,7 +180,9 @@ class Home extends Component {
     }
     return (
       <RecyclerListView
-        // ref={ref => this._recyclerListView = ref}
+        // ref={x => this.recyclerRef = x}
+        style={{ flex: 1 }}
+        canChangeSize={true}
         layoutProvider={this._layoutProvider}
         dataProvider={this.state.dataProvider}
         rowRenderer={this._renderRow}
@@ -191,9 +193,11 @@ class Home extends Component {
             refreshing={this.state.refreshing}
             onRefresh={this._onRefresh}
             colors={[appStyle.redColor]}
+            progressBackgroundColor={appStyle.overlayColor}
           />
         }
-      />)
+      />
+    )
   }
 
   onLeftToolBarPress = () => {
@@ -260,9 +264,15 @@ class Home extends Component {
     }
   }
 
+  onLayout = (e) => {
+    const { width } = Dimensions.get('window')
+    // console.log(width, height)
+    this.w = width
+  }
+
   render() {
     return (
-      <View style={styles.container}>
+      <View style={styles.container} onLayout={this.onLayout}>
         <Toolbar
           style={{
             container: { marginTop, backgroundColor: appStyle.buttonBackgroundColor },

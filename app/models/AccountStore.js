@@ -86,8 +86,8 @@ const AccountStore = types.model({
       self.add(x)
       return x
     })
-    const copiedList = self.items.slice()
-    console.log('self.items: ', JSON.stringify(copiedList))
+    // const copiedList = self.items.slice()
+    // console.log('self.items: ', JSON.stringify(copiedList))
     // }
   },
 
@@ -236,7 +236,7 @@ const AccountStore = types.model({
         // console.log('load: ', data)
         if (data) {
           const json = decrypt(data, pw)
-          console.log('load decrypt: ', json)
+          // console.log('load decrypt: ', json)
           self.setItem(json)
         } else {
           self.reset()
