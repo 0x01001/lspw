@@ -9,7 +9,7 @@ import prompt from 'react-native-prompt-android'
 import constant from '../utils/constant'
 import AppNav from '../AppNav'
 import AppState from '../AppState'
-import { encrypt, decrypt, getPassword, savePassword, extractDomain, getGoogleSheetData, capitalizeFirstLetter } from '../utils'
+import { encrypt, decrypt, getPassword, savePassword, extractDomain, getGoogleSheetData, capitalizeFirstLetter, checkNetwork } from '../utils'
 
 const uuidv4 = require('uuid/v4')
 
@@ -143,6 +143,10 @@ const AccountStore = types.model({
     return self.items.filter(x => x.state === true)
   },
 
+  // checkExist(item) {
+  //   return self.items.includes(item)
+  // },
+
   showMsg(msg) {
     AppNav.hideLoading()
     const m = msg === undefined || msg === null || msg === '' ? 'Something went wrong.' : msg
@@ -150,6 +154,7 @@ const AccountStore = types.model({
   },
 
   sendVerify(callback) {
+    if (!checkNetwork) { return }
     AppNav.showLoading()
     firebase.auth().currentUser.sendEmailVerification().then(() => {
       // console.log('sendVerify done')
@@ -161,6 +166,7 @@ const AccountStore = types.model({
   },
 
   login(email, password) {
+    if (!checkNetwork) { return }
     AppNav.showLoading()
 
     firebase.auth().signInWithEmailAndPassword(email, password).then((data) => {
@@ -178,7 +184,7 @@ const AccountStore = types.model({
   },
 
   async signUp(name, email, password, callback) {
-    if (AppState.internetConnect !== 'online') { return }
+    if (!checkNetwork) { return }
     AppNav.showLoading()
     try {
       const { data } = await axios.post(`${constant.ROOT_URL}/signup`, { name, email, password })
@@ -206,6 +212,7 @@ const AccountStore = types.model({
   },
 
   forgotPassword(email, callback) {
+    if (!checkNetwork) { return }
     AppNav.showLoading()
     firebase.auth().sendPasswordResetEmail(email).then(() => {
       AppNav.hideLoading()
@@ -223,9 +230,11 @@ const AccountStore = types.model({
   },
 
   async load(callback, msg = '') {
+    if (!checkNetwork) { return }
     const { currentUser } = firebase.auth()
     const pw = await getPassword()
     if (pw === '') {
+      self.signOut()
       self.showMsg()
       return
     }
@@ -259,6 +268,7 @@ const AccountStore = types.model({
       self.showMsg('Link is required.')
       return
     }
+    if (!checkNetwork) { return }
 
     console.log(`OK Pressed: ${url}`)
     // console.log('import: ', token, data)
@@ -380,6 +390,7 @@ const AccountStore = types.model({
   // ------------------------------------
 
   async saveData(item:Account, action, isShowNotify = true, callback = null, list = []) {
+    if (!checkNetwork) { return }
     // TODO: check duplicate -> show alert
 
     if (isShowNotify) { AppNav.showLoading() }
@@ -445,6 +456,7 @@ const AccountStore = types.model({
 
   // ------------------------------------
   async googleSignin() {
+    if (!checkNetwork) { return }
     // TODO: check accessToken !== null
     try {
       await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true })

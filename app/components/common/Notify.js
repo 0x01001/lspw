@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import { Animated, StyleSheet, Dimensions, Text } from 'react-native'
+import { observable } from 'mobx'
 import layout from '../../utils/layout'
 import appStyle from '../../utils/app_style'
 
@@ -16,6 +17,8 @@ export default class Notify extends Component {
     }
   }
 
+  @observable isShow = false;
+
   show(content, style = {}, styleText = {}) {
     this.setState({
       content,
@@ -26,14 +29,18 @@ export default class Notify extends Component {
       toValue: 0,
       duration: 250
     }).start()
-    setTimeout(() => this.hide(), 2500)
+    // setTimeout(() => this.hide(), 2500)
+    this.isShow = true
   }
 
   hide() {
-    Animated.timing(this.offset, {
-      toValue: -heightNotif,
-      duration: 250
-    }).start()
+    if (this.isShow) {
+      Animated.timing(this.offset, {
+        toValue: -heightNotif,
+        duration: 250
+      }).start()
+    }
+    this.isShow = false
   }
 
   render() {
@@ -58,6 +65,6 @@ const styles = StyleSheet.create({
   content: {
     fontSize: 16,
     color: '#fff',
-    marginBottom: 10
+    marginBottom: 8
   }
 })

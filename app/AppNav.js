@@ -43,6 +43,10 @@ class ObservableNav {
     this.notify && this.notify.show(content, style, styleText)
   }
 
+  @action hidewNotify() {
+    this.notify && this.notify.hide()
+  }
+
   @action
   closeMenu() {
     this.navigator.dispatch(DrawerActions.closeDrawer())

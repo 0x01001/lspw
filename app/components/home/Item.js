@@ -30,7 +30,7 @@ class Item extends Component {
           subtitle={data.username ? data.username : null}
           titleStyle={{ color: appStyle.mainColor, fontWeight: 'bold', height: 26 }}
           subtitleStyle={data.username ? {
-            color: appStyle.mainColor, fontSize: 12, fontStyle: 'italic', height: 20
+            color: appStyle.mainColor, fontSize: 12, fontStyle: 'italic', height: 16
           } : null}
           leftAvatar={{
             size: 26,

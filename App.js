@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, NetInfo } from 'react-native'
+import { View, NetInfo, StatusBar } from 'react-native'
 import Toast from './app/components/common/Toast'
 
 import Router from './app/Router'
@@ -55,8 +55,10 @@ export default class App extends Component<Props> {
 
   connectionChange = (connect) => {
     const type = connect.type === 'none' ? 'offline' : 'online'
-    if (connect.type === 'none') {
-      AppNav.showNotify('No internet connection', { backgroundColor: appStyle.redColor }, { color: appStyle.mainColor })
+    if (type === 'offline') {
+      AppNav.showNotify('No internet connection', { backgroundColor: `${appStyle.redColor}80` }, { color: appStyle.mainColor })
+    } else {
+      AppNav.hidewNotify()
     }
     AppState.setInternetConnect(type)
   }
@@ -71,6 +73,7 @@ export default class App extends Component<Props> {
   render() {
     return (
       <View style={{ flex: 1, backgroundColor: appStyle.backgroundColor }}>
+        <StatusBar backgroundColor={appStyle.backgroundColor} barStyle="light-content" translucent />
         {this.renderContent()}
         {/* <ImportPopup ref={(ref) => { AppNav.import = ref }} /> */}
         <Notify ref={(ref) => { AppNav.notify = ref }} />

@@ -37,6 +37,10 @@ class Home extends Component {
     this.w = Dimensions.get('window').width
 
     this.state = {
+      // dataProvider: new DataProvider((r1, r2) => r1 !== r2, (index) => {
+      //   const id = this.state.dataProvider.getDataForIndex(index)
+      //   return id
+      // }).cloneWithRows(AccountStore.data),
       dataProvider: new DataProvider((r1, r2) => r1 !== r2).cloneWithRows(AccountStore.data),
       refreshing: false
     }
@@ -45,6 +49,7 @@ class Home extends Component {
       dim.width = this.w
       dim.height = 66
     })
+
     reaction(() => AccountStore.data, (newItems) => {
       console.log('change....: ', this.didMount)
       // const data = this.state.dataProvider.getAllData()
@@ -187,7 +192,7 @@ class Home extends Component {
         dataProvider={this.state.dataProvider}
         rowRenderer={this._renderRow}
         onScroll={this.handleScroll}
-        optimizeForInsertDeleteAnimations={false}
+        optimizeForInsertDeleteAnimations={true}
         refreshControl={
           <RefreshControl
             refreshing={this.state.refreshing}
@@ -196,6 +201,7 @@ class Home extends Component {
             progressBackgroundColor={appStyle.overlayColor}
           />
         }
+        // forceNonDeterministicRendering={true}
       />
     )
   }

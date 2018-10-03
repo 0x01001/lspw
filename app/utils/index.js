@@ -5,6 +5,8 @@ import { Clipboard, Alert } from 'react-native'
 import AccountStore, { Account } from '../models/AccountStore'
 // import PinCodeStore from '../models/PinCodeStore'
 import constant from './constant'
+import AppState from '../AppState'
+import AppNav from '../AppNav'
 
 const CryptoJS = require('crypto-js')
 
@@ -188,6 +190,15 @@ export const deleteData = (item:Account, okCallback = null, cancelCallback = nul
   )
 }
 
+export const checkNetwork = () => {
+  if (AppState.internetConnect !== 'online') {
+    AppNav.showToast('No internet connection.')
+    AppNav.hideLoading()
+    return false
+  }
+  return true
+}
+
 export const capitalizeFirstLetter = val => val.charAt(0).toUpperCase() + val.slice(1)
 
 export default {
@@ -201,5 +212,6 @@ export default {
   // updatePassword,
   savePassword,
   capitalizeFirstLetter,
-  deleteData
+  deleteData,
+  checkNetwork
 }
