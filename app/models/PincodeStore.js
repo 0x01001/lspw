@@ -5,7 +5,7 @@ import axios from 'axios'
 import AppState from '../AppState'
 import AppNav from '../AppNav'
 import constant from '../utils/constant'
-import { encrypt, getPassword } from '../utils'
+import utils from '../utils'
 
 const PinCodeStore = types.model({
   title: '',
@@ -103,7 +103,7 @@ const PinCodeStore = types.model({
       return
     }
     AppNav.showLoading()
-    const password = encrypt(pw, self.pinCode)
+    const password = utils.encrypt(pw, self.pinCode)
     firebase.auth().currentUser.getIdToken().then((token) => {
       // console.log('token: ', token)
       axios.post(`${constant.ROOT_URL}/removepincode`, { token, password }).then((res) => {

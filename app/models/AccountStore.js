@@ -8,8 +8,7 @@ import prompt from 'react-native-prompt-android'
 
 import constant from '../utils/constant'
 import AppNav from '../AppNav'
-import AppState from '../AppState'
-import { encrypt, decrypt, getPassword, savePassword, extractDomain, getGoogleSheetData, capitalizeFirstLetter, checkNetwork } from '../utils'
+import utils from '../utils'
 
 const uuidv4 = require('uuid/v4')
 
@@ -135,6 +134,10 @@ const AccountStore = types.model({
       x.state = val
       return x
     })
+    //  self.items.reduce((acc, x) => {
+    //   acc[x.id] = isChecked;
+    //   return acc;
+    // }
     // const copiedList = self.items.slice()
     // console.log('self.items: ', copiedList)
   },
@@ -154,7 +157,7 @@ const AccountStore = types.model({
   },
 
   sendVerify(callback) {
-    if (!checkNetwork) { return }
+    if (!utils.checkNetwork) { return }
     AppNav.showLoading()
     firebase.auth().currentUser.sendEmailVerification().then(() => {
       // console.log('sendVerify done')
@@ -166,7 +169,7 @@ const AccountStore = types.model({
   },
 
   login(email, password) {
-    if (!checkNetwork) { return }
+    if (!utils.checkNetwork) { return }
     AppNav.showLoading()
 
     firebase.auth().signInWithEmailAndPassword(email, password).then((data) => {
@@ -174,7 +177,7 @@ const AccountStore = types.model({
       const emailVerified = data.user ? data.user.emailVerified : null
       // console.log('login emailVerified: ', emailVerified)
       if (emailVerified) {
-        savePassword(password)
+        utils.savePassword(password)
       } else {
         self.showMsg('Your account is not activated.')
       }
@@ -184,7 +187,7 @@ const AccountStore = types.model({
   },
 
   async signUp(name, email, password, callback) {
-    if (!checkNetwork) { return }
+    if (!utils.checkNetwork) { return }
     AppNav.showLoading()
     try {
       const { data } = await axios.post(`${constant.ROOT_URL}/signup`, { name, email, password })
@@ -195,7 +198,7 @@ const AccountStore = types.model({
           // console.log('token: ', token)
           firebase.auth().signInWithCustomToken(token).then(() => {
             self.sendVerify(callback)
-            savePassword(password)
+            utils.savePassword(password)
           }).catch(() => {
             self.showMsg()
           })
@@ -212,7 +215,7 @@ const AccountStore = types.model({
   },
 
   forgotPassword(email, callback) {
-    if (!checkNetwork) { return }
+    if (!utils.checkNetwork) { return }
     AppNav.showLoading()
     firebase.auth().sendPasswordResetEmail(email).then(() => {
       AppNav.hideLoading()
@@ -229,10 +232,17 @@ const AccountStore = types.model({
     return _.orderBy(result, ['date', 'name'], ['desc', 'asc'])
   },
 
+  async filteredData(start, count) {
+    return await self.items.slice(
+      start,
+      Math.min(self.items.length, start + count)
+    )
+  },
+
   async load(callback, msg = '') {
-    if (!checkNetwork) { return }
+    if (!utils.checkNetwork) { return }
     const { currentUser } = firebase.auth()
-    const pw = await getPassword()
+    const pw = await utils.getPassword()
     if (pw === '') {
       self.signOut()
       self.showMsg()
@@ -244,7 +254,7 @@ const AccountStore = types.model({
         const data = snapshot.val()
         // console.log('load: ', data)
         if (data) {
-          const json = decrypt(data, pw)
+          const json = utils.decrypt(data, pw)
           // console.log('load decrypt: ', json)
           self.setItem(json)
         } else {
@@ -268,7 +278,7 @@ const AccountStore = types.model({
       self.showMsg('Link is required.')
       return
     }
-    if (!checkNetwork) { return }
+    if (!utils.checkNetwork) { return }
 
     console.log(`OK Pressed: ${url}`)
     // console.log('import: ', token, data)
@@ -329,7 +339,7 @@ const AccountStore = types.model({
     // console.log('importData json ', listJoin)
     if (listJoin.length > 0) {
       const { currentUser } = firebase.auth()
-      const pw = await getPassword()
+      const pw = await utils.getPassword()
       // console.log('pw: ', pw)
       if (pw === '') {
         AppNav.hideLoading()
@@ -369,7 +379,7 @@ const AccountStore = types.model({
     const json = JSON.stringify(data)
     // console.log('submitData: ', json)
     // A post entry.
-    const postData = encrypt(json, pw)
+    const postData = utils.encrypt(json, pw)
     // Get a key for a new Post.
     // const newKey = key !== '' ? key : firebase.database().ref(`/data/${uid}/b`).push().key
     // Write the new post's data simultaneously in the posts list and the user's post list.
@@ -390,7 +400,7 @@ const AccountStore = types.model({
   // ------------------------------------
 
   async saveData(item:Account, action, isShowNotify = true, callback = null, list = []) {
-    if (!checkNetwork) { return }
+    if (!utils.checkNetwork) { return }
     // TODO: check duplicate -> show alert
 
     if (isShowNotify) { AppNav.showLoading() }
@@ -411,7 +421,7 @@ const AccountStore = types.model({
     console.log('data: ', json)
 
     if (json !== '') {
-      const pw = await getPassword()
+      const pw = await utils.getPassword()
       // console.log('pw: ', pw)
       if (pw === '') {
         if (isShowNotify) {
@@ -420,7 +430,7 @@ const AccountStore = types.model({
         }
         return
       }
-      const data = encrypt(json, pw)
+      const data = utils.encrypt(json, pw)
       // console.log('post data: ', data)
       firebase.auth().currentUser.getIdToken().then((token) => {
         // console.log('token: ', token)
@@ -441,7 +451,7 @@ const AccountStore = types.model({
               self.addFirst(item)
             }
             if (isShowNotify) {
-              self.showMsg(`${action === constant.DATA_DELETE_ALL ? 'Delete' : capitalizeFirstLetter(action)} success!`)
+              self.showMsg(`${action === constant.DATA_DELETE_ALL ? 'Delete' : utils.capitalizeFirstLetter(action)} success!`)
               AppNav.goBack()
               if (callback) {
                 callback()
@@ -456,7 +466,7 @@ const AccountStore = types.model({
 
   // ------------------------------------
   async googleSignin() {
-    if (!checkNetwork) { return }
+    if (!utils.checkNetwork) { return }
     // TODO: check accessToken !== null
     try {
       await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true })
@@ -559,13 +569,13 @@ const getDataImport = async (id, token) => {
         const model = {
           id: '',
           // name: getData(list, nameIndex),
-          url: getGoogleSheetData(list, urlIndex),
-          username: getGoogleSheetData(list, usernameIndex),
-          password: getGoogleSheetData(list, passwordIndex),
-          desc: getGoogleSheetData(list, extraIndex)
+          url: utils.getGoogleSheetData(list, urlIndex),
+          username: utils.getGoogleSheetData(list, usernameIndex),
+          password: utils.getGoogleSheetData(list, passwordIndex),
+          desc: utils.getGoogleSheetData(list, extraIndex)
         }
         if (model.password !== '' || model.url !== '' || model.username !== '' || model.desc !== '') {
-          model.name = extractDomain(model.url) // save root domain
+          model.name = utils.extractDomain(model.url) // save root domain
           result = [...result, model]
           // result.push(model)
         }

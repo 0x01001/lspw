@@ -4,7 +4,7 @@ import { ListItem } from 'react-native-elements'
 import { observer } from 'mobx-react'
 
 import appStyle from '../../utils/app_style'
-import { writeToClipboard } from '../../utils'
+import utils from '../../utils'
 import AccountStore from '../../models/AccountStore'
 
 @observer
@@ -18,6 +18,10 @@ class Item extends Component {
       data: {},
       onPress: () => {}
     }
+
+    // shouldComponentUpdate(newProps) {
+    //   return this.props.data !== newProps.data
+    // }
 
     render() {
       const { data } = this.props
@@ -42,7 +46,7 @@ class Item extends Component {
           rightIcon={{ name: 'chevron-right', color: appStyle.mainColor }}
           leftIcon={AccountStore.isSelecting ? { name: data.state ? 'check-circle' : 'radio-button-unchecked', color: appStyle.mainColor, paddingLeft: 8 } : null}
           onPress={() => { AccountStore.isSelecting ? data.updateState(!data.state) : this.props.onPress() }}
-          onLongPress={() => writeToClipboard(data)}
+          onLongPress={() => utils.writeToClipboard(data)}
           bottomDivider
         />
       )

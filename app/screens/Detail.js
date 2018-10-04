@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import {
   View, KeyboardAvoidingView, StyleSheet, Platform, Text, Keyboard, TouchableOpacity,
-  Dimensions, Alert
+  Dimensions
 } from 'react-native'
 import PropTypes from 'prop-types'
 import { observer } from 'mobx-react'
@@ -15,7 +15,7 @@ import { TextInput } from '../components/common'
 import AccountStore, { Account } from '../models/AccountStore'
 import layout from '../utils/layout'
 import AppNav from '../AppNav'
-import { extractDomain, unixTimeStampToDateTime, writeToClipboard, deleteData } from '../utils'
+import utils from '../utils'
 import constant from '../utils/constant'
 
 const top = layout.getExtraTopAndroid()
@@ -41,7 +41,7 @@ class Detail extends Component {
        </TouchableOpacity>
      ),
      headerRight: navigation.state.params.item ? (
-       <TouchableOpacity onPress={() => writeToClipboard(navigation.state.params.item)}>
+       <TouchableOpacity onPress={() => utils.writeToClipboard(navigation.state.params.item)}>
          <IconMaterialCommunity name="content-copy" size={25} style={{ color: appStyle.mainColor, padding: 10 }} />
        </TouchableOpacity>
      ) : null,
@@ -123,7 +123,7 @@ class Detail extends Component {
     this.setState({ [key]: val })
     if (key === 'url') {
       this.setState({ [`${key}Error`]: !val ? 'This field is required' : '' })
-      this.props.navigation.setParams({ title: extractDomain(val) })
+      this.props.navigation.setParams({ title: utils.extractDomain(val) })
     }
   };
 
@@ -141,7 +141,7 @@ class Detail extends Component {
     if (id === '') {
       id = uuidv4()
     }
-    const name = extractDomain(this.state.url)
+    const name = utils.extractDomain(this.state.url)
     // console.log('name: ', name)
     const {
       username, desc, url, password, date
@@ -159,7 +159,7 @@ class Detail extends Component {
   }
 
   onDelete = () => {
-    deleteData(this.props.navigation.state.params.item)
+    utils.deleteData(this.props.navigation.state.params.item)
   }
 
   renderDate = () => {
@@ -167,7 +167,7 @@ class Detail extends Component {
     if (date > 0 && this.state.isShowDate) {
       return (
         <View style={styles.dateContainer}>
-          <Text style={[style.label, { fontSize: 12, fontStyle: 'italic' }]}>Last use: {unixTimeStampToDateTime(date)}</Text>
+          <Text style={[style.label, { fontSize: 12, fontStyle: 'italic' }]}>Last use: {utils.unixTimeStampToDateTime(date)}</Text>
         </View>
       )
     }

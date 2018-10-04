@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, Text, Dimensions, StyleSheet, LayoutAnimation, TouchableOpacity, Alert, RefreshControl } from 'react-native'
+import { View, Text, Dimensions, StyleSheet, LayoutAnimation, TouchableOpacity, Alert, RefreshControl, ActivityIndicator } from 'react-native'
 import { Divider } from 'react-native-elements'
 import { Toolbar, ActionButton } from 'react-native-material-ui'
 import _ from 'lodash'
@@ -14,10 +14,11 @@ import appStyle from '../utils/app_style'
 import AppNav from '../AppNav'
 import AccountStore from '../models/AccountStore'
 import Item from '../components/home/Item'
-import { deleteData } from '../utils'
+import utils from '../utils'
 import constant from '../utils/constant'
 
 const marginTop = layout.getExtraTop()
+const numberItemPage = 20
 
 @observer
 class Home extends Component {
@@ -30,41 +31,34 @@ class Home extends Component {
   @observable
   leftElement = 'menu';
   didMount = false;
-  @observable w = 0
 
   constructor(args) {
     super(args)
-    this.w = Dimensions.get('window').width
 
     this.state = {
-      // dataProvider: new DataProvider((r1, r2) => r1 !== r2, (index) => {
-      //   const id = this.state.dataProvider.getDataForIndex(index)
-      //   return id
-      // }).cloneWithRows(AccountStore.data),
-      dataProvider: new DataProvider((r1, r2) => r1 !== r2).cloneWithRows(AccountStore.data),
+      dataProvider: new DataProvider((r1, r2) => r1 !== r2),
+      layoutProvider: layout.getLayoutProvider(),
+      listData: [],
+      count: 0,
       refreshing: false
     }
-
-    this._layoutProvider = new LayoutProvider(i => this.state.dataProvider.getDataForIndex(i), (type, dim) => {
-      dim.width = this.w
-      dim.height = 66
-    })
+    this.inProgressNetworkReq = false
+    this.searchCount = 0
 
     reaction(() => AccountStore.data, (newItems) => {
       console.log('change....: ', this.didMount)
       // const data = this.state.dataProvider.getAllData()
-      const dataUpdate = this.isSearching ? AccountStore.searchData(this.keyword) : AccountStore.data
-      // const nextData = [...dataUpdate, ...data]
-      // const nextProvider = this.state.dataProvider.cloneWithRows(nextData)
-      // this.setState({
-      //   dataProvider: nextProvider
-      // })
+      const data = this.isSearching ? AccountStore.searchData(this.keyword) : AccountStore.data
       if (this.didMount) { // fix: Can't call setState (or forceUpdate) on an unmounted component
         this.setState(prevState => ({
-          dataProvider: prevState.dataProvider.cloneWithRows(dataUpdate)
+          dataProvider: prevState.dataProvider.cloneWithRows(data)
         }))
       }
     })
+  }
+
+  componentWillMount() {
+    this.fetchMoreData()
   }
 
   componentDidMount() {
@@ -85,16 +79,18 @@ class Home extends Component {
     // console.log('onSearch')
     this.keyword = val
     this.isSearching = true
-    // this.dataSearch = AccountStore.searchData(val)
-    this.setState(prevState => ({
-      dataProvider: prevState.dataProvider.cloneWithRows(AccountStore.searchData(val))
-    }))
+    const list = AccountStore.searchData(val)
+    this.searchCount = list.length
+    this.setState({
+      dataProvider: this.state.dataProvider.cloneWithRows(list),
+      listData: list,
+      count: numberItemPage
+    })
   }
 
   onSearchClosed = () => {
     // console.log('onSearchClosed')
     this.isSearching = false
-    // this.dataSearch = []
     this.setState({ dataProvider: this.state.dataProvider.cloneWithRows(AccountStore.data) })
   }
 
@@ -103,10 +99,10 @@ class Home extends Component {
   )
 
   renderResultSearch = () => {
-    if (this.isSearching && this.state.dataProvider.getSize() > 0) {
+    if (this.isSearching && this.searchCount > 0) {
       return (
         <View>
-          <Text style={styles.resultText}>Result: {this.state.dataProvider.getSize()}</Text>
+          <Text style={styles.resultText}>Result: {this.searchCount}</Text>
           <Divider style={{ backgroundColor: appStyle.borderColor }} />
         </View>)
     }
@@ -138,18 +134,18 @@ class Home extends Component {
   }
 
   onDelete = (item) => {
-    deleteData(item, () => {
+    utils.deleteData(item, () => {
       this.closeSwipe()
     }, () => {
       this.closeSwipe()
     })
   }
 
-  _renderRow = item => (
+  rowRenderer = (type, data) => (
     <Swipeable
       rightButtonWidth={70}
       rightButtons={[
-        <TouchableOpacity style={[styles.rightSwipeItem, { backgroundColor: `${appStyle.redColor}80` }]} onPress={() => this.onDelete(item)}>
+        <TouchableOpacity style={[styles.rightSwipeItem, { backgroundColor: `${appStyle.redColor}80` }]} onPress={() => this.onDelete(data)}>
           {/* <Text style={{ textAlign: 'center' }}>Delete</Text> */}
           <Icon name="delete-forever" size={25} color={appStyle.mainColor} />
         </TouchableOpacity>
@@ -159,17 +155,17 @@ class Home extends Component {
       swipeStartMinRightEdgeClearance={10}
     >
       <Item
-        data={item}
+        data={data}
         onPress={() => {
           this.closeSwipe()
-          AppNav.pushToScreen('detail', { title: item.name, item })
+          AppNav.pushToScreen('detail', { title: data.name, data })
           // AppNav.pushToScreen('detail', { title: item.name, item, onNavigateBack: this.handleOnNavigateBack })
         }}
       />
     </Swipeable>
   )
 
-  _onRefresh = () => {
+  onRefresh = () => {
     this.setState({ refreshing: true })
     AccountStore.load(() => {
       this.setState({ refreshing: false })
@@ -179,8 +175,38 @@ class Home extends Component {
     })
   }
 
+  async fetchMoreData() {
+    // console.log('fetchMoreData: ', this.inProgressNetworkReq)
+    if (!this.inProgressNetworkReq) {
+      this.inProgressNetworkReq = true
+      const data = this.isSearching ? AccountStore.searchData(this.keyword) : AccountStore.data
+      const list = data.slice(this.state.count, Math.min(data.length, this.state.count + numberItemPage))
+      // const list = await AccountStore.filteredData(this.state.count, numberItemPage)
+      this.inProgressNetworkReq = false
+      this.setState({
+        dataProvider: this.state.dataProvider.cloneWithRows(this.state.listData.concat(list)),
+        listData: this.state.listData.concat(list),
+        count: this.state.count + numberItemPage
+      })
+    }
+  }
+
+  handleListEnd = () => {
+    this.fetchMoreData()
+    this.setState({})
+  };
+
+  renderFooter = () =>
+    (this.inProgressNetworkReq
+      ? <ActivityIndicator
+        style={{ margin: 10 }}
+        size="large"
+        color="black"
+      />
+      : <View style={{ height: 60 }} />);
+
   renderList = () => {
-    if (this.state.dataProvider.getSize() === 0) {
+    if (this.state.count === 0) {
       return this.renderEmptyContent()
     }
     return (
@@ -188,19 +214,22 @@ class Home extends Component {
         // ref={x => this.recyclerRef = x}
         style={{ flex: 1 }}
         canChangeSize={true}
-        layoutProvider={this._layoutProvider}
+        onEndReached={this.handleListEnd}
         dataProvider={this.state.dataProvider}
-        rowRenderer={this._renderRow}
+        layoutProvider={this.state.layoutProvider}
+        rowRenderer={this.rowRenderer}
+        renderFooter={this.renderFooter}
         onScroll={this.handleScroll}
         optimizeForInsertDeleteAnimations={true}
         refreshControl={
           <RefreshControl
             refreshing={this.state.refreshing}
-            onRefresh={this._onRefresh}
+            onRefresh={this.onRefresh}
             colors={[appStyle.redColor]}
             progressBackgroundColor={appStyle.overlayColor}
           />
         }
+        // renderAheadOffset={200}
         // forceNonDeterministicRendering={true}
       />
     )
@@ -270,15 +299,9 @@ class Home extends Component {
     }
   }
 
-  onLayout = (e) => {
-    const { width } = Dimensions.get('window')
-    // console.log(width, height)
-    this.w = width
-  }
-
   render() {
     return (
-      <View style={styles.container} onLayout={this.onLayout}>
+      <View style={styles.container}>
         <Toolbar
           style={{
             container: { marginTop, backgroundColor: appStyle.buttonBackgroundColor },
