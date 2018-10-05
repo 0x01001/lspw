@@ -39,6 +39,7 @@ export const Account = types.model({
 const AccountStore = types.model({
   items: types.array(Account),
   accessToken: '',
+  pwTemp: '',
   isSelecting: false
   // isLoading: false,
   // isDeleting: false,
@@ -125,6 +126,18 @@ const AccountStore = types.model({
     self.accessToken = val
   },
 
+  setPwTemp(val) {
+    self.pwTemp = val
+  },
+
+  async savePwTemp() {
+    if (self.pwTemp !== '') {
+      // console.log('savePwTemp')
+      await utils.savePassword(self.pwTemp)
+    }
+    self.setPwTemp('')
+  },
+
   setSelect(val) {
     self.isSelecting = val
   },
@@ -175,9 +188,10 @@ const AccountStore = types.model({
     firebase.auth().signInWithEmailAndPassword(email, password).then((data) => {
       // console.log('user: ', data.user)
       const emailVerified = data.user ? data.user.emailVerified : null
-      // console.log('login emailVerified: ', emailVerified)
+      console.log('login emailVerified: ', emailVerified)
       if (emailVerified) {
-        utils.savePassword(password)
+        // utils.savePassword(password)
+        self.setPwTemp(password)
       } else {
         self.showMsg('Your account is not activated.')
       }
@@ -198,7 +212,8 @@ const AccountStore = types.model({
           // console.log('token: ', token)
           firebase.auth().signInWithCustomToken(token).then(() => {
             self.sendVerify(callback)
-            utils.savePassword(password)
+            // utils.savePassword(password)
+            self.setPwTemp(password)
           }).catch(() => {
             self.showMsg()
           })
@@ -486,13 +501,12 @@ const AccountStore = types.model({
       )
     } catch (error) {
       console.log('error.code: ', error.code)
-
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
         // user cancelled the login flow
-      } else if (error.code === statusCodes.IN_PROGRESS) {
-        // operation (f.e. sign in) is in progress already
-      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-        // play services not available or outdated
+      // } else if (error.code === statusCodes.IN_PROGRESS) {
+      //   // operation (f.e. sign in) is in progress already
+      // } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+      //   // play services not available or outdated
       } else {
         // some other error happened
         self.showMsg()

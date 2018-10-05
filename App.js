@@ -23,7 +23,8 @@ export default class App extends Component<Props> {
 
     firebase.auth().onAuthStateChanged((user) => {
       if (user && user.emailVerified) {
-        PinCodeStore.getPinCode(() => {
+        PinCodeStore.getPinCode(async () => {
+          await AccountStore.savePwTemp() // save temp pw by pincode
           if (PinCodeStore.pinCode !== '') {
             this.setState({ isSignIn: true })
             AppNav.reset('unlockStack')

@@ -3,7 +3,7 @@ import firebase from 'firebase'
 import { Clipboard, Alert } from 'react-native'
 
 import AccountStore, { Account } from '../models/AccountStore'
-// import PinCodeStore from '../models/PinCodeStore'
+import PinCodeStore from '../models/PinCodeStore'
 import constant from './constant'
 import AppState from '../AppState'
 import AppNav from '../AppNav'
@@ -96,24 +96,28 @@ const utils = {
     return ''
   },
 
-  async savePassword(password) {
+  getSecret(pincode = '') {
+    return pincode !== '' ? pincode : PinCodeStore.pinCode !== '' ? PinCodeStore.pinCode : firebase.auth().currentUser.uid
+  },
+
+  async savePassword(password, pincode = '') {
     try {
       // TODO: if pin code != null ? pinCode : uid;
-      const { uid } = firebase.auth().currentUser
-      const pw = this.encrypt(password, uid)
+      const secret = this.getSecret(pincode)
+      const pw = this.encrypt(password, secret)
       await Keychain.setGenericPassword(constant.DATA_ENCRYPTED, pw)
     } catch (err) {
       console.log(err)
     }
   },
 
-  async getPassword() {
+  async getPassword(pincode = '') {
     try {
       const credentials = await Keychain.getGenericPassword()
       if (credentials) {
-      // console.log('password decrypt: ', credentials.password)
-        const { currentUser } = firebase.auth()
-        const pw = this.decrypt(credentials.password, currentUser.uid) // pincode
+        // console.log('password decrypt: ', credentials.password)
+        const secret = this.getSecret(pincode)
+        const pw = this.decrypt(credentials.password, secret) // pincode
         return pw
       }
       console.log('No credentials stored.')
@@ -122,17 +126,6 @@ const utils = {
     }
     return ''
   },
-
-  // updatePassword = async (pincode) => {
-  //   try {
-  //     const pw = await getPassword()
-  //     await savePassword(pw, pincode)
-  //     console.log('No credentials stored.')
-  //   } catch (err) {
-  //     console.log(err)
-  //   }
-  //   return ''
-  // },
 
   unixTimeStampToDateTime(timestamp) {
     const currentDate = new Date(timestamp)

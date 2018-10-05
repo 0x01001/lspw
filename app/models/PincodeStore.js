@@ -17,7 +17,6 @@ const PinCodeStore = types.model({
   confirmPinCode: ''
 
 }).actions(self => ({
-
   setPinCode(val) {
     self.pinCode = val
   },
@@ -72,7 +71,6 @@ const PinCodeStore = types.model({
       const pincode = snapshot.val()
       console.log('getPinCode: ', pincode)
       if (pincode) {
-        // await updatePassword(pincode)
         AppNav.hideLoading()
         self.setPinCode(pincode)
         self.setType(2)
@@ -87,8 +85,11 @@ const PinCodeStore = types.model({
 
     const { currentUser } = firebase.auth()
     firebase.database().ref(`/data/${currentUser.uid}`).update({ e: pincode })
-      .then(() => {
-        // await updatePassword(pincode)
+      .then(async () => {
+        const pin = self.type === 0 ? '' : self.pinCode
+        const pw = await utils.getPassword(pin)
+        // console.log(`updatePinCode :${pin} - ${pw}`)
+        await utils.savePassword(pw, pincode)
         AppNav.hideLoading()
         self.setPinCode(pincode)
         AppNav.reset('mainStack')
@@ -106,11 +107,11 @@ const PinCodeStore = types.model({
     const password = utils.encrypt(pw, self.pinCode)
     firebase.auth().currentUser.getIdToken().then((token) => {
       // console.log('token: ', token)
-      axios.post(`${constant.ROOT_URL}/removepincode`, { token, password }).then((res) => {
+      axios.post(`${constant.ROOT_URL}/removepincode`, { token, password }).then(async (res) => {
         // console.log(res)
         if (res.data.code === '1') {
-          // await updatePassword(self.pincode)
           self.setPinCode('')
+          await utils.savePassword(password)
           self.showMsg('Remove PIN code success!')
         } else {
           self.showMsg(res.data.msg)
