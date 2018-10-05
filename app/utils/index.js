@@ -98,7 +98,7 @@ const utils = {
 
   async savePassword(password) {
     try {
-    // TODO: if pin code != null ? pinCode : uid;
+      // TODO: if pin code != null ? pinCode : uid;
       const { uid } = firebase.auth().currentUser
       const pw = this.encrypt(password, uid)
       await Keychain.setGenericPassword(constant.DATA_ENCRYPTED, pw)

@@ -8,7 +8,8 @@ const isIPX = height === 812
 export default class LayoutUtils {
   static getWindowWidth() {
     // To deal with precision issues on android
-    return Math.round(Dimensions.get('window').width * 1000) / 1000 - 6 // Adjustment for margin given to RLV;
+    // return Math.round(Dimensions.get('window').width * 1000) / 1000 - 6 // Adjustment for margin given to RLV;
+    return width
   }
 
   static getExtraTop() {

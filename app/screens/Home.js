@@ -1,11 +1,11 @@
 import React, { Component } from 'react'
-import { View, Text, Dimensions, StyleSheet, LayoutAnimation, TouchableOpacity, Alert, RefreshControl, ActivityIndicator } from 'react-native'
+import { View, Text, StyleSheet, LayoutAnimation, TouchableOpacity, Alert, RefreshControl, ActivityIndicator } from 'react-native'
 import { Divider } from 'react-native-elements'
 import { Toolbar, ActionButton } from 'react-native-material-ui'
 import _ from 'lodash'
 import { observer } from 'mobx-react'
 import { observable, reaction } from 'mobx'
-import { RecyclerListView, LayoutProvider, DataProvider } from 'recyclerlistview'
+import { RecyclerListView, DataProvider } from 'recyclerlistview'
 import Swipeable from 'react-native-swipeable-row'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 
@@ -48,10 +48,12 @@ class Home extends Component {
     reaction(() => AccountStore.data, (newItems) => {
       console.log('change....: ', this.didMount)
       // const data = this.state.dataProvider.getAllData()
-      const data = this.isSearching ? AccountStore.searchData(this.keyword) : AccountStore.data
+      const list = this.isSearching ? AccountStore.searchData(this.keyword) : AccountStore.data
       if (this.didMount) { // fix: Can't call setState (or forceUpdate) on an unmounted component
         this.setState(prevState => ({
-          dataProvider: prevState.dataProvider.cloneWithRows(data)
+          dataProvider: prevState.dataProvider.cloneWithRows(list),
+          listData: list,
+          count: list.length > 0 ? numberItemPage : 0
         }))
       }
     })
@@ -186,7 +188,7 @@ class Home extends Component {
       this.setState({
         dataProvider: this.state.dataProvider.cloneWithRows(this.state.listData.concat(list)),
         listData: this.state.listData.concat(list),
-        count: this.state.count + numberItemPage
+        count: data.length > 0 ? this.state.count + numberItemPage : 0
       })
     }
   }
@@ -315,16 +317,16 @@ class Home extends Component {
           leftElement={this.leftElement}
           onLeftElementPress={() => this.onLeftToolBarPress()}
           centerElement="Home"
-          searchable={{
+          searchable={this.state.count > 0 ? {
             autoFocus: true,
             placeholder: 'Search',
             onChangeText: value => this.onSearch(value),
             onSearchClosed: () => this.onSearchClosed()
-          }}
+          } : null}
           rightElement={AccountStore.isSelecting ? 'check' : {
             menu: {
               icon: 'more-vert',
-              labels: ['Import', 'Export', 'Delete Selected']
+              labels: this.state.count > 0 ? ['Import', 'Export', 'Delete All'] : ['Import']
             }
           }}
           onRightElementPress={({ action, result, index }) => this.onRightToolBarPress(index)}

@@ -387,9 +387,6 @@ const AccountStore = types.model({
     // updates[`/data/${uid}/b/${newKey}`] = postData
     updates[`/data/${uid}/b`] = postData
     firebase.database().ref().update(updates).then(() => {
-      // AppNav.hideLoading()
-      // // AppNav.hideImport()
-      // self.showMsg('Import success.')
       self.load(null, 'Import success.')
     })
       .catch((err) => {
