@@ -111,7 +111,7 @@ const PinCodeStore = types.model({
         // console.log(res)
         if (res.data.code === '1') {
           self.setPinCode('')
-          await utils.savePassword(password)
+          await utils.savePassword(pw)
           self.showMsg('Remove PIN code success!')
         } else {
           self.showMsg(res.data.msg)

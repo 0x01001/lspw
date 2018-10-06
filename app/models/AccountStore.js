@@ -269,6 +269,7 @@ const AccountStore = types.model({
         const data = snapshot.val()
         // console.log('load: ', data)
         if (data) {
+          // console.log('pw: ', pw)
           const json = utils.decrypt(data, pw)
           // console.log('load decrypt: ', json)
           self.setItem(json)
@@ -283,6 +284,7 @@ const AccountStore = types.model({
         }
       } catch (err) {
         console.log('load: ', err)
+        self.signOut()
         self.showMsg()
       }
     })

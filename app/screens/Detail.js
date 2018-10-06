@@ -24,15 +24,15 @@ const uuidv4 = require('uuid/v4')
 @observer
 class Detail extends Component {
    static navigationOptions = ({ navigation }) => ({
-     title: navigation.state.params.title || (navigation.state.params.item ? 'Edit' : 'Create'),
+     title: navigation.state.params.title || (navigation.state.params.data ? 'Edit' : 'Create'),
      headerStyle: {
        backgroundColor: appStyle.buttonBackgroundColor,
        marginTop: top
      },
      headerLeft: (
        <TouchableOpacity onPress={() => {
-         //  if (navigation.state.params.item) {
-         //    navigation.state.params.onNavigateBack(navigation.state.params.item)
+         //  if (navigation.state.params.data) {
+         //    navigation.state.params.onNavigateBack(navigation.state.params.data)
          //  }
          AppNav.goBack()
        }}
@@ -40,8 +40,8 @@ class Detail extends Component {
          <Icon name="arrow-left" size={25} style={{ color: appStyle.mainColor, padding: 10 }} />
        </TouchableOpacity>
      ),
-     headerRight: navigation.state.params.item ? (
-       <TouchableOpacity onPress={() => utils.writeToClipboard(navigation.state.params.item)}>
+     headerRight: navigation.state.params.data ? (
+       <TouchableOpacity onPress={() => utils.writeToClipboard(navigation.state.params.data)}>
          <IconMaterialCommunity name="content-copy" size={25} style={{ color: appStyle.mainColor, padding: 10 }} />
        </TouchableOpacity>
      ) : null,
@@ -60,7 +60,7 @@ class Detail extends Component {
      headerTitleContainerStyle: {
        justifyContent: 'center',
        alignItems: 'center',
-       marginLeft: navigation.state.params.item ? 0 : -60
+       marginLeft: navigation.state.params.data ? 0 : -60
      }
    });
 
@@ -88,10 +88,10 @@ class Detail extends Component {
 
   componentWillMount() {
     const { params } = this.props.navigation.state
-    if (params && params.item) {
+    if (params && params.data) {
       const {
         url, username, password, desc, date
-      } = params.item
+      } = params.data
       this.setState({
         url, username, password, desc, date
       })
@@ -133,9 +133,9 @@ class Detail extends Component {
       return
     }
     let id = ''
-    const { item } = this.props.navigation.state.params
-    if (item) {
-      id = item.id
+    const { data } = this.props.navigation.state.params
+    if (data) {
+      id = data.id
     }
     const act = id === '' ? constant.DATA_CREATE : constant.DATA_UPDATE
     if (id === '') {
@@ -146,11 +146,11 @@ class Detail extends Component {
     const {
       username, desc, url, password, date
     } = this.state
-    const data = Account.create({
+    const param = Account.create({
       id, name, url, username, password, desc, date
     })
     Keyboard.dismiss()
-    AccountStore.saveData(data, act)
+    AccountStore.saveData(param, act)
     // , (x) => {
     //   // console.log('x: ', x)
     //   this.props.navigation.state.params.onNavigateBack(x)
@@ -159,7 +159,7 @@ class Detail extends Component {
   }
 
   onDelete = () => {
-    utils.deleteData(this.props.navigation.state.params.item)
+    utils.deleteData(this.props.navigation.state.params.data)
   }
 
   renderDate = () => {
@@ -175,7 +175,7 @@ class Detail extends Component {
   }
 
   renderDelete = () => {
-    if (this.props.navigation.state.params.item) {
+    if (this.props.navigation.state.params.data) {
       return (
         <View style={style.field}>
           <Button

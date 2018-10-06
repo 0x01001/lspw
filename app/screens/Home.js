@@ -101,7 +101,7 @@ class Home extends Component {
   )
 
   renderResultSearch = () => {
-    if (this.isSearching && this.searchCount > 0) {
+    if (this.isSearching && this.searchCount > 0 && this.keyword !== '') {
       return (
         <View>
           <Text style={styles.resultText}>Result: {this.searchCount}</Text>

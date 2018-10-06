@@ -117,6 +117,7 @@ const utils = {
       if (credentials) {
         // console.log('password decrypt: ', credentials.password)
         const secret = this.getSecret(pincode)
+        // console.log('secret: ', secret)
         const pw = this.decrypt(credentials.password, secret) // pincode
         return pw
       }
@@ -151,7 +152,8 @@ const utils = {
       return
     }
     await Clipboard.setString(item.password)
-    AccountStore.showMsg(`Password of '${item.username}' from <${item.name}> copied.`)
+    const username = item.username.length >= 50 ? `${item.username.substring(0, 50)}...` : item.username
+    AccountStore.showMsg(`Password of '${username}' from <${item.name}> copied.`)
     // alert('Copied to Clipboard!')
     AccountStore.saveData(item, constant.DATA_UPDATE, false)
   },
