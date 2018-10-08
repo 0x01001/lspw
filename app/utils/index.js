@@ -151,9 +151,9 @@ const utils = {
       AccountStore.showMsg('Password is empty.')
       return
     }
-    await Clipboard.setString(item.password)
     const username = item.username.length >= 50 ? `${item.username.substring(0, 50)}...` : item.username
     AccountStore.showMsg(`Password of '${username}' from <${item.name}> copied.`)
+    await Clipboard.setString(item.password)
     // alert('Copied to Clipboard!')
     AccountStore.saveData(item, constant.DATA_UPDATE, false)
   },

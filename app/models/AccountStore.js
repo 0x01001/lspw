@@ -271,7 +271,7 @@ const AccountStore = types.model({
         if (data) {
           // console.log('pw: ', pw)
           const json = utils.decrypt(data, pw)
-          // console.log('load decrypt: ', json)
+          console.log('load data decrypt: ', json)
           self.setItem(json)
         } else {
           self.reset()

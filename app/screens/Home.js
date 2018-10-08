@@ -46,7 +46,7 @@ class Home extends Component {
     this.searchCount = 0
 
     reaction(() => AccountStore.data, (newItems) => {
-      console.log('change....: ', this.didMount)
+      console.log('data change: ', this.didMount)
       // const data = this.state.dataProvider.getAllData()
       const list = this.isSearching ? AccountStore.searchData(this.keyword) : AccountStore.data
       if (this.didMount) { // fix: Can't call setState (or forceUpdate) on an unmounted component
@@ -177,7 +177,7 @@ class Home extends Component {
     })
   }
 
-  async fetchMoreData() {
+  fetchMoreData = async() => {
     // console.log('fetchMoreData: ', this.inProgressNetworkReq)
     if (!this.inProgressNetworkReq) {
       this.inProgressNetworkReq = true

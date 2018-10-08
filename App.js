@@ -7,7 +7,6 @@ import { initializeApp } from './reference'
 import Loading from './app/components/common/Loading'
 import AppNav from './app/AppNav'
 import AppState from './app/AppState'
-// import ImportPopup from './app/components/home/ImportPopup'
 import appStyle from './app/utils/app_style'
 import Notify from './app/components/common/Notify'
 import AccountStore from './app/models/AccountStore'
@@ -50,14 +49,15 @@ export default class App extends Component<Props> {
     })
 
     NetInfo.addEventListener('connectionChange', this.connectionChange)
-    // firebase.auth().signOut()
     console.disableYellowBox = true
   }
 
   connectionChange = (connect) => {
     const type = connect.type === 'none' ? 'offline' : 'online'
     if (type === 'offline') {
-      AppNav.showNotify('No internet connection', { backgroundColor: `${appStyle.redColor}80` }, { color: appStyle.mainColor })
+      const style = { backgroundColor: `${appStyle.redColor}80` }
+      const textStyle = { color: appStyle.mainColor }
+      AppNav.showNotify('No internet connection', style, textStyle)
     } else {
       AppNav.hidewNotify()
     }
@@ -76,7 +76,6 @@ export default class App extends Component<Props> {
       <View style={{ flex: 1, backgroundColor: appStyle.backgroundColor }}>
         <StatusBar backgroundColor={appStyle.backgroundColor} barStyle="light-content" translucent />
         {this.renderContent()}
-        {/* <ImportPopup ref={(ref) => { AppNav.import = ref }} /> */}
         <Notify ref={(ref) => { AppNav.notify = ref }} />
         <Toast
           ref={(ref) => { AppNav.toast = ref }}

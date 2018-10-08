@@ -9,6 +9,7 @@ import AppNav from '../../AppNav'
 import PinCodeStore from '../../models/PinCodeStore'
 import { Logo } from '../common'
 import appStyle from '../../utils/app_style'
+// import utils from '../../utils'
 
 @observer
 class MenuLeft extends Component {
@@ -20,6 +21,10 @@ class MenuLeft extends Component {
   showPincode = (type) => {
     PinCodeStore.setType(type)
     AppNav.reset('unlockStack')
+  }
+
+  showChangePassword = () => {
+
   }
 
   createPincode = () => {
@@ -108,7 +113,7 @@ class MenuLeft extends Component {
             </View>
             <View style={styles.navSectionStyle}>
               <Icon name="lastpass" size={20} color={appStyle.mainColor} />
-              <Text style={styles.navItemStyle}>Change password</Text>
+              <Text style={styles.navItemStyle} onPress={this.showChangePassword}>Change password</Text>
             </View>
             {this.renderPinCode()}
           </View>
