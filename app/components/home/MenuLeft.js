@@ -111,10 +111,10 @@ class MenuLeft extends Component {
               <Icon name="database-import" size={20} color={appStyle.mainColor} />
               <Text style={styles.navItemStyle} onPress={this.showImport}>Import data</Text>
             </View>
-            <View style={styles.navSectionStyle}>
+            {/* <View style={styles.navSectionStyle}>
               <Icon name="lastpass" size={20} color={appStyle.mainColor} />
               <Text style={styles.navItemStyle} onPress={this.showChangePassword}>Change password</Text>
-            </View>
+            </View> */}
             {this.renderPinCode()}
           </View>
         </ScrollView>

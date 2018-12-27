@@ -86,12 +86,12 @@ class Home extends Component {
     this.setState({
       dataProvider: this.state.dataProvider.cloneWithRows(list),
       listData: list,
-      count: numberItemPage
+      count: list.length > 0 ? numberItemPage : 0
     })
   }
 
   onSearchClosed = () => {
-    // console.log('onSearchClosed')
+    console.log('onSearchClosed')
     this.isSearching = false
     this.setState({ dataProvider: this.state.dataProvider.cloneWithRows(AccountStore.data) })
   }
@@ -208,6 +208,8 @@ class Home extends Component {
       : <View style={{ height: 60 }} />);
 
   renderList = () => {
+    console.log(`render list: ${this.state.count}`)
+
     if (this.state.count === 0) {
       return this.renderEmptyContent()
     }
@@ -317,12 +319,12 @@ class Home extends Component {
           leftElement={this.leftElement}
           onLeftElementPress={() => this.onLeftToolBarPress()}
           centerElement="Home"
-          searchable={this.state.count > 0 ? {
+          searchable={{
             autoFocus: true,
             placeholder: 'Search',
             onChangeText: value => this.onSearch(value),
             onSearchClosed: () => this.onSearchClosed()
-          } : null}
+          }}
           rightElement={AccountStore.isSelecting ? 'check' : {
             menu: {
               icon: 'more-vert',

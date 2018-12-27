@@ -69,7 +69,7 @@ const PinCodeStore = types.model({
     const { currentUser } = firebase.auth()
     firebase.database().ref(`/data/${currentUser.uid}/e`).once('value', (snapshot) => {
       const pincode = snapshot.val()
-      console.log('getPinCode: ', pincode)
+      // console.log('getPinCode: ', pincode)
       if (pincode) {
         AppNav.hideLoading()
         self.setPinCode(pincode)

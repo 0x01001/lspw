@@ -243,7 +243,7 @@ const AccountStore = types.model({
 
   // -----------------------------------------------
   searchData(val) {
-    const result = self.items.slice().filter(x => _.includes(x.name, val) || _.includes(x.username, val))
+    const result = self.items.slice().filter(x => _.includes(x.name, val))
     return _.orderBy(result, ['date', 'name'], ['desc', 'asc'])
   },
 
@@ -271,7 +271,7 @@ const AccountStore = types.model({
         if (data) {
           // console.log('pw: ', pw)
           const json = utils.decrypt(data, pw)
-          console.log('load data decrypt: ', json)
+          // console.log('load data decrypt: ', json)
           self.setItem(json)
         } else {
           self.reset()
@@ -429,10 +429,10 @@ const AccountStore = types.model({
     if (action === constant.DATA_DELETE_ALL) {
       json = JSON.stringify(list)
     } else {
-      console.log(`${action}: ${item.id}`)
+      // console.log(`${action}: ${item.id}`)
       json = JSON.stringify(item, ['id', 'name', 'url', 'username', 'password', 'desc', 'date'])
     }
-    console.log('data: ', json)
+    // console.log('data: ', json)
 
     if (json !== '') {
       const pw = await utils.getPassword()
@@ -449,7 +449,7 @@ const AccountStore = types.model({
       firebase.auth().currentUser.getIdToken().then((token) => {
         // console.log('token: ', token)
         axios.post(`${constant.ROOT_URL}/save`, { token, data, action }).then((res) => {
-          console.log(res)
+          // console.log(res)
           if (res.data.code === '1') {
             if (action === constant.DATA_UPDATE) {
               self.update(item)
@@ -485,7 +485,7 @@ const AccountStore = types.model({
     try {
       await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true })
       const userInfo = await GoogleSignin.signIn()
-      console.log(`token: ${userInfo.accessToken}`)
+      // console.log(`token: ${userInfo.accessToken}`)
       self.setToken(userInfo.accessToken)
       prompt(
         'Import Data',
